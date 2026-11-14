@@ -16,10 +16,16 @@
       "tol": 1e-08,
       "iterations": 10,
       "interpolateNormal": false
+    },
+    "gradAlpha": {
+      "reconstructionScheme": "gradAlpha",
+      "isoFaceTol": 1e-08,
+      "surfCellTol": 1e-08
     }
   },
   "interface_cells": {
     "isoAlpha": 110,
-    "plicRDF": 110
+    "plicRDF": 110,
+    "gradAlpha": 110
   }
 }

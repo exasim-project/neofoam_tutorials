@@ -23,7 +23,12 @@ Description
        - cutCellPLIC::calcSubCell of a fixed set of planes,
        - surfaceIteratorPLIC::vofCutCell (the signed distance matching a
          target volume fraction) for a set of normals and targets,
-       - TwoPhaseFlow's reconstructionError normal and centre errors.
+       - TwoPhaseFlow's reconstructionError normal and centre errors,
+       and for gradAlpha, for every interface cell (interfaceLabels), the
+       least-squares gradient of gradAlpha::gradSurf (the normal handed to
+       vofCutCell) and its zoneDistribute stencil; the utility stops unless
+       vofCutCell with this gradient gives the scheme's normal and centre
+       bitwise.
 
     Output (text tables, 17 significant digits) in reconstructionReference/,
     converted to .npz by neofoam_verification.reconstruction, which documents
@@ -55,6 +60,8 @@ Description
 #include "cutCellPLIC.H"
 #include "surfaceIteratorPLIC.H"
 #include "reconstructionSchemes.H"
+#include "zoneDistribute.H"
+#include "leastSquareGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -101,6 +108,93 @@ void writeCut(Ostream& os, const cutCellPLIC& cut)
     writeVector(os, cut.faceCentre());
     writeVector(os, cut.faceArea());
     writeVector(os, cut.subCellCentre());
+}
+
+
+//- gradAlpha::gradSurf replayed after reconstruct() (the stencil and maps of
+//  its zoneDistribute, serial: global = local cell labels); per interface
+//  cell: cell gx gy gz nStencil stencil...
+void writeGradAlpha
+(
+    const fileName& file,
+    const reconstructionSchemes& surf,
+    const volScalarField& alpha1,
+    const scalar isoFaceTol,
+    const scalar surfCellTol
+)
+{
+    const fvMesh& mesh = alpha1.mesh();
+    leastSquareGrad<scalar> lsGrad("polyDegree1", mesh.geometricD());
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh);
+    const boolList interfaceCell(surf.interfaceCell());
+    Map<vector> mapCC
+    (
+        exchangeFields.getDatafromOtherProc(interfaceCell, mesh.C())
+    );
+    Map<scalar> mapPhi
+    (
+        exchangeFields.getDatafromOtherProc(interfaceCell, alpha1)
+    );
+    const labelListList& stencil = exchangeFields.getStencil();
+    surfaceIteratorPLIC sIter(mesh, surfCellTol);
+
+    OFstream os(file);
+    os.precision(17);
+    os  << "# cell gx gy gz nStencil stencil..." << nl;
+
+    DynamicField<vector> cellCentre(100);
+    DynamicField<scalar> phiValues(100);
+    for (const label celli : surf.interfaceLabels())
+    {
+        cellCentre.clear();
+        phiValues.clear();
+        for (const label gblIdx : stencil[celli])
+        {
+            cellCentre.append
+            (
+                exchangeFields.getValue(mesh.C(), mapCC, gblIdx)
+            );
+            phiValues.append
+            (
+                exchangeFields.getValue(alpha1, mapPhi, gblIdx)
+            );
+        }
+        cellCentre -= mesh.C()[celli];
+        const vector grad(lsGrad.grad(cellCentre, phiValues));
+
+        os  << celli;
+        writeVector(os, grad);
+        os  << token::SPACE << stencil[celli].size();
+        for (const label gblIdx : stencil[celli])
+        {
+            os  << token::SPACE << gblIdx;
+        }
+        os  << nl;
+
+        // gradAlpha::reconstruct with this gradient
+        vector n(Zero);
+        vector c(Zero);
+        if (mag(grad) != 0)
+        {
+            sIter.vofCutCell(celli, alpha1[celli], isoFaceTol, 100, grad);
+            if (sIter.cellStatus() == 0)
+            {
+                n = sIter.surfaceArea();
+                c = sIter.surfaceCentre();
+                if (mag(n) == 0)
+                {
+                    c = Zero;
+                }
+            }
+        }
+        if (n != surf.normal()[celli] || c != surf.centre()[celli])
+        {
+            FatalErrorInFunction
+                << "The replayed gradAlpha normal differs in cell " << celli
+                << ": " << n << " != " << surf.normal()[celli]
+                << exit(FatalError);
+        }
+    }
 }
 
 } // End namespace
@@ -222,6 +316,18 @@ int main(int argc, char *argv[])
 
         const fileName schemeDir(outDir/schemeName);
         mkDir(schemeDir);
+
+        if (schemeDict.get<word>("reconstructionScheme") == "gradAlpha")
+        {
+            writeGradAlpha
+            (
+                schemeDir/"gradient.dat",
+                *surf,
+                alpha1,
+                schemeDict.getOrDefault<scalar>("isoFaceTol", 1e-8),
+                schemeDict.getOrDefault<scalar>("surfCellTol", 1e-8)
+            );
+        }
 
         OFstream interfaceOs(schemeDir/"interface.dat");
         OFstream planesOs(schemeDir/"planes.dat");

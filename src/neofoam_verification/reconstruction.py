@@ -22,7 +22,7 @@ File format (``np.load``; n cells, m interface cells, P = 8 planes, K = 12 cuts)
     ``alpha`` (n,): the initial alpha1 (cutCellIso, clamped to [0, 1]);
     ``cell_centres`` (n, 3), ``cell_volumes`` (n,): OpenFOAM's ``mesh.C()``, ``mesh.V()``.
 
-``reference/<case>/<scheme>.npz`` (scheme ``isoAlpha``, ``plicRDF``)
+``reference/<case>/<scheme>.npz`` (scheme ``isoAlpha``, ``plicRDF``, ``gradAlpha``)
     ``cells`` (m,) int: the cells with ``mag(normal) != 0``, ascending;
     ``normal`` (m, 3): ``reconstructionSchemes::normal()``, the interface area vector,
     pointing into the fluid (alpha = 1); ``centre`` (m, 3): ``centre()``;
@@ -55,6 +55,23 @@ File format (``np.load``; n cells, m interface cells, P = 8 planes, K = 12 cuts)
     ``reconstructionError`` over the m cells, max and mean of 1 - n0 . grad f/|grad f|
     and of the implicit function's distance |f| at x0.
 
+``reference/<case>/gradAlpha.npz`` also has the normal estimate that gradAlpha hands to
+``vofCutCell``, for its k interface cells (``interfaceLabels``, alpha in
+(surfCellTol, 1 - surfCellTol), a superset of ``cells``):
+    ``grad_cells`` (k,) int; ``grad`` (k, 3): ``gradAlpha::gradSurf``'s
+    ``leastSquareGrad<scalar>("polyDegree1", geometricD).grad(C_j - C_i, alpha_j)``, an
+    unweighted least-squares fit of alpha_j = a + g . (C_j - C_i) over the stencil
+    (normal equations, LU solve; the empty direction of the 2D cases is left out and
+    its component is 0); ``stencil_cells`` (sum of stencil sizes,) int and
+    ``stencil_offsets`` (k + 1,) int: the ``zoneDistribute`` (``zoneCPCStencil``,
+    cell-point-cell) stencil of ``grad_cells[i]`` is
+    ``stencil_cells[stencil_offsets[i]:stencil_offsets[i + 1]]``, in OpenFOAM's order (the
+    order of the sums of the fit), starting with the cell itself. A label j >= n is the
+    boundary face ``n_internal_faces + j - n`` (non-empty, non-coupled patches), entering
+    the fit with its face centre and alpha's boundary value (zeroGradient: the owner's
+    alpha); the cells are those sharing a point with the cell. The utility checks that
+    ``vofCutCell`` with ``grad`` gives the stored ``normal`` and ``centre`` bitwise.
+
 ``reference/<case>/run.json``: OpenFOAM version, settings, interface cell counts.
 """
 
@@ -79,7 +96,7 @@ REFERENCE = Path(__file__).resolve().parents[2] / "reference"
 UTILITY = REFERENCE / "reconstructionReference"
 OUTPUT = "reconstructionReference"
 NAMES = ("curvature2D", "curvature2DTri", "curvature3D", "curvature3DTri")
-SCHEMES = ("isoAlpha", "plicRDF")
+SCHEMES = ("isoAlpha", "plicRDF", "gradAlpha")
 N_PLANES = 8
 N_SIGNED_DISTANCE = 12
 
@@ -178,6 +195,19 @@ def _table(path: Path, columns: tuple[str, ...], n_per_cell: int) -> Arrays:
     return out
 
 
+def _gradient(path: Path) -> Arrays:
+    """gradAlpha's gradient table (cell, g, stencil size, stencil...) as arrays."""
+    rows = [line.split() for line in path.read_text().splitlines() if not line.startswith("#")]
+    sizes = np.array([int(r[4]) for r in rows], dtype=np.int64)
+    assert all(len(r) == 5 + n for r, n in zip(rows, sizes))
+    return {
+        "grad_cells": np.array([int(r[0]) for r in rows], dtype=np.int64),
+        "grad": np.array([[float(v) for v in r[1:4]] for r in rows]).reshape(-1, 3),
+        "stencil_cells": np.array([int(v) for r in rows for v in r[5:]], dtype=np.int64),
+        "stencil_offsets": np.concatenate([[0], np.cumsum(sizes)]).astype(np.int64),
+    }
+
+
 def read_output(case: Path) -> tuple[Arrays, dict[str, Arrays]]:
     """(mesh arrays, per-scheme arrays) of a run, in the layout of the ``.npz`` files."""
     mesh = PolyMesh.read(case)
@@ -212,6 +242,8 @@ def read_output(case: Path) -> tuple[Arrays, dict[str, Arrays]]:
             **{f"sd_{k}": v for k, v in sd.items()},
             **{k: np.array(v) for k, v in zip(ERRORS, errors[:4])},
         }
+        if (d / "gradient.dat").is_file():
+            schemes[scheme].update(_gradient(d / "gradient.dat"))
     return mesh_arrays, schemes
 
 

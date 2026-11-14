@@ -98,3 +98,39 @@ def test_rerun_reproduces_stored_reference(name: str, tmp_path: Path) -> None:
         assert arrays.keys() == stored.keys()
         for key, value in arrays.items():
             np.testing.assert_array_equal(value, stored[key], err_msg=f"{name} {scheme}: {key}")
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_grad_alpha_normal_is_the_least_squares_gradient(name: str) -> None:
+    """gradAlpha's stored stencil and gradient: an unweighted linear fit of alpha over
+    the stencil, and the reconstructed normal is parallel to it."""
+    poly, mesh = load_mesh(name)
+    a = load_scheme(name, "gradAlpha")
+    k = len(a["grad_cells"])
+    assert a["grad"].shape == (k, 3)
+    assert a["stencil_offsets"].shape == (k + 1,)
+    assert a["stencil_offsets"][-1] == len(a["stencil_cells"])
+    assert np.all(np.isin(a["cells"], a["grad_cells"]))
+    # stencil labels >= n are boundary faces: face centre, zeroGradient alpha
+    n_int = len(poly.neighbour)
+    b_faces = np.arange(n_int, len(poly.faces))
+    alpha = np.concatenate([mesh["alpha"], mesh["alpha"][poly.owner[b_faces]]])
+    centres = np.concatenate([mesh["cell_centres"], poly.face_centres[b_faces]])
+    # the geometric directions: the empty y direction of the 2D cases is left out
+    dims = [0, 2] if "2D" in name else [0, 1, 2]
+    offsets = a["stencil_offsets"]
+    for i, celli in enumerate(a["grad_cells"]):
+        stencil = a["stencil_cells"][offsets[i] : offsets[i + 1]]
+        assert stencil[0] == celli and len(set(stencil)) == len(stencil)
+        x = (centres[stencil] - centres[celli])[:, dims]
+        fit, *_ = np.linalg.lstsq(np.column_stack([np.ones(len(x)), x]), alpha[stencil])
+        grad = np.zeros(3)
+        grad[dims] = fit[1:]
+        np.testing.assert_allclose(a["grad"][i], grad, rtol=0, atol=1e-10 * np.abs(grad).max())
+    if "2D" in name:
+        assert np.all(a["grad"][:, 1] == 0)
+    # the normal handed to vofCutCell is the reconstructed normal's direction
+    g = a["grad"][np.searchsorted(a["grad_cells"], a["cells"])]
+    n = a["normal"]
+    cos = np.einsum("ij,ij->i", g, n) / np.linalg.norm(g, axis=1) / np.linalg.norm(n, axis=1)
+    np.testing.assert_allclose(cos, 1.0, rtol=0, atol=1e-12)

@@ -11,7 +11,7 @@ FoamFile
 // The settings of TwoPhaseFlow's run/benchmark/surfaceTension cases (fvSolution;
 // TwoPhaseFlow's vof2IsoTol is OpenFOAM's isoFaceTol), one sub-dictionary per
 // scheme, each run on the same initial alpha1.
-schemes             (isoAlpha plicRDF);
+schemes             (isoAlpha plicRDF gradAlpha);
 
 isoAlpha
 {
@@ -28,6 +28,13 @@ plicRDF
     tol             1e-8;
     iterations      10;
     interpolateNormal false;
+}
+
+gradAlpha
+{
+    reconstructionScheme gradAlpha;
+    isoFaceTol      1e-8;
+    surfCellTol     1e-8;
 }
 
 // surfaceIteratorPLIC::vofCutCell(celli, alpha, tol, maxIter, normal) for the

@@ -8,9 +8,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// reconstructionReference evaluates no finite-volume operator.
+// Only gradAlpha's constructor evaluates a finite-volume operator,
+// fvc::grad(alpha), whose value it discards.
 ddtSchemes          { default none; }
-gradSchemes         { default none; }
+gradSchemes         { default Gauss linear; }
 divSchemes          { default none; }
 laplacianSchemes    { default none; }
 interpolationSchemes { default linear; }
