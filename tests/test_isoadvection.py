@@ -20,8 +20,10 @@ from neofoam_verification import isoadvection
 from neofoam_verification.cut_cell import exact_alpha
 from neofoam_verification.isoadvection import (
     RUNS,
+    SCHEMES,
     exact_shape,
     load_run,
+    load_twophaseflow,
     read_run,
     run_key,
     run_keys,
@@ -216,3 +218,20 @@ def test_rerun_reproduces_stored_reference(label: str, tmp_path: Path) -> None:
             np.testing.assert_array_equal(
                 value, stored[key], err_msg=f"{label} {run_key(scheme, velocity)}: {key}"
             )
+
+
+TWOPHASEFLOW = [
+    (label, s) for label, case in RUNS.items() if case.resolution is not None for s in SCHEMES
+]
+
+
+@pytest.mark.parametrize("label, scheme", TWOPHASEFLOW, ids=[f"{lb}-{s}" for lb, s in TWOPHASEFLOW])
+def test_twophaseflow_isoadvection_matches_the_v2406_run(label: str, scheme: str) -> None:
+    """advectorVoF with TwoPhaseFlow's isoAdvection (v2506, Su = div(phi0) min(alpha, 1))
+    agrees with the v2406 parity run to round-off amplified over the run."""
+    dat, alpha = load_twophaseflow(label, scheme)
+    a = load_run(label, scheme)
+    np.testing.assert_allclose(dat[:, 0], a["write_time"])
+    np.testing.assert_allclose(dat[:, 1], a["Eshape"], rtol=1e-10)
+    assert np.all((alpha >= 0) & (alpha <= 1))
+    np.testing.assert_allclose(alpha, a["snapshot_alpha"][-1], rtol=0, atol=1e-9)

@@ -44,6 +44,9 @@ update-advection-flux-reference = { cmd = "python -m neofoam_verification.advect
 # Re-runs the OpenFOAM-v2406 multi-step isoAdvection reference (reference/isoAdvectionReference)
 # and rewrites reference/<case>/isoAdvection/ (curvature2D and the TwoPhaseFlow benchmarks).
 update-isoadvection-reference = { cmd = "python -m neofoam_verification.isoadvection", depends-on = ["install"] }
+# Re-runs TwoPhaseFlow's advectorVoF with its isoAdvection on the benchmarks (v2506, benchmark
+# context next to MULES) and rewrites reference/<case>/<resolution>/twoPhaseFlowIsoAdvection/.
+update-twophaseflow-isoadvection-reference = { cmd = "python -m neofoam_verification.isoadvection --twophaseflow", depends-on = ["install"] }
 lint = "ruff check src tests && ruff format --check src tests"
 format = "ruff format src tests && ruff check --fix src tests"
 type-check = "mypy"

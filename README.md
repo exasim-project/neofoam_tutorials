@@ -10,6 +10,7 @@ pixi run update-reference   # re-runs the C++ reference, rewrites reference/
 pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction reference, rewrites reference/curvature*/
 pixi run update-advection-flux-reference  # OpenFOAM-v2406 isoAdvection face fluxes, rewrites reference/curvature*/advection/
 pixi run update-isoadvection-reference    # OpenFOAM-v2406 multi-step isoAdvection, rewrites reference/*/isoAdvection/
+pixi run update-twophaseflow-isoadvection-reference  # advectorVoF/isoAdvection, rewrites reference/*/*/twoPhaseFlowIsoAdvection/
 ```
 
 ## Layout
@@ -259,3 +260,22 @@ outside [-100 SMALL, 1 + 100 SMALL] after 3 iterations loses mass to the clippin
 (Emass up to 8e-8). isoAdvection's upwind fluxes spread round-off values (< 1e-12) of
 alpha over most of the domain (55 000 of 65 536 cells of deformationSphere at t = 3),
 so a port compares alpha with an absolute tolerance, not by its support.
+
+### advectorVoF with isoAdvection (benchmark context)
+
+`python -m neofoam_verification.isoadvection --twophaseflow` runs the benchmarks with
+TwoPhaseFlow's advectorVoF as for MULES (`reference.run_twophaseflow`), with
+`advectionScheme isoAdvection` and the controls above (plus the testsuite's unused
+`nAlphaCorr 2`, `nAlphaSubCycles 1`, `cAlpha 1`, which advectorVoF requires), and
+stores `volumeFractionError.dat`, `alpha_final.txt` and `run.json` in
+`reference/<case>/<resolution>/twoPhaseFlowIsoAdvection/<scheme>/` (`load_twophaseflow`).
+TwoPhaseFlow's own isoAdvection on v2506, with `Su = div(phi0) min(alpha, 1)`, agrees
+with the v2406 runs: Eshape to 2e-11 relative, final alpha to 3e-10
+(`tests/test_isoadvection.py`). Wall time (advectorVoF, serial) next to MULES:
+
+| case | MULES | isoAdvection gradAlpha | isoAdvection plicRDF |
+|---|---|---|---|
+| discUniFlow 100x60 | 2.2 s | 0.9 s | 1.2 s |
+| vortexShearedDisc 32x32 | 1.5 s | 0.6 s | 0.9 s |
+| deformationSphere 32x32x64 | 6.4 s | 2.4 s | 4.0 s |
+| Leveque 32x32x32 | 5.1 s | 2.4 s | 4.7 s |

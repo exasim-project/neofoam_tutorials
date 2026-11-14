@@ -23,8 +23,10 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+from foamlib import FoamFile
 
 from .backend import RunResult
 from .benchmarks import BENCHMARKS, Benchmark, GeneratedVelocity
@@ -105,17 +107,24 @@ def read_run(benchmark: Benchmark, case: Path) -> RunResult:
 
 
 def run_twophaseflow(
-    benchmark: Benchmark, dest: Path, resolution: str | None = None
+    benchmark: Benchmark,
+    dest: Path,
+    resolution: str | None = None,
+    controls: dict[str, Any] | None = None,
 ) -> tuple[RunResult, dict[str, object]]:
-    """Mesh and run the benchmark with advectorVoF/MULESScheme in ``dest``."""
+    """Mesh and run the benchmark with advectorVoF/MULESScheme in ``dest``; with
+    ``controls``, advectorVoF reads them (fvSolution ``solvers/alpha.water``) instead."""
     mesh_case(benchmark, dest, resolution)
+    if controls is not None:
+        FoamFile(dest / "system" / "fvSolution")["solvers", "alpha.water"] = controls
     start = time.perf_counter()
     _foam(dest, "advectorVoF")
     wall = time.perf_counter() - start
     log = (dest / "log.advectorVoF").read_text()
     delta_ts = [float(v) for v in re.findall(r"^deltaT = (\S+)$", log, re.MULTILINE)]
     info: dict[str, object] = {
-        "solver": "advectorVoF, advectionScheme MULESScheme",
+        "solver": "advectorVoF, advectionScheme "
+        + (controls or {}).get("advectionScheme", "MULESScheme"),
         "twophaseflow": TWOPHASEFLOW,
         "bashrc": str(bashrc()),
         "resolution": resolution or benchmark.default_resolution,

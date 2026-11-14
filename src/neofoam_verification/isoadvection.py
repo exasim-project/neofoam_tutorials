@@ -57,6 +57,11 @@ Step 1 (``s1_*``)
     ``U(x0)`` by ``interpolationCellPoint``.
 
 ``reference/<case>/isoAdvection/run.json``: OpenFOAM version, controls, steps, timings.
+
+Benchmark context (``--twophaseflow``): TwoPhaseFlow's advectorVoF with its own
+isoAdvection and the same controls, stored as the MULES reference
+(``reference/<benchmark>/<resolution>/twoPhaseFlowIsoAdvection/<scheme>/``,
+:func:`load_twophaseflow`).
 """
 
 from __future__ import annotations
@@ -77,7 +82,7 @@ from foamlib import FoamFile
 from . import reconstruction, reference
 from .benchmarks import BENCHMARKS, CASES
 from .cut_cell import exact_alpha
-from .foam import PolyMesh
+from .foam import PolyMesh, read_function_object_dat
 from .metrics import exact_shape_at, volume_fraction_error
 from .reconstruction import REFERENCE, Arrays, bashrc, shape
 from .shapes import Shape
@@ -360,9 +365,66 @@ def write_reference(case: Case) -> Path:
     return ref
 
 
+# TwoPhaseFlow's advectorVoF with its own isoAdvection (benchmark context next to MULES)
+TWOPHASEFLOW_DIR = "twoPhaseFlowIsoAdvection"
+
+
+def twophaseflow_controls(scheme: str) -> dict[str, Any]:
+    """advectorVoF's ``alpha.water`` controls: the isoAdvection settings of the
+    v2406 runs (nAlphaBounds 3, clip, snapTol 0); advectorVoF also requires the
+    testsuite's (unused) nAlphaCorr, nAlphaSubCycles and cAlpha."""
+    return {
+        "advectionScheme": "isoAdvection",
+        "nAlphaCorr": 2,
+        "nAlphaSubCycles": 1,
+        "cAlpha": 1,
+        **CONTROLS[scheme],
+        "nAlphaBounds": 3,
+        "clip": True,
+        "snapTol": 0,
+    }
+
+
+def twophaseflow_dir(case: Case, scheme: str) -> Path:
+    return REFERENCE / case.label / TWOPHASEFLOW_DIR / scheme
+
+
+def load_twophaseflow(label: str, scheme: str) -> tuple[Any, Any]:
+    """(volumeFractionError rows, final alpha) of advectorVoF/isoAdvection, as
+    :func:`.reference.load_reference`."""
+    ref = twophaseflow_dir(RUNS[label], scheme)
+    return (
+        read_function_object_dat(ref / reference.DAT.name),
+        np.loadtxt(ref / "alpha_final.txt"),
+    )
+
+
+def write_twophaseflow(case: Case, scheme: str) -> Path:
+    ref = twophaseflow_dir(case, scheme)
+    controls = twophaseflow_controls(scheme)
+    with tempfile.TemporaryDirectory() as tmp:
+        dest = Path(tmp) / case.name
+        result, info = reference.run_twophaseflow(
+            BENCHMARKS[case.name], dest, case.resolution, controls
+        )
+        ref.mkdir(parents=True, exist_ok=True)
+        shutil.copy(dest / reference.DAT, ref / reference.DAT.name)
+        np.savetxt(ref / "alpha_final.txt", result.alpha[-1], fmt="%.17g")
+    (ref / "run.json").write_text(json.dumps({**info, "controls": controls}, indent=2) + "\n")
+    return ref
+
+
 if __name__ == "__main__":
     import sys
 
+    # --twophaseflow: the advectorVoF runs of the benchmarks instead of the v2406 ones
+    twophaseflow = "--twophaseflow" in sys.argv
+    names = [a for a in sys.argv[1:] if a != "--twophaseflow"]
     for c in CASES_RUN:
-        if len(sys.argv) == 1 or c.name in sys.argv[1:]:
+        if names and c.name not in names:
+            continue
+        if not twophaseflow:
             print(f"{c.label}: {write_reference(c)}")
+        elif c.resolution is not None:
+            for scheme in SCHEMES:
+                print(f"{c.label} {scheme}: {write_twophaseflow(c, scheme)}")
