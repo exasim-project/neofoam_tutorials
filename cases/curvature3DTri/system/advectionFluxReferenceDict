@@ -1,0 +1,40 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      advectionFluxReferenceDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// One isoAdvection::advect step from the initial alpha1 for every velocity,
+// Courant number and scheme. The isoAdvection settings are fvSolution's
+// solvers alpha.<scheme> (bounded, as interIsoFoam) and
+// alpha.<scheme>.unbounded (no bounding, no clipping).
+schemes             (isoAlpha plicRDF gradAlpha);
+
+// dt = Co/(0.5 max(sum |phi|/V)), OpenFOAM's CourantNo
+courantNumbers      (0.2 0.5);
+
+// U = U(C) in the cells and U(Cf) on boundary faces, phi = U(Cf) & Sf
+velocities
+{
+    // oblique uniform velocity
+    translation
+    {
+        type        uniform;
+        value       (1 0.5 0.25);
+    }
+    // solid-body rotation omega*normalised(axis) ^ (x - origin) about
+    // an oblique axis, off the interface centre
+    rotation
+    {
+        type        rotation;
+        origin      (1.3 0.9 0.8);
+        axis        (1 2 3);
+        omega       1;
+    }
+}
+
+// ************************************************************************* //

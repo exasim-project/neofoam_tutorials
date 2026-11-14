@@ -1,0 +1,175 @@
+{
+  "utility": "reference/advectionFluxReference",
+  "bashrc": "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc",
+  "openfoam": "_630d60de3b-20240620 OPENFOAM=2406 version=v2406",
+  "velocities": {
+    "translation": {
+      "type": "uniform",
+      "value": [
+        1.0,
+        0.0,
+        0.5
+      ]
+    },
+    "rotation": {
+      "type": "rotation",
+      "origin": [
+        1.3,
+        0.0,
+        0.8
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "omega": 1
+    }
+  },
+  "runs": {
+    "isoAlpha_translation_Co0.2": {
+      "dt": 0.008333333333333304,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 0
+    },
+    "plicRDF_translation_Co0.2": {
+      "dt": 0.008333333333333304,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 5
+    },
+    "gradAlpha_translation_Co0.2": {
+      "dt": 0.008333333333333304,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 4
+    },
+    "isoAlpha_translation_Co0.5": {
+      "dt": 0.02083333333333326,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 7
+    },
+    "plicRDF_translation_Co0.5": {
+      "dt": 0.02083333333333326,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 13
+    },
+    "gradAlpha_translation_Co0.5": {
+      "dt": 0.02083333333333326,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 12
+    },
+    "isoAlpha_rotation_Co0.2": {
+      "dt": 0.005128205128205135,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 0
+    },
+    "plicRDF_rotation_Co0.2": {
+      "dt": 0.005128205128205135,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 2
+    },
+    "gradAlpha_rotation_Co0.2": {
+      "dt": 0.005128205128205135,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 1
+    },
+    "isoAlpha_rotation_Co0.5": {
+      "dt": 0.012820512820512837,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 2
+    },
+    "plicRDF_rotation_Co0.5": {
+      "dt": 0.012820512820512837,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 4
+    },
+    "gradAlpha_rotation_Co0.5": {
+      "dt": 0.012820512820512837,
+      "surface_cells": 64,
+      "traced_faces": 128,
+      "branches": [
+        0,
+        128,
+        0,
+        0
+      ],
+      "limited_faces": 3
+    }
+  }
+}

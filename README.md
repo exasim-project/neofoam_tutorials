@@ -8,6 +8,7 @@ pixi install
 pixi run test               # 44 passed, ~6 min (the backend tests need NeoFOAM, $NEOFOAM_PYTHON, and a GPU)
 pixi run update-reference   # re-runs the C++ reference, rewrites reference/
 pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction reference, rewrites reference/curvature*/
+pixi run update-advection-flux-reference  # OpenFOAM-v2406 isoAdvection face fluxes, rewrites reference/curvature*/advection/
 ```
 
 ## Layout
@@ -22,6 +23,7 @@ pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction refere
 | `metrics.py` | TwoPhaseFlow's `volumeFractionError` (Eshape, Emass, Ebound) on arrays |
 | `reference.py` | meshes a case (blockMesh, setAlphaField, generator) and runs TwoPhaseFlow's `advectorVoF` |
 | `reconstruction.py` | meshes a curvature case and runs `reference/reconstructionReference`; the `.npz` format (module docstring) and loaders |
+| `advection_flux.py` | runs `reference/advectionFluxReference` on the curvature cases; the `.npz` format (module docstring) and loader |
 | `backend.py` | `run_case(benchmark, backend, executor, case_dir) -> RunResult`, the adapter to `neofoam.algorithms.vof` |
 
 ## Reference
@@ -171,3 +173,33 @@ on hexahedra, so its plane 0 cuts the cell's alpha only to ~1e-3 on curvature3D 
 Python cut cell against the initial alpha (1e-14), gradAlpha's gradient against a numpy
 least-squares fit over the stored stencil, and, marked `geometricvof`, that a rerun
 reproduces them bitwise.
+
+## isoAdvection face fluxes (geometric VoF)
+
+The unit-level reference for porting isoAdvector's advection step: one
+`isoAdvection::advect` from the curvature cases' initial alpha, per scheme (isoAlpha,
+plicRDF, gradAlpha), velocity (an oblique uniform one and a solid-body rotation off the
+interface centre, `system/advectionFluxReferenceDict`) and Courant number (0.2, 0.5).
+`reference/advectionFluxReference/` (wmake utility) runs the library's isoAdvection
+twice (fvSolution `alpha.<scheme>`: nAlphaBounds 3 and clip, as interIsoFoam;
+`alpha.<scheme>.unbounded`: neither) and replays `timeIntegratedFlux()` with
+`cutFaceAdvectTrace.{H,C}`, a copy of `cutFaceAdvect` with trace lines only (`diff` it
+against v2406's). It stops unless the trace equals the library on every face and the
+replayed field equals the library's unbounded `dVf_`, both bitwise.
+`reference/<case>/advection/<scheme>_<velocity>_Co<Co>.npz` holds the inputs (phi, U,
+U at the points, dt, the interface and Un0), one row per `timeIntegratedFaceFlux` call
+(its arguments, result, point arrival times, branch, time-integrated area and its
+contributions), and the assembled fields (upwind dVf, dVf before and after
+`limitFluxes`, alphaPhi, alpha unbounded and bounded); keys and shapes are documented in
+`src/neofoam_verification/advection_flux.py`. `tests/test_advection_flux.py` checks
+that the assembled fields follow from the rows and the inputs from the reconstruction
+reference, and, marked `geometricvof`, that a rerun reproduces them bitwise.
+
+Found on the way (a port has to reproduce them): `timeIntegratedArea` drops vertex
+times within `max(1e-6 dt, 10 SMALL)` of the previous one, and its final constant phase
+starts at the last vertex time, so the integration intervals need not join exactly;
+the triangle-decomposition branch for non-planar faces (nShifts > 2) iterates its
+`sortedOrder` indices as times (`for (const scalar timeI : order)`) and so skips the
+intermediate vertex times; it is not reached on these planar meshes (every traced face
+takes the nShifts 0/2 branch, none the `|Un0| <= 1e-12` one). The interface does not
+reach the boundary, so no boundary face is traced.

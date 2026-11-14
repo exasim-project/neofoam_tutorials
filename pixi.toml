@@ -38,6 +38,9 @@ update-reference = { cmd = "python -m neofoam_verification.reference", depends-o
 # Re-runs the OpenFOAM-v2406 reconstruction reference (reference/reconstructionReference)
 # of every curvature case and rewrites reference/curvature*/.
 update-reconstruction-reference = { cmd = "python -m neofoam_verification.reconstruction", depends-on = ["install"] }
+# Re-runs the OpenFOAM-v2406 isoAdvection face-flux reference (reference/advectionFluxReference)
+# of every curvature case and rewrites reference/curvature*/advection/.
+update-advection-flux-reference = { cmd = "python -m neofoam_verification.advection_flux", depends-on = ["install"] }
 lint = "ruff check src tests && ruff format --check src tests"
 format = "ruff format src tests && ruff check --fix src tests"
 type-check = "mypy"
