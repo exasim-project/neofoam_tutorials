@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  vortexShearedDisc, MULES variant. div(phi,alpha) is the testsuite's; its
+  div(phirb,alpha) (Gauss interfaceCompression, unused by isoAdvector) is the
+  interFoam standard Gauss linear here, and the gradient of alpha (interface
+  normal nHat) is Gauss linear instead of the testsuite's pointCellsLeastSquares.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+}
+
+divSchemes
+{
+    div(phi,alpha)   Gauss vanLeer;
+    div(phirb,alpha) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+// ************************************************************************* //

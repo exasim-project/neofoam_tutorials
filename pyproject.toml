@@ -1,0 +1,43 @@
+[project]
+name = "neofoam-verification"
+version = "0.1.0"
+description = "Verification of NeoFOAM's MULES VoF advection against OpenFOAM (TwoPhaseFlow benchmarks)"
+authors = [{ name = "Henning Scheufler", email = "henning.scheufler@web.de" }]
+requires-python = ">=3.10"
+# numpy and foamlib come from the pixi environment.
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "openfoam: needs OpenFOAM-v2506 with TwoPhaseFlow's advectorVoF (TWOPHASEFLOW_BASHRC)",
+    "backend: needs the NeoFOAM MULES advection library (neofoam.algorithms.vof)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [".pixi/", "cases/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["neofoam_verification"]
+
+[tool.mypy]
+files = ["src"]
+mypy_path = ["src"]
+python_version = "3.12"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["foamlib", "foamlib.*"]
+ignore_missing_imports = true

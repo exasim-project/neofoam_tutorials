@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Leveque, MULES variant. div(phi,alpha) is the testsuite's; its
+  div(phirb,alpha) (Gauss interfaceCompression, unused by isoAdvector) is the
+  interFoam standard Gauss linear here; the gradient (interface normal nHat)
+  is the testsuite's Gauss linear.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+}
+
+divSchemes
+{
+    div(phi,alpha)   Gauss vanLeer;
+    div(phirb,alpha) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+// ************************************************************************* //

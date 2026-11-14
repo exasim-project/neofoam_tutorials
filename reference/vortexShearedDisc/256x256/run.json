@@ -1,0 +1,10 @@
+{
+  "solver": "advectorVoF, advectionScheme MULESScheme",
+  "twophaseflow": "TwoPhaseFlow master ba10702 (~/OpenFOAM/<user>-v2506 build)",
+  "bashrc": "$HOME/OpenFOAM/OpenFOAM-v2506/etc/bashrc",
+  "resolution": "256x256",
+  "time_steps": 3365,
+  "deltaT_first": 0.0015168752370117557,
+  "deltaT_last": 0.00149932197660263,
+  "wall_time_s": 44.26
+}

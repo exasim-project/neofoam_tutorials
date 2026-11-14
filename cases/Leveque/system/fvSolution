@@ -1,0 +1,53 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Leveque (TwoPhaseFlow testsuite/advection/test-Leveque), MULES variant.
+  The testsuite selects isoAdvection/plicRDF; here TwoPhaseFlow's MULESScheme
+  advects alpha. nAlphaCorr, nAlphaSubCycles and cAlpha are the testsuite's;
+  MULESCorr and nLimiterIter are OpenFOAM's defaults, written out.
+  pcorr and PIMPLE are the testsuite's, for the CorrectPhi projection of
+  generateU*, which makes phi divergence-free.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "alpha.water.*"
+    {
+        advectionScheme MULESScheme;   // TwoPhaseFlow advectorVoF: selects MULES
+        nAlphaCorr      2;
+        nAlphaSubCycles 1;             // MULESScheme does not sub-cycle; keep 1
+        cAlpha          1;
+        MULESCorr       no;
+        nLimiterIter    3;
+    }
+
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-10;
+        relTol          0;
+    }
+}
+
+// advectorVoF reads this dict: phi = phi0 cos(pi (t + dt/2)/spirallingFlow)
+isoAdvector
+{
+    spirallingFlow  3;
+}
+
+PIMPLE
+{
+    nNonOrthogonalCorrectors 1;
+    pRefCell        0;
+    pRefValue       0;
+}
+
+// ************************************************************************* //
