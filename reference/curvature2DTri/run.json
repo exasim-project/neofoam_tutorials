@@ -1,0 +1,25 @@
+{
+  "utility": "reference/reconstructionReference",
+  "bashrc": "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc",
+  "openfoam": "_630d60de3b-20240620 OPENFOAM=2406 version=v2406",
+  "n_cells": 2400,
+  "settings": {
+    "isoAlpha": {
+      "reconstructionScheme": "isoAlpha",
+      "isoFaceTol": 1e-08,
+      "surfCellTol": 1e-08
+    },
+    "plicRDF": {
+      "reconstructionScheme": "plicRDF",
+      "isoFaceTol": 1e-08,
+      "surfCellTol": 1e-08,
+      "tol": 1e-08,
+      "iterations": 10,
+      "interpolateNormal": false
+    }
+  },
+  "interface_cells": {
+    "isoAlpha": 110,
+    "plicRDF": 110
+  }
+}

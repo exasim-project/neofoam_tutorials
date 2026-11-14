@@ -14,3 +14,4 @@ runs/
 
 # wmake objects of the velocity generators in cases/<name>/<generator>/
 cases/*/*/Make/linux64*/
+reference/*/Make/linux64*/

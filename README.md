@@ -7,6 +7,7 @@ Serial/CPU/GPU executors) against OpenFOAM, on TwoPhaseFlow's advection benchmar
 pixi install
 pixi run test               # 44 passed, ~6 min (the backend tests need NeoFOAM, $NEOFOAM_PYTHON, and a GPU)
 pixi run update-reference   # re-runs the C++ reference, rewrites reference/
+pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction reference, rewrites reference/curvature*/
 ```
 
 ## Layout
@@ -20,6 +21,7 @@ pixi run update-reference   # re-runs the C++ reference, rewrites reference/
 | `shapes.py`, `cut_cell.py` | implicit functions; TwoPhaseFlow's `cutCellIso` (exact volume fraction) |
 | `metrics.py` | TwoPhaseFlow's `volumeFractionError` (Eshape, Emass, Ebound) on arrays |
 | `reference.py` | meshes a case (blockMesh, setAlphaField, generator) and runs TwoPhaseFlow's `advectorVoF` |
+| `reconstruction.py` | meshes a curvature case and runs `reference/reconstructionReference`; the `.npz` format (module docstring) and loaders |
 | `backend.py` | `run_case(benchmark, backend, executor, case_dir) -> RunResult`, the adapter to `neofoam.algorithms.vof` |
 
 ## Reference
@@ -123,3 +125,41 @@ few ulps of the total volume. The timing columns (tRec, Tadv) are not reproduced
 
 A case directory under `cases/` plus a `Benchmark` entry in `benchmarks.py`;
 `tests/test_benchmarks.py` checks that the two agree.
+
+## Interface reconstruction (geometric VoF)
+
+The reference for a geometric VoF port: OpenFOAM-v2406's geometricVoF
+(`$OPENFOAM_BASHRC`, default `~/OpenFOAM/OpenFOAM-v2406/etc/bashrc`) on TwoPhaseFlow's
+`run/benchmark/surfaceTension` cases, after `apps/benchmark/reconstructInterface`.
+`reference/reconstructionReference/` is an OpenFOAM utility (wmake, at most two jobs):
+alpha1 from the implicit function by `cutCellIso` (as setAlphaField), then for
+`isoAlpha` and `plicRDF` the interface normal and centre, `cutCellPLIC::calcSubCell` for
+8 fixed planes per interface cell (the reconstructed one, shifted, tilted, outside the
+cell, oblique), `surfaceIteratorPLIC::vofCutCell` (signed distance) for 3 normals x 4
+target fractions, and TwoPhaseFlow's `reconstructionError` (normal and centre terms).
+`reference/<case>/{mesh,isoAlpha,plicRDF}.npz` and `run.json` hold it; the keys and
+shapes are documented in `src/neofoam_verification/reconstruction.py`.
+
+| case | mesh | cells | scheme | interface cells | LNormalInf | LNormal1 | LCentreInf | LCentre1 |
+|---|---|---|---|---|---|---|---|---|
+| curvature2D | 32 x 32 hex | 1024 | isoAlpha | 64 | 2.93e-03 | 3.37e-04 | 1.85e-03 | 9.48e-04 |
+| | | | plicRDF | 64 | 5.21e-04 | 7.98e-05 | 1.85e-03 | 9.51e-04 |
+| curvature2DTri | prisms, 32 edges per side | 2400 | isoAlpha | 110 | 2.39e-02 | 2.48e-03 | 9.00e-04 | 4.79e-04 |
+| | | | plicRDF | 110 | 1.74e-03 | 2.01e-04 | 9.00e-04 | 4.89e-04 |
+| curvature3D | 16^3 hex | 4096 | isoAlpha | 680 | 1.12e-02 | 1.53e-03 | 7.29e-03 | 4.65e-03 |
+| | | | plicRDF | 680 | 4.66e-03 | 4.47e-04 | 7.22e-03 | 4.68e-03 |
+| curvature3DTri | tets, 10 edges per side | 4685 | isoAlpha | 650 | 4.30e-01 | 3.09e-02 | 2.97e-02 | 1.12e-02 |
+| | | | plicRDF | 650 | 2.54e-02 | 4.31e-03 | 3.03e-02 | 1.16e-02 |
+
+Differences to TwoPhaseFlow's cases: smaller meshes, origin (1.01, 0, 1.01) /
+(1.01, 1.01, 1.01) instead of (1, 0, 1) / (1, 1, 1), where the interface passes through
+mesh points; alpha by `cutCellIso` (their `setAlphaMethod cutCellImpFunc` is TwoPhaseFlow
+only); the tet block is the 2 x 2 x 2 cube of curvature3D (theirs, the unit cube, holds
+an octant of the sphere); no curvature. The triangle/tet meshes are the committed
+`.msh` files (gmsh 4.15.2, `pixi exec -s gmsh gmsh ...`, see the `.geo` header), so the
+reference does not depend on a gmsh version. `normal()` points into the fluid
+(alpha = 1), and so does the cut face's area vector. isoAlpha's iso face is not planar
+on hexahedra, so its plane 0 cuts the cell's alpha only to ~1e-3 on curvature3D (to
+1e-8 everywhere else). `tests/test_reconstruction.py` checks the stored files, the
+Python cut cell against the initial alpha (1e-14), and, marked `geometricvof`, that a
+rerun reproduces them bitwise.
