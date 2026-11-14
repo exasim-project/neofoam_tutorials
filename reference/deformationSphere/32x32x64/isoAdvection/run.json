@@ -1,0 +1,80 @@
+{
+  "utility": "reference/isoAdvectionReference",
+  "bashrc": "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc",
+  "openfoam": "_630d60de3b-20240620 OPENFOAM=2406 version=v2406",
+  "case": "deformationSphere/32x32x64",
+  "n_cells": 65536,
+  "controls": {
+    "gradAlpha": {
+      "reconstructionScheme": "gradAlpha",
+      "isoFaceTol": 1e-08,
+      "surfCellTol": 1e-08
+    },
+    "plicRDF": {
+      "reconstructionScheme": "plicRDF",
+      "isoFaceTol": 1e-08,
+      "surfCellTol": 1e-08,
+      "tol": 1e-08,
+      "iterations": 10,
+      "interpolateNormal": false
+    }
+  },
+  "alpha_interval": 0,
+  "velocities": {},
+  "runs": {
+    "gradAlpha": {
+      "steps": 202,
+      "end_time": 3.0,
+      "dt_first": 0.00967741935483871,
+      "dt_min": 0.009614578969417678,
+      "dt_max": 0.05,
+      "n_iter": [
+        0,
+        15,
+        78,
+        109
+      ],
+      "surface_cells_step1": 416,
+      "Eshape": [
+        0.027558282300642563,
+        0.004452170034702769
+      ],
+      "Ebound": [
+        0.0,
+        0.0
+      ],
+      "Emass": [
+        2.171980706400234e-09,
+        7.918358189626384e-09
+      ],
+      "wall_time_s": 9.73
+    },
+    "plicRDF": {
+      "steps": 202,
+      "end_time": 3.0,
+      "dt_first": 0.00967741935483871,
+      "dt_min": 0.009614578969417678,
+      "dt_max": 0.05,
+      "n_iter": [
+        0,
+        14,
+        74,
+        114
+      ],
+      "surface_cells_step1": 416,
+      "Eshape": [
+        0.027558293241585083,
+        0.004480964571022145
+      ],
+      "Ebound": [
+        0.0,
+        0.0
+      ],
+      "Emass": [
+        1.3112921238428443e-08,
+        7.511907250228045e-08
+      ],
+      "wall_time_s": 14.2
+    }
+  }
+}

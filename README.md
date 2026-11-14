@@ -9,6 +9,7 @@ pixi run test               # 44 passed, ~6 min (the backend tests need NeoFOAM,
 pixi run update-reference   # re-runs the C++ reference, rewrites reference/
 pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction reference, rewrites reference/curvature*/
 pixi run update-advection-flux-reference  # OpenFOAM-v2406 isoAdvection face fluxes, rewrites reference/curvature*/advection/
+pixi run update-isoadvection-reference    # OpenFOAM-v2406 multi-step isoAdvection, rewrites reference/*/isoAdvection/
 ```
 
 ## Layout
@@ -24,6 +25,7 @@ pixi run update-advection-flux-reference  # OpenFOAM-v2406 isoAdvection face flu
 | `reference.py` | meshes a case (blockMesh, setAlphaField, generator) and runs TwoPhaseFlow's `advectorVoF` |
 | `reconstruction.py` | meshes a curvature case and runs `reference/reconstructionReference`; the `.npz` format (module docstring) and loaders |
 | `advection_flux.py` | runs `reference/advectionFluxReference` on the curvature cases; the `.npz` format (module docstring) and loader |
+| `isoadvection.py` | runs `reference/isoAdvectionReference` (multi-step isoAdvection) on curvature2D and the benchmarks; the `.npz` format (module docstring) and loader |
 | `backend.py` | `run_case(benchmark, backend, executor, case_dir) -> RunResult`, the adapter to `neofoam.algorithms.vof` |
 
 ## Reference
@@ -203,3 +205,57 @@ the triangle-decomposition branch for non-planar faces (nShifts > 2) iterates it
 intermediate vertex times; it is not reached on these planar meshes (every traced face
 takes the nShifts 0/2 branch, none the `|Un0| <= 1e-12` one). The interface does not
 reach the boundary, so no boundary face is traced.
+
+## Multi-step isoAdvection (geometric VoF)
+
+The parity reference for a ported isoAdvector time loop: OpenFOAM-v2406's
+`isoAdvection` advects alpha as interIsoFoam does (`advect(zeroField, zeroField)`,
+limitFluxes with `nAlphaBounds 3`, then clipping to [0, 1], `snapTol 0`), in
+advectorVoF's time loop (dt from `maxAlphaCo` with the previous dt, capped by
+`maxDeltaT`, adjusted to hit the write times; phi0 and U0 scaled by the `isoAdvector`
+dict's cosine before `runTime++`). `reference/isoAdvectionReference/` (wmake utility)
+runs the library with `clip false` and clips itself, so alpha before clipping is seen
+every step, and counts limitFluxes' iterations with copies advected with
+`nAlphaBounds` 0, 1, 2; it stops unless the copies and the library's own clipping
+(step 1) agree with the run bitwise. Schemes gradAlpha and plicRDF
+(`interpolateNormal false`, `iterations 10`, `tol 1e-8`; no state between steps).
+`reference/<case>/isoAdvection/<scheme>[_<velocity>].npz` holds a table per step (t,
+dt, Courant numbers, limitFluxes iterations, surface cells, mass/min/max before and
+after clipping), alpha after step 1, at the write times (and every
+`alpha_interval` steps), step 1's pieces (dVf before and after limitFluxes, alpha
+after 0, 1, 2 iterations and before clipping, the interface with x0, n0 and Un0 from
+`interpolationCellPoint`; U and phi for the 2D cases) and the volumeFractionError
+(`metrics.py`) at the write times; keys and shapes are documented in
+`src/neofoam_verification/isoadvection.py` (`load_run(label, scheme, velocity)`).
+`tests/test_isoadvection.py` checks the files' consistency (time steps, iterations,
+mass up to the clipping, bounds, step 1 from its face fluxes, the errors), and, marked
+`geometricvof`, that a rerun reproduces them bitwise.
+
+curvature2D's velocities are in `system/isoAdvectionReferenceDict` (`maxAlphaCo 0.5`;
+translation (1, 0, 0.5) to t = 0.4, rotation omega = 1 about (1, 0, 0.8) to t = 1); the
+benchmarks run their own case (meshed with v2506 as for MULES, `0/U` and `0/phi` from
+the generator) to the end time, at the coarsest stored resolution. advectorVoF's
+`Su = div(phi0) min(alpha, 1)` (round-off) is not passed.
+
+| case | scheme | cells | steps | dt | iterations 0/1/2/3 | Eshape (write times) | max Emass | wall [s] |
+|---|---|---|---|---|---|---|---|---|
+| curvature2D translation | gradAlpha | 1024 | 20 | 0.02 | 0/18/2/0 | 6.39e-04 / 1.21e-03 | 7e-17 | 0.3 |
+| | plicRDF | | 20 | | 0/19/1/0 | 1.21e-04 / 1.99e-04 | 6e-17 | 0.3 |
+| curvature2D rotation | gradAlpha | 1024 | 32 | 0.030 ... 0.033 | 0/31/1/0 | 6.57e-04 / 6.83e-04 | 3e-17 | 0.3 |
+| | plicRDF | | 32 | | 0/31/1/0 | 1.63e-04 / 2.21e-04 | 1e-17 | 0.3 |
+| discUniFlow 100x60 | gradAlpha | 6000 | 1200 | 1/300 | 295/904/1/0 | 1.49e-02 / 1.92e-02 / 2.11e-02 / 2.25e-02 | 3e-15 | 2.5 |
+| | plicRDF | | 1200 | | 271/897/32/0 | 3.17e-03 / 6.22e-03 / 9.23e-03 / 1.22e-02 | 6e-16 | 2.9 |
+| vortexShearedDisc 32x32 | gradAlpha | 1024 | 431 | 0.012 ... 0.051 | 0/253/155/23 | 1.14e-01 / 5.28e-02 | 2e-13 | 1.5 |
+| | plicRDF | | 431 | | 0/234/171/26 | 1.13e-01 / 4.25e-02 | 7e-13 | 2.6 |
+| deformationSphere 32x32x64 | gradAlpha | 65536 | 202 | 0.0096 ... 0.05 | 0/15/78/109 | 2.76e-02 / 4.45e-03 | 8e-09 | 9.7 |
+| | plicRDF | | 202 | | 0/14/74/114 | 2.76e-02 / 4.48e-03 | 8e-08 | 14 |
+| Leveque 32x32x32 | gradAlpha | 32768 | 298 | 0.0064 ... 0.053 | 0/108/157/33 | 1.95e-02 / 8.54e-03 | 1e-09 | 11 |
+| | plicRDF | | 299 | | 0/73/172/54 | 1.94e-02 / 7.75e-03 | 2e-08 | 18 |
+
+(The wall time includes 1 to 3 extra advects per step that count the iterations.) The plicRDF
+end values agree with the testsuite's (discUniFlow 1.22e-02 against its limit 0.0122,
+deformationSphere 4.5e-03, Leveque 7.7e-03). A step whose limitFluxes leaves alpha
+outside [-100 SMALL, 1 + 100 SMALL] after 3 iterations loses mass to the clipping
+(Emass up to 8e-8). isoAdvection's upwind fluxes spread round-off values (< 1e-12) of
+alpha over most of the domain (55 000 of 65 536 cells of deformationSphere at t = 3),
+so a port compares alpha with an absolute tolerance, not by its support.
