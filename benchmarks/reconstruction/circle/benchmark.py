@@ -8,7 +8,8 @@ are numufoam's ``error.csv``.
 from pathlib import Path
 
 from neofoam_verification.reconstruction_error import COLUMNS, read_numufoam
-from neofoam_verification.solvers.reconstruct_interface import ERROR_DAT, alpha_samples
+from neofoam_verification.solvers.reconstruction_io import ERROR_DAT, alpha_samples
+from neofoam_verification.suite.backends import NEOFOAM_BACKENDS
 from neofoam_verification.suite.benchmark import Benchmark, FunctionObjectTable, Step, Sweep
 from neofoam_verification.suite.checks import AgainstBackend, Order, Published
 
@@ -28,9 +29,9 @@ BENCHMARK = Benchmark(
         Step("blockMesh"),
         Step("setAlphaField", "setAlphaField -dict system/initAlphaFieldDict"),
         # reconstructInterface sets its samples itself; NeoFOAM's solver reads them
-        Step("alphaSamples", alpha_samples, backends=("neofoam",)),
+        Step("alphaSamples", alpha_samples, backends=NEOFOAM_BACKENDS),
     ),
-    backends=("twophaseflow", "neofoam"),
+    backends=("twophaseflow", *NEOFOAM_BACKENDS),
     table=FunctionObjectTable(ERROR_DAT.as_posix(), COLUMNS, timing=("k1", "k2")),
     report_columns=NORMS,
     checks=(

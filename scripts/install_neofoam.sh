@@ -16,10 +16,12 @@ lock=${NEOFOAM_BUILD_LOCK:-$HOME/libsAndApps/NeoFOAM/.claude/worktrees/vof_scrat
 log="$build_dir.log"
 mkdir -p "$(dirname "$build_dir")"
 
-set +u
+# OpenFOAM's bashrc uses unset variables and returns non-zero
+set +eu
 # shellcheck disable=SC1090
 source "$NEOFOAM_BASHRC" >/dev/null 2>&1
-set -u
+set -eu
+[ -n "${WM_PROJECT_DIR:-}" ] || { echo "sourcing $NEOFOAM_BASHRC failed" >&2; exit 1; }
 export CMAKE_BUILD_PARALLEL_LEVEL=4
 export CCACHE_BASEDIR=${CCACHE_BASEDIR:-$(dirname "$src")}
 if [ -d /usr/lib/ccache ]; then export PATH="/usr/lib/ccache:$PATH"; fi

@@ -12,6 +12,8 @@ rewritten. Options::
     --store-reference BACKEND
                     after a full run, merge BACKEND's table into the benchmark's
                     ``reference/<BACKEND>.csv`` (the verified table AgainstBackend reads)
+    --rerun RULE    rerun RULE's jobs and what depends on them (``solve`` after changing
+                    the method's code, which the workflow does not see; repeatable)
     --in-process    run without Snakemake (not implemented yet)
 
 A backend that cannot run here (:meth:`Backend.unavailable`) is skipped with its reason
@@ -44,6 +46,7 @@ def run_benchmark(
     smoke: bool = False,
     backends: Sequence[str] = (),
     cores: int = 1,
+    rerun: Sequence[str] = (),
 ) -> int:
     """Export and run one benchmark's workflow; Snakemake's return code."""
     chosen = [b for b in benchmark.backends if not backends or b in backends]
@@ -59,7 +62,8 @@ def run_benchmark(
     )
     command = ["snakemake", "-s", str(snakefile), "-d", str(workdir), "-c", str(cores)]
     print(f"{benchmark.name}: {' '.join(command)}", flush=True)
-    return subprocess.run(command + ["--rerun-incomplete", "--quiet", "rules"]).returncode
+    force = ["--forcerun", *rerun] if rerun else []
+    return subprocess.run(command + ["--rerun-incomplete", "--quiet", "rules", *force]).returncode
 
 
 def store_reference(benchmark: Benchmark, results_dir: Path, backend: str) -> Path:
@@ -80,6 +84,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("-j", type=int, default=MAX_CORES)
     parser.add_argument("--store-reference", metavar="BACKEND")
     parser.add_argument("--results", type=Path, default=RESULTS)
+    parser.add_argument("--rerun", action="append", default=[], metavar="RULE")
     parser.add_argument("--in-process", action="store_true")
     args = parser.parse_args(argv)
     if args.in_process:
@@ -96,7 +101,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     for path in paths:
         benchmark = load(path)
         code = run_benchmark(
-            benchmark, args.results, args.method, args.smoke, args.backend, min(args.j, MAX_CORES)
+            benchmark,
+            args.results,
+            args.method,
+            args.smoke,
+            args.backend,
+            min(args.j, MAX_CORES),
+            args.rerun,
         )
         checks_file = args.results / benchmark.name / "checks.json"
         checks = json.loads(checks_file.read_text())["checks"] if code == 0 else []

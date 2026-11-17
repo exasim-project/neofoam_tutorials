@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from .benchmark import Benchmark
-from .checks import Result
+from .checks import Result, read_table
 
 
 def _row(cells: Sequence[object]) -> str:
@@ -82,12 +82,8 @@ def write_summary(results_dir: Path) -> Path:
         checks = json.loads(checks_file.read_text())["checks"]
         for backend in run["backends"]:
             mine = [c["status"] for c in checks if c["backend"] == backend]
-            wall = sum(
-                json.loads(
-                    (workdir / "cases" / backend / case["name"] / ".solve.json").read_text()
-                )["wall_s"]
-                for case in run["cases"]
-            )
+            table = read_table(workdir / "tables" / f"{backend}.csv")
+            wall = sum(row["wall_s"] for row in table.values())
             rows.append(
                 [
                     f"[{run['name']}]({workdir.relative_to(results_dir).as_posix()}/report.md)",

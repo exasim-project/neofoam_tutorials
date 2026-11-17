@@ -6,7 +6,8 @@ benchmark's solver name to its own command:
 
 * ``twophaseflow`` -- the reference: TwoPhaseFlow master's applications built for
   OpenFOAM-v2506 (``$TWOPHASEFLOW_BASHRC``); the solver name is the application.
-* ``neofoam`` -- the method under test: ``neofoam solver <name>``, a benchmark solver
+* ``neofoam``, ``neofoam-cpu``, ``neofoam-gpu`` -- the method under test on NeoN's
+  Serial, CPU (OpenMP) and GPU executor: ``neofoam solver <name>``, a benchmark solver
   of :mod:`neofoam_verification.solvers` registered through the ``neofoam.solvers``
   entry-point group (OpenFOAM-v2406, ``$NEOFOAM_BASHRC``, as NeoFOAM is built against).
 
@@ -74,6 +75,8 @@ class TwoPhaseFlow:
 @dataclass(frozen=True)
 class NeoFOAM:
     name: str = "neofoam"
+    #: the NeoN executor, written to system/controlDict's ``executor`` before the solver
+    executor: str = "Serial"
 
     @property
     def bashrc(self) -> Path:
@@ -89,7 +92,8 @@ class NeoFOAM:
         return None
 
     def solver_command(self, solver: str) -> str:
-        return f"neofoam solver {solver}"
+        set_executor = f"foamDictionary -entry executor -set {self.executor} system/controlDict"
+        return f"{set_executor} > log.foamDictionary && neofoam solver {solver}"
 
 
 BACKENDS: dict[str, Backend] = {}
@@ -101,6 +105,10 @@ def register(backend: Backend) -> None:
 
 register(TwoPhaseFlow())
 register(NeoFOAM())
+register(NeoFOAM("neofoam-cpu", "CPU"))
+register(NeoFOAM("neofoam-gpu", "GPU"))
+#: the NeoFOAM backends, one per executor
+NEOFOAM_BACKENDS = ("neofoam", "neofoam-cpu", "neofoam-gpu")
 
 
 def run(backend: Backend, case: Path, command: str, log: str) -> None:

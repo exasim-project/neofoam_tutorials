@@ -317,7 +317,8 @@ BENCHMARK = Benchmark(
 ### Running the benchmarks
 
 ```bash
-pixi run benchmark FOLDER [--smoke] [--method NAME] [--backend NAME] [-j N] [--store-reference BACKEND]
+pixi run benchmark FOLDER [--smoke] [--method NAME] [--backend NAME] [-j N] [--rerun RULE]
+                          [--store-reference BACKEND]
 ```
 
 runs every `benchmark.py` under FOLDER (`src/neofoam_verification/run.py`). Each is
@@ -334,15 +335,20 @@ per backend and case (`cases/<backend>/<method>_n<n>/`, a copy of the template w
 backend `tables/<backend>.csv`, `checks.json` and `report.md` (error table, observed
 orders between consecutive resolutions, the checks), and `results/summary.md` over all
 benchmarks. Snakemake reruns only what changed (a full sweep after a smoke run reuses the
-smoke cases; a changed reference table or `benchmark.py` reruns verify). The command
+smoke cases; a changed reference table or `benchmark.py` reruns verify). It does not see
+the solver's code: after changing a method, `--rerun solve` reruns the solves and what
+follows. Deleting an intermediate file (a table) does not rerun anything either. The command
 fails when a check fails. `-j` is at most 4. A backend that cannot run here is left out
 of the workflow and reported as skipped with the reason. `--in-process` (without
 Snakemake) is not implemented.
 
 Backends (`suite/backends.py`): `twophaseflow` runs the solver name as a TwoPhaseFlow
-application under `$TWOPHASEFLOW_BASHRC` (v2506); `neofoam` runs `neofoam solver <name>`
-under `$NEOFOAM_BASHRC` (v2406), a benchmark solver of `neofoam_verification.solvers`
-registered by the `neofoam.solvers` entry point in `pyproject.toml`. NeoFOAM's benchmark
+application under `$TWOPHASEFLOW_BASHRC` (v2506); `neofoam`, `neofoam-cpu` and
+`neofoam-gpu` write `executor Serial|CPU|GPU` to `system/controlDict` and run
+`neofoam solver <name>` under `$NEOFOAM_BASHRC` (v2406), a benchmark solver of
+`neofoam_verification.solvers` registered by the `neofoam.solvers` entry point in
+`pyproject.toml` (a module exporting the `<name>` spec and `run(argv)`). The CPU executor
+takes all cores unless `OMP_NUM_THREADS` is set. NeoFOAM's benchmark
 solvers use NeoFOAM's models only; what they add is the benchmark's input/output
 convention (here: the alpha samples in, `reconstructionError`'s `error.dat` out).
 
@@ -377,7 +383,9 @@ OpenMP; CUDA when `nvcc` is found; Ginkgo on by default), 4 jobs, under
 `.pixi/build/neofoam`, not the checkout's `_skbuild`. Compilers are the system's (gcc 13
 through ccache, `/usr/local/cuda`), the ones OpenFOAM-v2406 is built with; cmake, ninja,
 scikit-build-core, nanobind 3.0 and NeoFOAM's Python dependencies come from the pixi
-feature `neofoam`. Then `pixi run install` registers the benchmark solvers.
+feature `neofoam`. Then `pixi run install` registers the benchmark solvers. A first build
+(vof/recon-family cf55e5b85, fresh build directory, CUDA: Kokkos, Ginkgo, NeoN) took
+37 min with 4 jobs and needs about 1.6 GB for the build directory.
 
 ### reconstruction/circle
 
@@ -416,6 +424,17 @@ agrees with numufoam to 1.9e-10 relative (LCentreInf at x1024); fitted order 1.9
 LCentre1 and 1.68 in LCentreInf (2.0 down to 1.2 between consecutive resolutions), the
 normal errors do not converge. The NeoFOAM backend's alpha samples (`alphaSamples`:
 setAlphaField v2406 per centre into time directory `i`) equal reconstructInterface's own
-bitwise (`tests/test_suite.py`, x8). The NeoFOAM `reconstructInterface` solver
-(`solvers/reconstruct_interface.py`) is pending NeoFOAM's reconstruction-scheme model
-family and an installed NeoFOAM; until then the backend is skipped.
+bitwise (`tests/test_suite.py`, x8).
+
+NeoFOAM's `reconstructInterface` (`solvers/reconstruct_interface.py`) selects the scheme
+from `reconstructionSchemeNeoN` (`reconstructionSchemeNeoN.select(...).reconstruct(ops,
+alpha)`), so any registered scheme runs with `--method`. With gradAlpha's default
+`planeSearch volTaylor` it agrees with TwoPhaseFlow to 4e-8 relative in the normal norms
+and LCentreInf at every resolution, and to 3e-7 ... 4.2e-6 in LCentre1 from x32 on (1.6e-6
+at x64, 4.2e-6 at x1024): volTaylor places the plane to alpha within `isoFaceTol` 1e-8,
+which moves the centre by ~1e-8 h, against an LCentre1 of 1.6e-6 at x1024. So
+`AgainstBackend` (rtol 1e-6) fails; with `planeSearch openfoam` x1024 agrees to 4e-16.
+Serial, CPU and GPU give the same norms bitwise. Wall time of a solve at x1024: 11.8 s
+(Serial), 11.9 s (CPU), 11.3 s (GPU), against 17.6 s for reconstructInterface; per
+reconstruction (k1, normal and centre copied to the host, after an untimed ~2 s warm-up
+that builds the stencils) 21 / 16 / 13 ms, against 0.33 s CPU time in TwoPhaseFlow.

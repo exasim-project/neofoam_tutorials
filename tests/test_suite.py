@@ -12,7 +12,7 @@ import pytest
 from foamlib import FoamFile
 
 from neofoam_verification import run
-from neofoam_verification.solvers.reconstruct_interface import alpha_samples
+from neofoam_verification.solvers.reconstruction_io import alpha_samples
 from neofoam_verification.suite import backends
 from neofoam_verification.suite.benchmark import cases, discover, load
 from neofoam_verification.suite.checks import Result, read_table
@@ -109,8 +109,17 @@ def test_in_process_runner_is_deferred() -> None:
         run.main([str(CIRCLE), "--in-process"])
 
 
-def test_neofoam_backend_reports_why_it_cannot_run() -> None:
-    reason = NEOFOAM.unavailable("reconstructInterface")
-    if reason is None:
-        pytest.skip("neofoam with the reconstructInterface entry point is installed")
-    assert "neofoam" in reason
+@pytest.mark.backend
+@pytest.mark.skipif(
+    NEOFOAM.unavailable("reconstructInterface") is not None
+    or not _have(NEOFOAM.bashrc, "setAlphaField"),
+    reason=f"neofoam backend: {NEOFOAM.unavailable('reconstructInterface')}",
+)
+def test_smoke_run_of_neofoam_matches_the_reference(tmp_path: Path) -> None:
+    code = run.main(
+        [str(CIRCLE), "--smoke", "--backend", "neofoam", "--results", str(tmp_path), "-j", "2"]
+    )
+
+    assert code == 0
+    checks = json.loads((tmp_path / "reconstruction" / "circle" / "checks.json").read_text())
+    assert {c["status"] for c in checks["checks"]} == {"pass"}, checks

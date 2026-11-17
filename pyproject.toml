@@ -10,7 +10,7 @@ dependencies = ["neofoam"]
 
 # The NeoFOAM benchmark solvers: `neofoam solver <name>`.
 [project.entry-points."neofoam.solvers"]
-reconstructInterface = "neofoam_verification.solvers.reconstruct_interface:run"
+reconstructInterface = "neofoam_verification.solvers.reconstruct_interface"
 
 [build-system]
 requires = ["setuptools>=64"]
@@ -24,7 +24,7 @@ testpaths = ["tests"]
 markers = [
     "openfoam: needs OpenFOAM-v2506 with TwoPhaseFlow's advectorVoF / reconstructInterface (TWOPHASEFLOW_BASHRC)",
     "geometricvof: builds and runs reference/reconstructionReference and advectionFluxReference (OpenFOAM-v2406, OPENFOAM_BASHRC)",
-    "backend: needs the NeoFOAM MULES advection library (neofoam.algorithms.vof)",
+    "backend: needs NeoFOAM (the MULES advection library, or installed into this env for the benchmark solvers)",
 ]
 
 [tool.ruff]
