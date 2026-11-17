@@ -1,0 +1,53 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// numufoam's / TwoPhaseFlow's tiltedBox: the unit box (x-z, one cell through the empty y
+// direction) tilted by 30 degrees about y. The vertices are the blockMesh box's after
+// `transformPoints -yawPitchRoll '(0 30 0)'` (x' = x cos a + z sin a, z' = -x sin a + z cos a,
+// a = 30 deg; the same points as transformPoints to round-off): NeoFOAM has no mesh
+// transform tool. Another angle is another vertices list (a mesh variant's payload).
+scale   1;
+
+vertices
+(
+    (0 -0.5 0)
+    (0.8660254037844387 -0.5 -0.49999999999999994)
+    (0.8660254037844387 0.5 -0.49999999999999994)
+    (0 0.5 0)
+    (0.49999999999999994 -0.5 0.8660254037844387)
+    (1.3660254037844386 -0.5 0.36602540378443876)
+    (1.3660254037844386 0.5 0.36602540378443876)
+    (0.49999999999999994 0.5 0.8660254037844387)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (32 1 32) simpleGrading (1 1 1)
+);
+
+boundary
+(
+    left { type wall; faces ((0 4 7 3)); }
+    right { type wall; faces ((1 2 6 5)); }
+    bottom { type wall; faces ((0 3 2 1)); }
+    // closed (wall) in numufoam/TwoPhaseFlow, with a pressure reference cell:
+    // incompressibleVoFNeoN needs a fixed-value p_rgh patch (no closed domains)
+    top { type patch; faces ((4 5 6 7)); }
+    frontAndBack { type empty; faces ((0 1 5 4) (2 3 7 6)); }
+);
+
+// ************************************************************************* //

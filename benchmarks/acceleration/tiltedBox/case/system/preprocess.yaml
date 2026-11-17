@@ -1,0 +1,7 @@
+# blockMesh runs once per mesh variant of a sweep, setAlphaPlane (neofoam_verification's
+# tool: OpenFOAM setAlphaField's plane) per case: the water below the plane of
+# system/setAlphaFieldDict cut exactly into 0/alpha.water.
+tools:
+  - tool: blockMesh
+  - tool: setAlphaPlane
+    depends_on: [blockMesh]

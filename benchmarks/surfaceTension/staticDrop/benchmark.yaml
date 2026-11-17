@@ -1,0 +1,56 @@
+# Static drop (parasitic currents of the Brackbill CSF surface tension): NeoFOAM's
+# stationaryDroplet case (test/solver/incompressibleVoFNeoN), a 2 mm water cylinder in air
+# at the centre of an 8 mm box, sigma 0.07, g = 0, MULES, 200 steps of 2e-5 to t = 4e-3.
+# The drop should stay at rest: what moves is the spurious current, and the pressure jump
+# should balance sigma/R. Swept over resolution x executor.
+# NeoFOAM's incompressibleVoFNeoN (solvers/vof_neon.py: without the sweep's --no-preprocess)
+solver: incompressibleVoFNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # R/dx = 5, 10, 20; deltaT 2e-5 is 0.57 of the capillary limit
+  # sqrt(rho_avg dx^3 / (2 pi sigma)) at n80: a finer mesh needs a smaller deltaT
+  # (control_dict_config in a further dimension)
+  mesh:
+    n20: {block_mesh_dict_config: {blocks: [{cells: [20, 20, 1]}]}}
+    n40: {block_mesh_dict_config: {blocks: [{cells: [40, 40, 1]}]}}
+    n80: {block_mesh_dict_config: {blocks: [{cells: [80, 80, 1]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [n20]
+  neo_n_control_config: [Serial]
+# per case, after the solve: metrics.py's table from the written fields (every 10th
+# step) as postProcessing/metrics.dat, then the time directories but 0 and the last removed
+metrics: {script: metrics.py, prune: true}
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (the end time; maxU_max, Ca_max over time) of each table
+collect:
+  tables:
+    - postProcessing/metrics.dat
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# per executor (the dimensions but mesh)
+checks:
+  # native interFoam on the same case at n40 (t = 4e-3; NeoFOAM's
+  # test_stationaryDroplet_surface_tension, whose tolerances these are: the linear solvers
+  # stop at different iterates, the spurious current is the velocity's whole content)
+  - {type: reference, file: interfoam.csv, match: [mesh], columns: [dp], rtol: 1.0e-4}
+  - {type: reference, file: interfoam.csv, match: [mesh], columns: [maxU], rtol: 1.5e-2}
+  # interFoam's CSF deficit of the jump, 14.7 % (n40) and 9.6 % (n80), stored to 3 digits
+  - {type: reference, file: interfoam.csv, match: [mesh], columns: [dp_err], rtol: 1.0e-2}
+  # the jump within 20 % of sigma/R (the NeoFOAM test's bound at R/dx = 10; measured
+  # 18 / 14.7 / 9.6 % at R/dx = 5 / 10 / 20: gradAlpha's curvature converges slowly)
+  - {type: maximum, column: dp_err, maximum: 0.2}
+  # the spurious current over time, a regression bound: measured 0.15 / 0.26 / 0.42 m/s
+  # (Ca 2.2e-3 / 3.7e-3 / 6.1e-3); CSF currents grow with resolution at fixed deltaT
+  - {type: maximum, column: maxU_max, maximum: 0.5}
+  # CPU and GPU against Serial: measured 1e-10 (written with 12 digits)
+  - {type: agreement, across: executor, base: Serial, columns: [maxU_max, meanU, maxU, dp], rtol: 1.0e-8}
+# the columns of report.md's results table
+report: [maxU_max, meanU, Ca_max, maxU, dp, sigma_R, dp_err]
