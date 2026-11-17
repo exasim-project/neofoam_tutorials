@@ -1,6 +1,6 @@
 # The benchmark's rules after NeoFOAM's sweep, included by the Snakefile that
 # neofoam_verification.suite.benchmark.export writes: (metrics per case ->) collect ->
-# verify, plots -> report.
+# verify, plots -> report; on success the case and mesh data are removed.
 # Consumes the sweep's globals `cases` and BASE_CASE (the benchmark's case/ folder).
 from pathlib import Path
 
@@ -68,3 +68,9 @@ rule report:
         "report.md"
     shell:
         BENCHMARK_WORKER + " report --benchmark '{BENCHMARK}' --out '{output}'"
+
+
+# Keep only the outputs (results.csv, checks.json, plots/, report.md) and the small
+# sweep files that rerun the workflow; the case and mesh data go once the run succeeded.
+onsuccess:
+    shell("rm -rf cases meshes")
