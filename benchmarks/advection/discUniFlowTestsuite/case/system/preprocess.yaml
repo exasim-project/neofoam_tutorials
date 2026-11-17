@@ -1,0 +1,6 @@
+# blockMesh runs once per mesh variant of a sweep, setAlphaField (the initial disc of
+# system/setAlphaFieldDict, OpenFOAM's cutCellIso) per case.
+tools:
+  - tool: blockMesh
+  - tool: setAlphaField
+    depends_on: [blockMesh]

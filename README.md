@@ -323,8 +323,10 @@ code: after changing a method, `--forcerun solve` on the printed command.
 
 Checks (`suite/checks.py`), per group of cases (the dimensions but `mesh`: executor and
 method): `{type: reference, file, match, columns, rtol}` (the stored table, rows matched
-by the `match` columns) and `{type: order, column, spacing, minimum}` (least-squares
-order over the group's resolutions).
+by the `match` columns), `{type: order, column, spacing, minimum}` (least-squares
+order over the group's resolutions) and `{type: maximum, column, maximum}` (the group's
+largest value, e.g. a mass or bound error); `where: {column: [values]}` limits a check to
+those rows.
 
 The benchmark solvers (`solvers/`) are `neofoam.solvers` entry points (`pyproject.toml`):
 a module exporting the `<name>` spec, which declares the configs a sweep may vary, and
@@ -410,3 +412,30 @@ x1024 the solver runs 10.5 s (Serial), 11.2 s (CPU), 10.7 s (GPU) (`wall_s`, imp
 excluded), per reconstruction (k1, normal and centre copied to the host, after an
 untimed ~2 s warm-up that builds the stencils) 15 / 20 / 13 ms, against 0.33 s CPU time
 in TwoPhaseFlow.
+
+### advection/discUniFlow, advection/discUniFlowTestsuite
+
+TwoPhaseFlow's `advectorVoF` on NeoFOAM (`solvers/advector_vof.py`, `neofoam solver
+advectorVoF`): a subset of `incompressibleVoFNeoN` (runtime, solution loop, field writer,
+the `advectionModelNeoN` member of fvSolution's `advectionScheme`: NeoN isoAdvector with
+`reconstructionScheme gradAlpha`, or NeoN MULES; `0/U` read, `phi = flux(U)`, no pressure
+or surface-force member). The time step is fixed: `adaptiveTimeStepNeoN`'s
+`courant_limit` (setDeltaT.H's undamped `maxAlphaCo` target) is contributed as the
+`initialTimeStepConstraint`, so the first step takes it (controlDict `deltaT` is the
+ceiling) and no damped constraint changes it later; for a uniform velocity that is
+advectorVoF's step. It writes TwoPhaseFlow's `volumeFractionError.dat` (`metrics.py` on
+the solver's alpha at the function object's `writeInterval`; `tRec` 0, `Tadv` the wall
+time per alpha advection) and `timing.dat` (`wall_s`, `steps`).
+
+* `discUniFlow`: numufoam's / the paper's setup (R = 0.2 at (0.25, 0.25), U = (1, 1),
+  unit square, t = 0.5), E1 at t = 0.5 against numufoam's `error.csv`
+  (`reference/numufoam.csv`). The default sweep is n10-n40 x CFL 0.1, 0.5 x
+  Serial/CPU/GPU x isoAdvector/MULES (36 cases, ~1.5 min with `-c 1`); numufoam's finer
+  meshes and CFLs are commented variants in `benchmark.yaml`. Only MULES has a numufoam
+  counterpart (its normal is pointCellsLeastSquares, NeoN's Gauss linear: 0.84-1.05x
+  numufoam's E1 at n10/n20, up to 3.5x at n320); numufoam's isoAlpha/plicRDF are other
+  reconstructions than gradAlpha, so isoAdvector compares in trend only.
+* `discUniFlowTestsuite`: TwoPhaseFlow's `test-discUniFlow` (R = 0.25, U = (1, 0.5),
+  100 x 60, t = 4), against the stored TwoPhaseFlow advectorVoF runs of
+  `reference/discUniFlow/100x60` (`twophaseflow_*.csv`): MULES agrees to 1.7e-14, gradAlpha
+  isoAdvector to 4.7e-9 relative (volTaylor plane search) on every executor.

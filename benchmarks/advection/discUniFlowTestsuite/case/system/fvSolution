@@ -1,0 +1,36 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// The advectionModelNeoN member; the sweep's method variants set it.
+advectionScheme isoAdvector;
+
+solvers
+{
+    alpha.water
+    {
+        // isoAdvector: the stored TwoPhaseFlow run's controls (reference/discUniFlow/
+        // 100x60/twoPhaseFlowIsoAdvection/gradAlpha), NeoFOAM's production plane search
+        reconstructionScheme gradAlpha;
+        planeSearch     volTaylor;
+        isoFaceTol      1e-8;
+        surfCellTol     1e-8;
+        nAlphaBounds    3;
+        clip            true;
+        snapTol         0;
+        // MULES: the testsuite's nAlphaCorr, nAlphaSubCycles and cAlpha, OpenFOAM's defaults
+        nAlphaCorr      2;
+        nAlphaSubCycles 1;
+        cAlpha          1;
+        MULESCorr       no;
+        nLimiterIter    3;
+    }
+}
+
+// ************************************************************************* //

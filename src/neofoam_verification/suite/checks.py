@@ -9,7 +9,11 @@ executor and method) and gives one result ``{check, group, status, detail}``, st
   ``rtol`` relative;
 * ``{type: order, column, spacing, minimum}`` -- the observed order, the least-squares
   slope of ``log(column)`` over ``log(spacing)`` across the group's resolutions, at least
-  ``minimum``.
+  ``minimum``;
+* ``{type: maximum, column, maximum}`` -- the group's largest ``column`` value at most
+  ``maximum`` (a mass or bound error).
+
+A check with ``where: {column: [values]}`` sees only the results' rows with those values.
 """
 
 from __future__ import annotations
@@ -68,6 +72,19 @@ def order(check: Check, results: pd.DataFrame, by: Sequence[str]) -> list[Check]
     return out
 
 
+def maximum(check: Check, results: pd.DataFrame, by: Sequence[str]) -> list[Check]:
+    label = f"maximum {check['column']}"
+    out = []
+    for key, rows in results.groupby(list(by)):
+        group = " ".join(map(str, key))
+        i = rows[check["column"]].idxmax()
+        worst = float(rows[check["column"]][i])
+        status = "pass" if worst <= check["maximum"] else "fail"
+        detail = f"{worst:.1e} ({rows['case'][i]}), maximum {check['maximum']:g}"
+        out.append(_result(label, group, status, detail))
+    return out
+
+
 def fitted_order(spacing: Sequence[float], error: Sequence[float]) -> float:
     """``-d log(error) / d log(1/h)``, least squares over all resolutions."""
     return float(-np.polyfit(np.log(1.0 / np.asarray(spacing)), np.log(np.asarray(error)), 1)[0])
@@ -79,10 +96,15 @@ def evaluate(
     """Every check's results; ``folder`` holds the stored tables, ``by`` the group columns."""
     out = []
     for check in checks:
+        rows = results
+        for column, values in check.get("where", {}).items():
+            rows = rows[rows[column].isin(values)]
         if check["type"] == "reference":
-            out += reference(check, results, folder, by)
+            out += reference(check, rows, folder, by)
         elif check["type"] == "order":
-            out += order(check, results, by)
+            out += order(check, rows, by)
+        elif check["type"] == "maximum":
+            out += maximum(check, rows, by)
         else:
-            raise ValueError(f"unknown check type {check['type']!r}: reference or order")
+            raise ValueError(f"unknown check type {check['type']!r}: reference, order or maximum")
     return out

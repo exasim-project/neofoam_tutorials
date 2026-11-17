@@ -11,6 +11,7 @@ dependencies = ["neofoam"]
 # The NeoFOAM benchmark solvers: `neofoam solver <name>`.
 [project.entry-points."neofoam.solvers"]
 reconstructInterface = "neofoam_verification.solvers.reconstruct_interface"
+advectorVoF = "neofoam_verification.solvers.advector_vof"
 
 [build-system]
 requires = ["setuptools>=64"]
