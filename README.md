@@ -279,3 +279,40 @@ with the v2406 runs: Eshape to 2e-11 relative, final alpha to 3e-10
 | vortexShearedDisc 32x32 | 1.5 s | 0.6 s | 0.9 s |
 | deformationSphere 32x32x64 | 6.4 s | 2.4 s | 4.0 s |
 | Leveque 32x32x32 | 5.1 s | 2.4 s | 4.7 s |
+
+## Verification benchmarks (`benchmarks/<category>/<name>/`)
+
+Runnable verification cases laid out like numufoam's `benchmarksuite/<category>/<name>/`:
+a template case (`case/`, swept through `system/simulationParameters`) and the published
+reference (`reference/`). The run/sweep layer (generation, the NeoFOAM benchmark solver,
+the results table and report) is not in place yet.
+
+### reconstruction/circle
+
+arXiv 1801.05382 (Scheufler & Roenby), sec. 4.1.1, as numufoam's
+`benchmarksuite/interfaceCapturing/reconstruction/circle` (319c4b8): a disc of radius
+0.49999999 in the 2 x 2 square (x-z, one cell through the empty y direction), n x n hex
+cells (n = 8 ... 1024), schemes isoAlpha, plicRDF, gradAlpha (`nx`, `nz`, `reconScheme`).
+TwoPhaseFlow's `reconstructInterface` reconstructs `nIter 10` samples per mesh, the
+disc centred at `Random(1234567).globalPosition(0.9 o, 1.1 o)`, o = (1.01, 0, 1.01)
+(`foam_random.py` reproduces the sequence to the last digit of the log), alpha by
+`cutCellIso`. The errors are TwoPhaseFlow's `reconstructionError`
+(`reconstruction_error.py`): per interface cell `1 - n . n_exact` (unit implicit-function
+gradient at the reconstructed centre) and `distanceToSurfaces` of the centre; `*Inf` is
+the largest over all cells and samples, `*1` the mean of the per-sample cell means.
+
+`reference/numufoam_error.csv` is numufoam's stored table, verbatim. Its `getResults.py`
+labels the `error.dat` columns one position off: `LNormal_1` is LNormalInf,
+`LNormal_Inf` is LNormal1, `LCentre_1` is LCentreInf, `LCentre_Inf` is LCentre1
+(`read_numufoam` maps them back). The case here, with TwoPhaseFlow master ba10702 on
+v2506, reproduces it to 1e-11 relative (x8, x32 all schemes; x256 plicRDF);
+`tests/test_circle_reconstruction.py` checks x8 and x16 (marked `openfoam`). Changes to
+numufoam's template, which today's TwoPhaseFlow no longer runs: the top-level
+`reconstructionScheme` and controls, the `surfaceForces` dict of `transportProperties`
+(from `run/benchmark/surfaceTension/curvatureCircle`), `solvers.alpha1` for NeoFOAM,
+write precision 17, uncompressed.
+
+Observed order of numufoam's numbers (consecutive refinements, x8 -> x1024):
+plicRDF 1.6 ... 2.8 in LNormalInf, 1.8 ... 2.6 in LNormal1, 2.0 in both centre norms;
+isoAlpha's and gradAlpha's normal errors stop converging (gradAlpha's LNormalInf stays
+at 2.4e-3 from x32), as in the paper.

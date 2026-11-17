@@ -17,7 +17,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
-    "openfoam: needs OpenFOAM-v2506 with TwoPhaseFlow's advectorVoF (TWOPHASEFLOW_BASHRC)",
+    "openfoam: needs OpenFOAM-v2506 with TwoPhaseFlow's advectorVoF / reconstructInterface (TWOPHASEFLOW_BASHRC)",
     "geometricvof: builds and runs reference/reconstructionReference and advectionFluxReference (OpenFOAM-v2406, OPENFOAM_BASHRC)",
     "backend: needs the NeoFOAM MULES advection library (neofoam.algorithms.vof)",
 ]

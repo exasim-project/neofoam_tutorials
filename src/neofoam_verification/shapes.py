@@ -32,6 +32,22 @@ class Cylinder:
         distance = np.sqrt(np.einsum("ij,ij->i", r, r))
         return np.asarray((-distance + self.radius) * self.scale, dtype=float)
 
+    def grad(self, points: Array) -> Array:
+        """``grad``: ``-(I - d d) . (p - origin) * scale``, towards the axis (into the fluid)."""
+        r = (points - np.asarray(self.origin, dtype=float)) @ self._project().T
+        return np.asarray(-r * self.scale, dtype=float)
+
+    def distance_to_surface(self, points: Array) -> Array:
+        """``distanceToSurfaces``: ``| |(I - d d) . (p - origin)| - radius | * scale``."""
+        r = (points - np.asarray(self.origin, dtype=float)) @ self._project().T
+        distance = np.sqrt(np.einsum("ij,ij->i", r, r))
+        return np.asarray(np.abs(distance - self.radius) * self.scale, dtype=float)
+
+    def _project(self) -> Array:
+        d = np.asarray(self.direction, dtype=float)
+        d = d / np.sqrt(d @ d)
+        return np.eye(3) - np.outer(d, d)
+
     def translated(self, shift: Array) -> Cylinder:
         o = np.asarray(self.origin, dtype=float) + shift
         return replace(self, origin=(float(o[0]), float(o[1]), float(o[2])))
@@ -49,6 +65,16 @@ class Sphere:
         r = points - np.asarray(self.origin, dtype=float)
         distance = np.sqrt(np.einsum("ij,ij->i", r, r))
         return np.asarray((-distance + self.radius) * self.scale, dtype=float)
+
+    def grad(self, points: Array) -> Array:
+        """``grad``: ``(origin - p) * scale``, towards the centre (into the fluid)."""
+        return np.asarray((np.asarray(self.origin, dtype=float) - points) * self.scale, dtype=float)
+
+    def distance_to_surface(self, points: Array) -> Array:
+        """``distanceToSurfaces``: ``| |p - origin| - radius | * scale``."""
+        r = points - np.asarray(self.origin, dtype=float)
+        distance = np.sqrt(np.einsum("ij,ij->i", r, r))
+        return np.asarray(np.abs(distance - self.radius) * self.scale, dtype=float)
 
     def translated(self, shift: Array) -> Sphere:
         o = np.asarray(self.origin, dtype=float) + shift
