@@ -416,7 +416,7 @@ at x64, 4.2e-6 at x1024): volTaylor places the plane to alpha within `isoFaceTol
 which moves the centre by ~1e-8 h, against an LCentre1 of 1.6e-6 at x1024. So
 the `reference` check (rtol 1e-6) fails; with `planeSearch openfoam` x1024 agrees to 4e-16.
 Serial, CPU and GPU give the same norms bitwise. The full sweep (8 resolutions x 3
-executors, `-c 4`, `OMP_NUM_THREADS=4`) takes about 1 min and 1.5 GB in `results/`; at
+executors, `-c 4`, `OMP_NUM_THREADS=4`) takes about 1 min (1.5 GB of case data while it runs, removed on success); at
 x1024 the solver runs 10.5 s (Serial), 11.2 s (CPU), 10.7 s (GPU) (`wall_s`, imports
 excluded), per reconstruction (k1, normal and centre copied to the host, after an
 untimed ~2 s warm-up that builds the stencils) 15 / 20 / 13 ms, against 0.33 s CPU time
