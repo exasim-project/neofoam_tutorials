@@ -2,9 +2,33 @@
   "checks": [
     {
       "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CPU",
+      "status": "pass",
+      "detail": "max rel diff 1.7e-14 (Eshape MULES_n100x60_CPU), rtol 1e-12, 1 cases"
+    },
+    {
+      "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES GPU",
+      "status": "pass",
+      "detail": "max rel diff 2.0e-14 (Eshape MULES_n100x60_GPU), rtol 1e-12, 1 cases"
+    },
+    {
+      "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
       "group": "MULES Serial",
       "status": "pass",
       "detail": "max rel diff 1.7e-14 (Eshape MULES_n100x60_Serial), rtol 1e-12, 1 cases"
+    },
+    {
+      "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector GPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
     },
     {
       "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
@@ -14,9 +38,33 @@
     },
     {
       "check": "reference twophaseflow_isoadvection.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference twophaseflow_isoadvection.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES GPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference twophaseflow_isoadvection.csv Eshape,celltoCellDist,Ncells",
       "group": "MULES Serial",
       "status": "skip",
       "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference twophaseflow_isoadvection.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CPU",
+      "status": "pass",
+      "detail": "max rel diff 4.7e-09 (Eshape isoAdvector_n100x60_CPU), rtol 1e-07, 1 cases"
+    },
+    {
+      "check": "reference twophaseflow_isoadvection.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector GPU",
+      "status": "pass",
+      "detail": "max rel diff 4.7e-09 (Eshape isoAdvector_n100x60_GPU), rtol 1e-07, 1 cases"
     },
     {
       "check": "reference twophaseflow_isoadvection.csv Eshape,celltoCellDist,Ncells",
@@ -26,9 +74,33 @@
     },
     {
       "check": "maximum Emass",
+      "group": "MULES CPU",
+      "status": "pass",
+      "detail": "5.551e-17 (MULES_n100x60_CPU), maximum 1e-13"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES GPU",
+      "status": "pass",
+      "detail": "0.000e+00 (MULES_n100x60_GPU), maximum 1e-13"
+    },
+    {
+      "check": "maximum Emass",
       "group": "MULES Serial",
       "status": "pass",
       "detail": "5.551e-17 (MULES_n100x60_Serial), maximum 1e-13"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CPU",
+      "status": "pass",
+      "detail": "3.886e-16 (isoAdvector_n100x60_CPU), maximum 1e-13"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector GPU",
+      "status": "pass",
+      "detail": "3.886e-16 (isoAdvector_n100x60_GPU), maximum 1e-13"
     },
     {
       "check": "maximum Emass",
@@ -38,9 +110,33 @@
     },
     {
       "check": "maximum Ebound",
+      "group": "MULES CPU",
+      "status": "pass",
+      "detail": "3.675e-19 (MULES_n100x60_CPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "MULES GPU",
+      "status": "pass",
+      "detail": "3.780e-19 (MULES_n100x60_GPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
       "group": "MULES Serial",
       "status": "pass",
       "detail": "3.675e-19 (MULES_n100x60_Serial), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CPU",
+      "status": "pass",
+      "detail": "0.000e+00 (isoAdvector_n100x60_CPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector GPU",
+      "status": "pass",
+      "detail": "0.000e+00 (isoAdvector_n100x60_GPU), maximum 1e-08"
     },
     {
       "check": "maximum Ebound",
