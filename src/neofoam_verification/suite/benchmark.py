@@ -34,6 +34,7 @@ from ..foam import read_function_object_dat
 
 if TYPE_CHECKING:
     from .checks import Check
+    from .plots import Plot
 
 #: ``benchmarks/`` of this repository: a benchmark's name is its folder relative to it.
 BENCHMARKS = Path(__file__).resolve().parents[3] / "benchmarks"
@@ -116,6 +117,12 @@ class Benchmark:
     report_columns: tuple[str, ...] = ()
     #: the column of ``table`` holding the mesh spacing (the report's observed orders)
     spacing: str = "length"
+    #: the result columns of ``results.csv`` after backend, executor, method, n (``table``'s
+    #: columns and ``wall_s``, the solver's wall time; default: all of them)
+    results_columns: tuple[str, ...] = ()
+    plots: tuple[Plot, ...] = ()
+    #: the backend drawn dashed in the plots
+    reference_backend: str = ""
     folder: Path = field(default=Path(), compare=False)
 
     @property

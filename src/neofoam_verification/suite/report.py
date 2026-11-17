@@ -10,6 +10,7 @@ import numpy as np
 
 from .benchmark import Benchmark
 from .checks import Result, read_table
+from .plots import plot_name
 
 
 def _row(cells: Sequence[object]) -> str:
@@ -34,6 +35,10 @@ def write_report(benchmark: Benchmark, workdir: Path, results: Sequence[Result],
     ]
     for backend, reason in run["skipped"].items():
         lines += [f"**{backend}: skipped** -- {reason}", ""]
+    lines += ["All results: [results.csv](results.csv).", ""]
+    for plot in benchmark.plots:
+        name = plot_name(plot)
+        lines += [f"![{name}](plots/{name}.png) ([pdf](plots/{name}.pdf))", ""]
     for backend in run["backends"]:
         rows = sorted(
             (r for r in results if r.backend == backend), key=lambda r: (r.method, r.resolution)

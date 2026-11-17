@@ -14,6 +14,9 @@ rewritten. Options::
                     ``reference/<BACKEND>.csv`` (the verified table AgainstBackend reads)
     --rerun RULE    rerun RULE's jobs and what depends on them (``solve`` after changing
                     the method's code, which the workflow does not see; repeatable)
+    --prune-cases   after a successful run, delete the cases' meshes and time directories
+                    (keeps system/, logs, postProcessing/ and the stamps; a later
+                    ``--rerun solve`` then needs ``--rerun generate``)
     --in-process    run without Snakemake (not implemented yet)
 
 A backend that cannot run here (:meth:`Backend.unavailable`) is skipped with its reason
@@ -24,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from collections.abc import Sequence
@@ -66,6 +70,27 @@ def run_benchmark(
     return subprocess.run(command + ["--rerun-incomplete", "--quiet", "rules", *force]).returncode
 
 
+def prune_cases(workdir: Path) -> int:
+    """Delete every case's ``constant/polyMesh`` and time directories; the bytes freed."""
+    freed = 0
+    for case in workdir.glob("cases/*/*"):
+        doomed = [case / "constant" / "polyMesh"]
+        doomed += [d for d in case.iterdir() if d.is_dir() and _is_number(d.name)]
+        for directory in doomed:
+            if directory.is_dir():
+                freed += sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
+                shutil.rmtree(directory)
+    return freed
+
+
+def _is_number(name: str) -> bool:
+    try:
+        float(name)
+    except ValueError:
+        return False
+    return True
+
+
 def store_reference(benchmark: Benchmark, results_dir: Path, backend: str) -> Path:
     """Merge the run's ``tables/<backend>.csv`` into ``reference/<backend>.csv`` (no timings)."""
     path = benchmark.reference / f"{backend}.csv"
@@ -85,6 +110,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--store-reference", metavar="BACKEND")
     parser.add_argument("--results", type=Path, default=RESULTS)
     parser.add_argument("--rerun", action="append", default=[], metavar="RULE")
+    parser.add_argument("--prune-cases", action="store_true")
     parser.add_argument("--in-process", action="store_true")
     args = parser.parse_args(argv)
     if args.in_process:
@@ -113,6 +139,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         checks = json.loads(checks_file.read_text())["checks"] if code == 0 else []
         failing = [c for c in checks if c["status"] == "fail"]
         failed += code != 0 or bool(failing)
+        if code == 0 and args.prune_cases:
+            freed = prune_cases(args.results / benchmark.name)
+            print(f"pruned {freed / 1e6:.0f} MB of case data")
         if code == 0 and args.store_reference:
             if any(c["backend"] == args.store_reference for c in failing):
                 print(f"not stored: {args.store_reference} fails a check")

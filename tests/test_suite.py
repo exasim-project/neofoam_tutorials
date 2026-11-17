@@ -16,6 +16,7 @@ from neofoam_verification.solvers.reconstruction_io import alpha_samples
 from neofoam_verification.suite import backends
 from neofoam_verification.suite.benchmark import cases, discover, load
 from neofoam_verification.suite.checks import Result, read_table
+from neofoam_verification.suite.plots import draw_all, plot_name
 from neofoam_verification.suite.workflow import export, generate
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,12 +35,29 @@ def test_method_override_names_the_cases(tmp_path: Path) -> None:
     assert [c.name for c in sweep] == ["myScheme_n8", "myScheme_n16"]
     assert sweep[0].parameters == {"nx": 8, "nz": 8, "reconScheme": "myScheme"}
     snakefile = export(BENCHMARK, tmp_path, sweep, ["twophaseflow"], {}, smoke=True).read_text()
-    for rule in ("generate", "blockMesh", "setAlphaField", "alphaSamples", "solve", "table"):
+    rules = ("generate", "blockMesh", "setAlphaField", "alphaSamples", "solve", "table")
+    for rule in (*rules, "results", "plots", "verify", "report"):
         assert f"rule {rule}:" in snakefile
     config = json.loads(
         (tmp_path / "configs" / "myScheme_n8" / "simulation_parameters.json").read_text()
     )
     assert config == {"simulation_parameters": {"nx": 8, "nz": 8, "reconScheme": "myScheme"}}
+
+
+def test_plots_of_the_stored_table(tmp_path: Path) -> None:
+    stored = read_table(CIRCLE / "reference" / "twophaseflow.csv")
+    results = tmp_path / "results.csv"
+    columns = [c for c in BENCHMARK.results_columns if c != "wall_s"]
+    with results.open("w") as file:
+        file.write(",".join(["backend", "executor", "method", "n", *columns]) + "\n")
+        for (method, n), row in stored.items():
+            values = [str(row[c] if c != "k1" else 1e-3 * n) for c in columns]
+            file.write(",".join(["twophaseflow", "Serial", method, str(n), *values]) + "\n")
+    plots = [p for p in BENCHMARK.plots if plot_name(p) != "wall"]
+
+    written = draw_all(plots, results, tmp_path / "plots", "twophaseflow")
+
+    assert sorted(p.name for p in written) == ["errors.pdf", "errors.png", "k1.pdf", "k1.png"]
 
 
 def test_stored_twophaseflow_table_passes_the_checks() -> None:

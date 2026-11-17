@@ -25,6 +25,8 @@ foamlib = "*"
 pytest = "*"
 snakemake = ">=9.27.1,<10"
 pyyaml = ">=6.0.3,<7"
+# the benchmark plots (suite/plots.py)
+matplotlib = "*"
 
 # NeoFOAM's runtime dependencies (its pyproject) and build tools; NeoFOAM itself is built
 # from $NEOFOAM_SRC by `pixi run install-neofoam` with the system gcc and CUDA (as OpenFOAM).
@@ -32,7 +34,6 @@ pyyaml = ">=6.0.3,<7"
 typer = "*"
 pydantic = ">=2"
 networkx = ">=3"
-matplotlib = "*"
 pyvis = ">=0.3.2"
 scikit-build-core = ">=0.11"
 nanobind = "3.0.*"

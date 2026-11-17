@@ -12,6 +12,7 @@ from neofoam_verification.solvers.reconstruction_io import ERROR_DAT, alpha_samp
 from neofoam_verification.suite.backends import NEOFOAM_BACKENDS
 from neofoam_verification.suite.benchmark import Benchmark, FunctionObjectTable, Step, Sweep
 from neofoam_verification.suite.checks import AgainstBackend, Order, Published
+from neofoam_verification.suite.plots import ErrorPlot, TimingPlot
 
 HERE = Path(__file__).resolve().parent
 NORMS = ("LNormalInf", "LNormal1", "LCentreInf", "LCentre1")
@@ -34,6 +35,14 @@ BENCHMARK = Benchmark(
     backends=("twophaseflow", *NEOFOAM_BACKENDS),
     table=FunctionObjectTable(ERROR_DAT.as_posix(), COLUMNS, timing=("k1", "k2")),
     report_columns=NORMS,
+    results_columns=("nCells", "length", *NORMS, "k1", "wall_s"),
+    plots=(
+        ErrorPlot(NORMS),
+        # TwoPhaseFlow's k1 is CPU time with 1 ms resolution (0 below x64), NeoFOAM's wall time
+        TimingPlot("k1", "reconstruction time per sample, k1", name="k1"),
+        TimingPlot("wall_s", "solver wall time", name="wall"),
+    ),
+    reference_backend="twophaseflow",
     checks=(
         # numufoam's run of the same case reproduces to ~1e-11 relative (TwoPhaseFlow only:
         # NeoFOAM is held to the TwoPhaseFlow table)

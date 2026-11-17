@@ -12,7 +12,8 @@
 * ``Snakefile`` -- per backend and case ``generate`` (template copy, ``0.orig`` -> ``0``,
   simulationParameters) -> one rule per preparation step (``blockMesh``,
   ``setAlphaField``, ...) -> ``solve``; per backend ``table`` (``tables/<backend>.csv``);
-  ``verify`` (``checks.json``); ``report`` (``report.md``).
+  ``results`` (``results.csv``, long format); ``plots`` (``plots/<name>.png|pdf``, the
+benchmark's ``plots``); ``verify`` (``checks.json``); ``report`` (``report.md``).
 
 The rules call ``python -m neofoam_verification.suite.workflow <command>``.
 """
@@ -35,6 +36,7 @@ from foamlib import FoamFile
 from . import backends as backends_module
 from .benchmark import Benchmark, Case, load
 from .checks import Keyed, Result, read_table, write_table
+from .plots import FORMATS, draw_all, plot_name
 from .report import write_report
 
 DIMENSION = "simulation_parameters"
@@ -86,6 +88,7 @@ def export(
 def snakefile_text(benchmark: Benchmark, case_names: Sequence[str], backends: Sequence[str]) -> str:
     benchmark_py = benchmark.folder / "benchmark.py"
     steps = {step.name: [b for b in backends if step.applies_to(b)] for step in benchmark.prepare}
+    plot_files = [f"plots/{plot_name(p)}.{fmt}" for p in benchmark.plots for fmt in FORMATS]
     verify_inputs = [str(benchmark_py), *map(str, sorted(benchmark.reference.glob("*")))]
     lines = [
         f"# Generated from {benchmark_py} by neofoam_verification.suite.workflow.export.",
@@ -96,6 +99,7 @@ def snakefile_text(benchmark: Benchmark, case_names: Sequence[str], backends: Se
         f"WORKER = {WORKER!r}",
         "# the checks read these: a changed benchmark.py or reference table reruns verify",
         f"VERIFY_INPUTS = {verify_inputs!r}",
+        f"PLOTS = {plot_files!r}",
         "",
         "wildcard_constraints:",
         '    case="[^/]+",',
@@ -144,13 +148,23 @@ def snakefile_text(benchmark: Benchmark, case_names: Sequence[str], backends: Se
         "    shell: WORKER + \" table --benchmark '{BENCHMARK}' --backend {wildcards.backend}"
         " --out '{output}'\"",
         "",
+        "rule results:",
+        '    input: expand("tables/{backend}.csv", backend=BACKENDS), "run.json"',
+        '    output: "results.csv"',
+        "    shell: WORKER + \" results --benchmark '{BENCHMARK}' --out '{output}'\"",
+        "",
+        "rule plots:",
+        '    input: "results.csv"',
+        "    output: PLOTS",
+        "    shell: WORKER + \" plots --benchmark '{BENCHMARK}' --out plots\"",
+        "",
         "rule verify:",
         '    input: expand("tables/{backend}.csv", backend=BACKENDS), "run.json", VERIFY_INPUTS',
         '    output: "checks.json"',
         "    shell: WORKER + \" verify --benchmark '{BENCHMARK}' --out '{output}'\"",
         "",
         "rule report:",
-        '    input: "checks.json"',
+        '    input: "checks.json", "results.csv", PLOTS',
         '    output: "report.md"',
         "    shell: WORKER + \" report --benchmark '{BENCHMARK}' --out '{output}'\"",
         "",
@@ -211,10 +225,27 @@ def table(benchmark: Benchmark, backend: str, workdir: Path) -> Keyed:
     return rows
 
 
+def results_columns(benchmark: Benchmark) -> tuple[str, ...]:
+    return benchmark.results_columns or (*benchmark.table.columns, "wall_s")
+
+
+def write_results(benchmark: Benchmark, workdir: Path, out: Path) -> None:
+    """``results.csv``: one row per backend, method and resolution (long format)."""
+    columns = results_columns(benchmark)
+    with out.open("w", newline="") as file:
+        writer = csv.writer(file, lineterminator="\n")
+        writer.writerow(["backend", "executor", "method", "n", *columns])
+        for r in sorted(results(workdir), key=lambda r: (r.backend, r.method, r.resolution)):
+            executor = backends_module.BACKENDS[r.backend].executor
+            values = (f"{r.values[c]:.17g}" for c in columns)
+            writer.writerow([r.backend, executor, r.method, r.resolution, *values])
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog=WORKER)
     parser.add_argument(
-        "command", choices=("generate", "step", "solve", "table", "verify", "report")
+        "command",
+        choices=("generate", "step", "solve", "table", "results", "plots", "verify", "report"),
     )
     parser.add_argument("--benchmark", type=Path, required=True)
     parser.add_argument("--config", type=Path)
@@ -237,6 +268,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     elif args.command == "table":
         rows = table(benchmark, args.backend, workdir)
         write_table(args.out, rows, [*benchmark.table.columns, "wall_s"])
+    elif args.command == "results":
+        write_results(benchmark, workdir, args.out)
+    elif args.command == "plots":
+        reference = benchmark.reference_backend
+        draw_all(benchmark.plots, workdir / "results.csv", args.out, reference)
     elif args.command == "verify":
         checks = [r for c in benchmark.checks for r in c.evaluate(benchmark, results(workdir))]
         _stamp(args.out, {"checks": [asdict(c) for c in checks]})

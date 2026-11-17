@@ -318,7 +318,7 @@ BENCHMARK = Benchmark(
 
 ```bash
 pixi run benchmark FOLDER [--smoke] [--method NAME] [--backend NAME] [-j N] [--rerun RULE]
-                          [--store-reference BACKEND]
+                          [--store-reference BACKEND] [--prune-cases]
 ```
 
 runs every `benchmark.py` under FOLDER (`src/neofoam_verification/run.py`). Each is
@@ -328,16 +328,25 @@ exported to a Snakemake workflow in `results/<category>/<name>/` (gitignored;
 `configs/<case>/simulation_parameters.json`), `run.json`, and the `Snakefile` with the
 rules
 
-    generate -> blockMesh -> setAlphaField [-> alphaSamples] -> solve -> table -> verify -> report
+    generate -> blockMesh -> setAlphaField [-> alphaSamples] -> solve -> table
+             -> results -> plots -> verify -> report
 
 per backend and case (`cases/<backend>/<method>_n<n>/`, a copy of the template with
 `0.orig` -> `0` and the parameters written to `system/simulationParameters`), then per
-backend `tables/<backend>.csv`, `checks.json` and `report.md` (error table, observed
-orders between consecutive resolutions, the checks), and `results/summary.md` over all
-benchmarks. Snakemake reruns only what changed (a full sweep after a smoke run reuses the
+backend `tables/<backend>.csv`, `results.csv` (long format, one row per backend,
+method and resolution: `backend, executor, method, n` and the benchmark's
+`results_columns`), `plots/<name>.png|pdf` (the benchmark's `plots`: `ErrorPlot(columns)`,
+the norms vs n with order-1/2 slope guides; `TimingPlot(column, label)`, a time vs n; one
+line per backend, the `reference_backend` dashed), `checks.json` and `report.md` (links to
+the CSV and plots, error table, observed orders between consecutive resolutions, the
+checks), and `results/summary.md` over all benchmarks. `--rerun table` redraws the
+CSV, plots and report from the existing cases. Snakemake reruns only what changed (a full sweep after a smoke run reuses the
 smoke cases; a changed reference table or `benchmark.py` reruns verify). It does not see
 the solver's code: after changing a method, `--rerun solve` reruns the solves and what
-follows. Deleting an intermediate file (a table) does not rerun anything either. The command
+follows. Deleting an intermediate file (a table) does not rerun anything either.
+`--prune-cases` deletes the cases' meshes and time directories after a successful run
+(the full circle sweep on four backends takes 1.5 GB otherwise); a later `--rerun solve`
+then needs `--rerun generate`. The command
 fails when a check fails. `-j` is at most 4. A backend that cannot run here is left out
 of the workflow and reported as skipped with the reason. `--in-process` (without
 Snakemake) is not implemented.

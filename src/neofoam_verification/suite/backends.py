@@ -35,6 +35,9 @@ class Backend(Protocol):
     @property
     def bashrc(self) -> Path: ...
 
+    @property
+    def executor(self) -> str: ...
+
     def unavailable(self, solver: str) -> str | None:
         """Why ``solver`` cannot run on this backend here, or None."""
         ...
@@ -56,6 +59,8 @@ def _has_command(bashrc: Path, command: str) -> bool:
 @dataclass(frozen=True)
 class TwoPhaseFlow:
     name: str = "twophaseflow"
+    #: TwoPhaseFlow runs serial on the host
+    executor: str = "Serial"
 
     @property
     def bashrc(self) -> Path:
