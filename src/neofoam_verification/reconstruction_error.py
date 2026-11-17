@@ -27,7 +27,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .foam import Array, read_function_object_dat
+from .foam import Array
 from .shapes import Shape
 
 #: The columns of ``postProcessing/reconstructionError/0/error.dat`` after ``Time``.
@@ -86,14 +86,6 @@ class ReconstructionError:
             "LCentreInf": self.centre_inf,
             "LCentre1": float(np.mean(self.centre_means)),
         }
-
-
-def read_error_dat(path: Path) -> dict[str, float]:
-    """The last row of a ``reconstructionError`` ``error.dat``, keyed by :data:`COLUMNS`."""
-    row = read_function_object_dat(path)[-1]
-    if len(row) != len(COLUMNS) + 1:
-        raise ValueError(f"{path}: {len(row)} columns, expected Time + {COLUMNS}")
-    return dict(zip(COLUMNS, (float(v) for v in row[1:])))
 
 
 #: numufoam's ``getResults.py`` names ``error.dat``'s columns one position off (it counts

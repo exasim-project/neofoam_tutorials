@@ -45,5 +45,5 @@ python_version = "3.12"
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["foamlib", "foamlib.*", "yaml", "neofoam", "neofoam.*", "pybFoam", "pybFoam.*"]
+module = ["foamlib", "foamlib.*", "pandas", "pandas.*", "yaml", "neofoam", "neofoam.*", "pybFoam", "pybFoam.*"]
 ignore_missing_imports = true

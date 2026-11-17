@@ -11,10 +11,10 @@ version = "0.1.0"
 # ~/OpenFOAM/<user>-v2506 (TwoPhaseFlow_latest). OpenFOAM-v2406 has no
 # TwoPhaseFlow build, so the C++ reference runs on v2506.
 TWOPHASEFLOW_BASHRC = "$HOME/OpenFOAM/OpenFOAM-v2506/etc/bashrc"
-# NeoFOAM (and its pybFoam) is built against OpenFOAM-v2406; the neofoam backend's case
-# preparation runs under it too. NEOFOAM_SRC is the checkout `pixi run install-neofoam` builds.
+# NeoFOAM (and its pybFoam) is built against OpenFOAM-v2406; the benchmark workflows
+# run under it (scripts/benchmark.sh). NEOFOAM_SRC is the checkout `pixi run install-neofoam` builds.
 NEOFOAM_BASHRC = "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
-NEOFOAM_SRC = "$HOME/libsAndApps/NeoFOAM/.claude/worktrees/vof-neon-geometric"
+NEOFOAM_SRC = "$HOME/libsAndApps/NeoFOAM/.claude/worktrees/workflow-benchmarks"
 
 [dependencies]
 python = "3.12.*"
@@ -25,7 +25,8 @@ foamlib = "*"
 pytest = "*"
 snakemake = ">=9.27.1,<10"
 pyyaml = ">=6.0.3,<7"
-# the benchmark plots (suite/plots.py)
+# the benchmark results, checks and plots (suite/)
+pandas = "*"
 matplotlib = "*"
 
 # NeoFOAM's runtime dependencies (its pyproject) and build tools; NeoFOAM itself is built
@@ -53,9 +54,9 @@ default = ["dev", "neofoam"]
 install = 'pip install -e . --no-build-isolation --no-deps'
 # The tests marked openfoam run TwoPhaseFlow's advectorVoF and skip without it.
 test = { cmd = "pytest -v", depends-on = ["install"] }
-# Runs every benchmark.py under the folder as a Snakemake workflow into results/:
-# pixi run benchmark benchmarks/reconstruction/circle [--smoke] [--method NAME] [--backend NAME] [-j N]
-benchmark = { cmd = "python -m neofoam_verification.run", depends-on = ["install"] }
+# Exports a benchmark's NeoFOAM sweep (benchmark.yaml) to results/ and runs it with one
+# snakemake command (printed): pixi run benchmark FOLDER [--smoke] [--method NAME] [-c N]
+benchmark = { cmd = "bash scripts/benchmark.sh", depends-on = ["install"] }
 # Builds and installs NeoFOAM (C++ core, Kokkos OpenMP+CUDA, Ginkgo, pybFoam on v2406)
 # from $NEOFOAM_SRC (or the given checkout) into this environment; 4 jobs, under build.lock.
 install-neofoam = "bash scripts/install_neofoam.sh"

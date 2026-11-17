@@ -3,26 +3,21 @@
 The interface centres and the error definition are TwoPhaseFlow's (``reconstructInterface``,
 ``reconstructionError``); numufoam's ``error.csv``
 (``benchmarks/reconstruction/circle/reference/``) is the published run of the same case.
-The ``openfoam`` test runs the coarsest resolutions of ``benchmarks/reconstruction/circle/case``
-with TwoPhaseFlow's reconstructInterface (OpenFOAM-v2506).
+``reference/twophaseflow.csv`` is TwoPhaseFlow's reconstructInterface (v2506) run of the case.
 """
 
 from __future__ import annotations
 
-import os
-import shutil
-import subprocess
+import csv
 from pathlib import Path
 
 import numpy as np
 import pytest
-from foamlib import FoamFile
 
 from neofoam_verification.foam_random import centres
 from neofoam_verification.reconstruction_error import (
     ReconstructionError,
     observed_order,
-    read_error_dat,
     read_numufoam,
     sample_errors,
 )
@@ -30,9 +25,7 @@ from neofoam_verification.shapes import Cylinder
 
 ROOT = Path(__file__).resolve().parents[1]
 BENCHMARK = ROOT / "benchmarks" / "reconstruction" / "circle"
-CASE = BENCHMARK / "case"
 NUMUFOAM = read_numufoam(BENCHMARK / "reference" / "numufoam_error.csv")
-SCHEMES = ("isoAlpha", "plicRDF", "gradAlpha")
 NORMS = ("LNormalInf", "LNormal1", "LCentreInf", "LCentre1")
 
 # reconstructInterface's log ("centre (x y z)", writePrecision 17) of the circle case
@@ -90,32 +83,12 @@ def test_numufoam_plicRDF_converges_second_order(norm: str) -> None:
     assert 1.8 < fitted < 2.3, observed_order(spacing, error)
 
 
-def _have_reconstruct_interface() -> bool:
-    bashrc = Path(os.environ.get("TWOPHASEFLOW_BASHRC", ""))
-    check = f'source "{bashrc}" >/dev/null 2>&1 && command -v reconstructInterface'
-    return bashrc.is_file() and subprocess.run(["bash", "-c", check]).returncode == 0
-
-
-@pytest.mark.openfoam
-@pytest.mark.skipif(
-    not _have_reconstruct_interface(), reason="no TwoPhaseFlow reconstructInterface"
-)
-@pytest.mark.parametrize("scheme", SCHEMES)
-@pytest.mark.parametrize("n", [8, 16])
-def test_reconstructInterface_reproduces_numufoam(tmp_path: Path, scheme: str, n: int) -> None:
-    case = tmp_path / "case"
-    shutil.copytree(CASE, case)
-    parameters = FoamFile(case / "system" / "simulationParameters")
-    parameters["nx"] = n
-    parameters["nz"] = n
-    parameters["reconScheme"] = scheme
-    command = (
-        f'source "{os.environ["TWOPHASEFLOW_BASHRC"]}" >/dev/null 2>&1 && blockMesh > log.blockMesh'
-        " && cp -r 0.orig 0 && reconstructInterface > log.reconstructInterface 2>&1"
-    )
-    subprocess.run(["bash", "-c", command], cwd=case, check=True)
-
-    result = read_error_dat(case / "postProcessing" / "reconstructionError" / "0" / "error.dat")
-    for norm in (*NORMS, "length", "nCells"):
-        # numufoam's run agrees to ~1e-11 relative (a different build of the same code)
-        np.testing.assert_allclose(result[norm], NUMUFOAM[scheme, n][norm], rtol=1e-9, err_msg=norm)
+def test_stored_twophaseflow_table_reproduces_numufoam() -> None:
+    # numufoam's run agrees to ~1e-10 relative (a different build of the same code)
+    with (BENCHMARK / "reference" / "twophaseflow.csv").open(newline="") as file:
+        stored = list(csv.DictReader(file))
+    assert {int(row["resolution"]) for row in stored} == {8, 16, 32, 64, 128, 256, 512, 1024}
+    for row in stored:
+        published = NUMUFOAM[row["method"], int(row["resolution"])]
+        for norm in (*NORMS, "length", "nCells"):
+            assert float(row[norm]) == pytest.approx(published[norm], rel=1e-9), (row, norm)

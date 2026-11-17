@@ -15,48 +15,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "simulationParameters"
-
-// TwoPhaseFlow's reconstructionSchemes::New (reconstructInterface) reads the scheme and
-// its controls from the top level.
-reconstructionScheme $reconScheme;
-iterations          10;
-interpolateNormal   false;
-vof2IsoTol          1e-8;
-surfCellTol         1e-8;
-writeVTK            false;
-tol                 1e-8;
-
-// The same scheme and tolerances where NeoFOAM's isoAdvectorNeoN looks for them
-// (read_iso_advector_controls: solvers.<alpha>.reconstructionScheme, isoFaceTol, surfCellTol).
+// NeoFOAM's reconstruction controls, where isoAdvectorNeoN reads them
+// (read_iso_advector_controls); the sweep sets reconstructionScheme.
 solvers
 {
     alpha1
     {
-        reconstructionScheme $reconScheme;
+        reconstructionScheme gradAlpha;
         isoFaceTol          1e-8;
         surfCellTol         1e-8;
     }
-}
-
-// reconstructInterface: nIter interface samples, centres from Random(1234567) in
-// origin +- 10% (initAlphaFieldDict), alpha by cutCellIso.
-reconstruction
-{
-    nIter           10;
-    setAlphaMethod  cutCellIso;
-}
-
-PIMPLE
-{
-    momentumPredictor no;
-    nCorrectors     -1;
-    nNonOrthogonalCorrectors -1;
-    nAlphaCorr      1;
-    nAlphaSubCycles 1;
-    cAlpha          1;
-    pRefCell        0;
-    pRefValue       0;
 }
 
 // ************************************************************************* //

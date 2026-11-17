@@ -11,7 +11,7 @@ pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction refere
 pixi run update-advection-flux-reference  # OpenFOAM-v2406 isoAdvection face fluxes, rewrites reference/curvature*/advection/
 pixi run update-isoadvection-reference    # OpenFOAM-v2406 multi-step isoAdvection, rewrites reference/*/isoAdvection/
 pixi run update-twophaseflow-isoadvection-reference  # advectorVoF/isoAdvection, rewrites reference/*/*/twoPhaseFlowIsoAdvection/
-pixi run benchmark benchmarks/reconstruction/circle --smoke  # the benchmark suite, below; ~5 s
+pixi run benchmark benchmarks/reconstruction/circle --smoke  # the benchmark suite, below
 pixi run install-neofoam [CHECKOUT]  # builds NeoFOAM (C++) into this env, below
 ```
 
@@ -284,102 +284,64 @@ with the v2406 runs: Eshape to 2e-11 relative, final alpha to 3e-10
 
 ## Verification benchmarks (`benchmarks/<category>/<name>/`)
 
-Runnable verification cases laid out like numufoam's `benchmarksuite/<category>/<name>/`:
-a template case (`case/`, swept through `system/simulationParameters`) and the published
-reference (`reference/`), and a `benchmark.py` that defines the run:
+A benchmark is a folder of files, laid out like numufoam's `benchmarksuite/<category>/<name>/`:
 
-```python
-BENCHMARK = Benchmark(
-    case=HERE / "case",
-    solver="reconstructInterface",          # each backend maps it to its command
-    sweep=Sweep(
-        resolutions=(8, 16, 32, 64, 128, 256, 512, 1024),
-        smoke=(8, 16),
-        methods=("gradAlpha",),
-        parameters=lambda n, method: {"nx": n, "nz": n, "reconScheme": method},
-    ),
-    prepare=(                               # one Snakemake rule each, under the backend's OpenFOAM
-        Step("blockMesh"),
-        Step("setAlphaField", "setAlphaField -dict system/initAlphaFieldDict"),
-        Step("alphaSamples", alpha_samples, backends=("neofoam",)),
-    ),
-    backends=("twophaseflow", "neofoam"),
-    table=FunctionObjectTable(ERROR_DAT.as_posix(), COLUMNS, timing=("k1", "k2")),
-    checks=(
-        Published("numufoam_error.csv", read_numufoam, (*NORMS, "length", "nCells"), rtol=1e-9,
-                  backends=("twophaseflow",)),
-        AgainstBackend("twophaseflow", (*NORMS, "length", "nCells"), rtol=1e-6),
-        Order("LCentre1", minimum=1.5),
-    ),
-)
-```
+| File | Contents |
+|---|---|
+| `benchmark.yaml` | the solver, the sweep's `dimensions` in NeoFOAM's `params.yaml` shape (dimension -> variant -> config payloads of the solver's configs), `merge` (payloads laid over the base case's config), the `smoke` subset, the `method` dimension, the `collect` spec, the declarative `checks`, the `report` columns |
+| `case/` | the base case with literal values (`0/`, `system/`, `system/preprocess.yaml`) |
+| `plots.py` | `plot(results: DataFrame, references: dict[str, DataFrame], out: Path)`; helpers in `suite/plots.py` (`error_plot`, `timing_plot`, `save`) |
+| `reference/` | stored tables (CSV), read by the checks and handed to `plots.py` by file stem |
 
-### Running the benchmarks
+### Running a benchmark
 
 ```bash
-pixi run benchmark FOLDER [--smoke] [--method NAME] [--backend NAME] [-j N] [--rerun RULE]
-                          [--store-reference BACKEND] [--prune-cases]
+pixi run benchmark FOLDER [--smoke] [--method NAME] [-c N]
 ```
 
-runs every `benchmark.py` under FOLDER (`src/neofoam_verification/run.py`). Each is
-exported to a Snakemake workflow in `results/<category>/<name>/` (gitignored;
-`suite/workflow.py`) and run there: the sweep in NeoFOAM's paramspace format
-(`sweep.csv`, `params.yaml` with one dimension `simulation_parameters`,
-`configs/<case>/simulation_parameters.json`), `run.json`, and the `Snakefile` with the
-rules
+exports the benchmark's NeoFOAM sweep (`suite/benchmark.py`: NeoFOAM's `Sweep(...,
+merge=True, includes=[suite/benchmark.smk], targets=["report.md"]).export`) to
+`results/<category>/<name>/` (gitignored) and runs it with one Snakemake command, which it
+prints and which alone reproduces the run (in the pixi environment, OpenFOAM-v2406
+sourced, as `scripts/benchmark.sh` does):
 
-    generate -> blockMesh -> setAlphaField [-> alphaSamples] -> solve -> table
-             -> results -> plots -> verify -> report
+```bash
+snakemake -s results/reconstruction/circle/Snakefile -d results/reconstruction/circle -c 4
+```
 
-per backend and case (`cases/<backend>/<method>_n<n>/`, a copy of the template with
-`0.orig` -> `0` and the parameters written to `system/simulationParameters`), then per
-backend `tables/<backend>.csv`, `results.csv` (long format, one row per backend,
-method and resolution: `backend, executor, method, n` and the benchmark's
-`results_columns`), `plots/<name>.png|pdf` (the benchmark's `plots`: `ErrorPlot(columns)`,
-the norms vs n with order-1/2 slope guides; `TimingPlot(column, label)`, a time vs n; one
-line per backend, the `reference_backend` dashed), `checks.json` and `report.md` (links to
-the CSV and plots, error table, observed orders between consecutive resolutions, the
-checks), and `results/summary.md` over all benchmarks. `--rerun table` redraws the
-CSV, plots and report from the existing cases. Snakemake reruns only what changed (a full sweep after a smoke run reuses the
-smoke cases; a changed reference table or `benchmark.py` reruns verify). It does not see
-the solver's code: after changing a method, `--rerun solve` reruns the solves and what
-follows. Deleting an intermediate file (a table) does not rerun anything either.
-`--prune-cases` deletes the cases' meshes and time directories after a successful run
-(the full circle sweep on four backends takes 1.5 GB otherwise); a later `--rerun solve`
-then needs `--rerun generate`. The command
-fails when a check fails. `-j` is at most 4. A backend that cannot run here is left out
-of the workflow and reported as skipped with the reason. `--in-process` (without
-Snakemake) is not implemented.
+The rules are NeoFOAM's `setup_mesh -> blockMesh` once per mesh variant (`meshes/<v>/`),
+`setup` (clone of `case/`, the payloads merged in, the mesh copied, the case-level
+preprocess tools run) `-> solve` (`neofoam solver <name>`) per case (`cases/<case>/`),
+then `suite/benchmark.smk`'s `collect` (`results.csv`: one row per case, its variant per
+dimension, renamed by `collect.columns`, and the last row of each `collect.tables`
+`.dat`), `verify` (`checks.json`), `plots` (`plots/`, by the benchmark's `plots.py`) and
+`report` (`report.md`: the plots, the results table, the checks). `--smoke` keeps the
+`smoke` variants, `--method NAME` (repeatable) replaces the method dimension's variants by
+`{NAME: {<entry>: NAME}}`. Snakemake reruns what changed (a changed `benchmark.yaml`,
+`plots.py` or reference table reruns collect/verify/plots); it does not see the solver's
+code: after changing a method, `--forcerun solve` on the printed command.
 
-Backends (`suite/backends.py`): `twophaseflow` runs the solver name as a TwoPhaseFlow
-application under `$TWOPHASEFLOW_BASHRC` (v2506); `neofoam`, `neofoam-cpu` and
-`neofoam-gpu` write `executor Serial|CPU|GPU` to `system/controlDict` and run
-`neofoam solver <name>` under `$NEOFOAM_BASHRC` (v2406), a benchmark solver of
-`neofoam_verification.solvers` registered by the `neofoam.solvers` entry point in
-`pyproject.toml` (a module exporting the `<name>` spec and `run(argv)`). The CPU executor
-takes all cores unless `OMP_NUM_THREADS` is set. NeoFOAM's benchmark
-solvers use NeoFOAM's models only; what they add is the benchmark's input/output
-convention (here: the alpha samples in, `reconstructionError`'s `error.dat` out).
+Checks (`suite/checks.py`), per group of cases (the dimensions but `mesh`: executor and
+method): `{type: reference, file, match, columns, rtol}` (the stored table, rows matched
+by the `match` columns) and `{type: order, column, spacing, minimum}` (least-squares
+order over the group's resolutions).
 
-Checks (`suite/checks.py`): `Published` (a published table, per value), `AgainstBackend`
-(the verified table `reference/<backend>.csv`, which `--store-reference BACKEND` writes
-from a full run with no failing check of that backend, merged per method), `Order`
-(least-squares order over the run's resolutions).
+The benchmark solvers (`solvers/`) are `neofoam.solvers` entry points (`pyproject.toml`):
+a module exporting the `<name>` spec, which declares the configs a sweep may vary, and
+`run(argv)`. They use NeoFOAM's models only; what they add is the benchmark's
+input/output convention (here: the alpha samples in, `reconstructionError`'s `error.dat`
+and a `timing.dat` with the run's wall time out). The CPU executor takes all cores unless
+`OMP_NUM_THREADS` is set.
 
 ### Adding a benchmark / developing a new method
 
-* A benchmark is a folder `benchmarks/<category>/<name>/` with `case/` (its swept entries
-  in `system/simulationParameters`, which the dicts `#include`), `reference/` and
-  `benchmark.py`; `pixi run benchmark benchmarks/<category>/<name> --smoke` runs it.
+* A benchmark is a folder `benchmarks/<category>/<name>/` with the files above;
+  `pixi run benchmark benchmarks/<category>/<name> --smoke` runs it.
 * A new method (e.g. a reconstruction scheme registered with NeoFOAM through a
   `neofoam.plugins` entry point) needs no edit of the benchmark:
-  `pixi run benchmark benchmarks/reconstruction/circle --method myScheme --backend neofoam --smoke`
-  sets `reconScheme myScheme`, runs the cases `myScheme_n8`, `myScheme_n16` and reports
-  the errors, the observed orders and the checks. `Published`/`AgainstBackend` skip
-  the rows they have no stored value for; `Order` applies to every method unless
-  restricted (`methods=`).
-* A new backend is a `Backend` (`name`, `bashrc`, `unavailable(solver)`,
-  `solver_command(solver)`) passed to `suite.backends.register`.
+  `pixi run benchmark benchmarks/reconstruction/circle --method myScheme --smoke` runs
+  the cases `n8_Serial_myScheme`, `n16_Serial_myScheme` and reports the errors and the
+  checks; `reference` skips a group it has no stored row for.
 
 ### NeoFOAM in this environment
 
@@ -401,7 +363,7 @@ feature `neofoam`. Then `pixi run install` registers the benchmark solvers. A fi
 arXiv 1801.05382 (Scheufler & Roenby), sec. 4.1.1, as numufoam's
 `benchmarksuite/interfaceCapturing/reconstruction/circle` (319c4b8): a disc of radius
 0.49999999 in the 2 x 2 square (x-z, one cell through the empty y direction), n x n hex
-cells (n = 8 ... 1024), schemes isoAlpha, plicRDF, gradAlpha (`nx`, `nz`, `reconScheme`).
+cells (n = 8 ... 1024; the `mesh` dimension), schemes isoAlpha, plicRDF, gradAlpha.
 TwoPhaseFlow's `reconstructInterface` reconstructs `nIter 10` samples per mesh, the
 disc centred at `Random(1234567).globalPosition(0.9 o, 1.1 o)`, o = (1.01, 0, 1.01)
 (`foam_random.py` reproduces the sequence to the last digit of the log), alpha by
@@ -414,12 +376,10 @@ the largest over all cells and samples, `*1` the mean of the per-sample cell mea
 labels the `error.dat` columns one position off: `LNormal_1` is LNormalInf,
 `LNormal_Inf` is LNormal1, `LCentre_1` is LCentreInf, `LCentre_Inf` is LCentre1
 (`read_numufoam` maps them back). The case here, with TwoPhaseFlow master ba10702 on
-v2506, reproduces it to 1e-11 relative (x8, x32 all schemes; x256 plicRDF);
-`tests/test_circle_reconstruction.py` checks x8 and x16 (marked `openfoam`). Changes to
-numufoam's template, which today's TwoPhaseFlow no longer runs: the top-level
-`reconstructionScheme` and controls, the `surfaceForces` dict of `transportProperties`
-(from `run/benchmark/surfaceTension/curvatureCircle`), `solvers.alpha1` for NeoFOAM,
-write precision 17, uncompressed.
+v2506, reproduced it to 1e-11 relative (x8, x32 all schemes; x256 plicRDF). The
+TwoPhaseFlow run is no longer part of the benchmark: `case/` is NeoFOAM's (literal
+values, `0/`, `system/preprocess.yaml`: blockMesh, then setAlphaField with `samples: 10`;
+`solvers.alpha1` holds the scheme and tolerances).
 
 Observed order of numufoam's numbers (consecutive refinements, x8 -> x1024):
 plicRDF 1.6 ... 2.8 in LNormalInf, 1.8 ... 2.6 in LNormal1, 2.0 in both centre norms;
@@ -427,13 +387,14 @@ isoAlpha's and gradAlpha's normal errors stop converging (gradAlpha's LNormalInf
 at 2.4e-3 from x32), as in the paper.
 
 `reference/twophaseflow.csv` is the TwoPhaseFlow (v2506) gradAlpha sweep x8 ... x1024
-(`pixi run benchmark benchmarks/reconstruction/circle --store-reference twophaseflow`,
-33 s with `-j 4`; x1024 takes 18 s), all `error.dat` columns but the timings. It
-agrees with numufoam to 1.9e-10 relative (LCentreInf at x1024); fitted order 1.92 in
+(stored by the earlier live TwoPhaseFlow backend, fb6a24b), all `error.dat` columns but
+the timings. It agrees with numufoam to 1.9e-10 relative (LCentreInf at x1024;
+`tests/test_circle_reconstruction.py`); fitted order 1.92 in
 LCentre1 and 1.68 in LCentreInf (2.0 down to 1.2 between consecutive resolutions), the
-normal errors do not converge. The NeoFOAM backend's alpha samples (`alphaSamples`:
-setAlphaField v2406 per centre into time directory `i`) equal reconstructInterface's own
-bitwise (`tests/test_suite.py`, x8).
+normal errors do not converge. The alpha samples are NeoFOAM's `setAlphaField` tool
+(`samples: 10`, time directories 1 ... 10, reconstructInterface's centres); they agree
+with OpenFOAM-v2406's setAlphaField to round-off (3.9e-16 in 2 cells at x8), so the norms
+equal those of the earlier OpenFOAM samples bitwise to x64 and to 5e-13 (LCentre1) above.
 
 NeoFOAM's `reconstructInterface` (`solvers/reconstruct_interface.py`) selects the scheme
 from `reconstructionSchemeNeoN` (`reconstructionSchemeNeoN.select(...).reconstruct(ops,
@@ -442,8 +403,10 @@ alpha)`), so any registered scheme runs with `--method`. With gradAlpha's defaul
 and LCentreInf at every resolution, and to 3e-7 ... 4.2e-6 in LCentre1 from x32 on (1.6e-6
 at x64, 4.2e-6 at x1024): volTaylor places the plane to alpha within `isoFaceTol` 1e-8,
 which moves the centre by ~1e-8 h, against an LCentre1 of 1.6e-6 at x1024. So
-`AgainstBackend` (rtol 1e-6) fails; with `planeSearch openfoam` x1024 agrees to 4e-16.
-Serial, CPU and GPU give the same norms bitwise. Wall time of a solve at x1024: 11.8 s
-(Serial), 11.9 s (CPU), 11.3 s (GPU), against 17.6 s for reconstructInterface; per
-reconstruction (k1, normal and centre copied to the host, after an untimed ~2 s warm-up
-that builds the stencils) 21 / 16 / 13 ms, against 0.33 s CPU time in TwoPhaseFlow.
+the `reference` check (rtol 1e-6) fails; with `planeSearch openfoam` x1024 agrees to 4e-16.
+Serial, CPU and GPU give the same norms bitwise. The full sweep (8 resolutions x 3
+executors, `-c 4`, `OMP_NUM_THREADS=4`) takes about 1 min and 1.5 GB in `results/`; at
+x1024 the solver runs 10.5 s (Serial), 11.2 s (CPU), 10.7 s (GPU) (`wall_s`, imports
+excluded), per reconstruction (k1, normal and centre copied to the host, after an
+untimed ~2 s warm-up that builds the stencils) 15 / 20 / 13 ms, against 0.33 s CPU time
+in TwoPhaseFlow.

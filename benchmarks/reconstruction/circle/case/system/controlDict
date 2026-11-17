@@ -19,6 +19,9 @@ FoamFile
 
 application     reconstructInterface;
 
+// the NeoN executor (NeoNControlConfig); the sweep sets it
+executor        Serial;
+
 startFrom       startTime;
 
 startTime       0.0;
