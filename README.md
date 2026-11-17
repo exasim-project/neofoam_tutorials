@@ -292,6 +292,7 @@ A benchmark is a folder of files, laid out like numufoam's `benchmarksuite/<cate
 | `case/` | the base case with literal values (`0/`, `system/`, `system/preprocess.yaml`) |
 | `plots.py` | `plot(results: DataFrame, references: dict[str, DataFrame], out: Path)`; helpers in `suite/plots.py` (`error_plot`, `timing_plot`, `save`) |
 | `reference/` | stored tables (CSV), read by the checks and handed to `plots.py` by file stem |
+| `metrics.py` | optional: `metrics(case: Path) -> DataFrame`, one row per written time from the case's fields (for a solver without in-run tables), named by `metrics: {script, prune}` |
 
 ### Running a benchmark
 
@@ -321,12 +322,20 @@ dimension, renamed by `collect.columns`, and the last row of each `collect.table
 `plots.py` or reference table reruns collect/verify/plots); it does not see the solver's
 code: after changing a method, `--forcerun solve` on the printed command.
 
+With `metrics` in `benchmark.yaml`, a per-case rule `metrics` runs after `solve`: it
+writes the script's table as `cases/<case>/postProcessing/metrics.dat` (a function-object
+`.dat`, which `collect.tables` names and `suite/plots.py`'s `histories` reads for time
+series) and, with `prune: true`, removes the case's time directories but the first and the
+last.
+
 Checks (`suite/checks.py`), per group of cases (the dimensions but `mesh`: executor and
 method): `{type: reference, file, match, columns, rtol}` (the stored table, rows matched
-by the `match` columns), `{type: order, column, spacing, minimum}` (least-squares
-order over the group's resolutions) and `{type: maximum, column, maximum}` (the group's
-largest value, e.g. a mass or bound error); `where: {column: [values]}` limits a check to
-those rows.
+by the `match` columns; an empty stored value is skipped), `{type: order, column, spacing,
+minimum}` (least-squares order over the group's resolutions), `{type: maximum, column,
+maximum}` (the group's largest value at most `maximum`: a mass or bound error, a spurious
+velocity) and `{type: agreement, across, base, columns, rtol}` (each case against the same
+case of the `base` variant of `across`, e.g. CPU and GPU against Serial); `where: {column:
+[values]}` limits a check to those rows.
 
 The benchmark solvers (`solvers/`) are `neofoam.solvers` entry points (`pyproject.toml`):
 a module exporting the `<name>` spec, which declares the configs a sweep may vary, and
@@ -439,3 +448,35 @@ time per alpha advection) and `timing.dat` (`wall_s`, `steps`).
   100 x 60, t = 4), against the stored TwoPhaseFlow advectorVoF runs of
   `reference/discUniFlow/100x60` (`twophaseflow_*.csv`): MULES agrees to 1.7e-14, gradAlpha
   isoAdvector to 4.7e-9 relative (volTaylor plane search) on every executor.
+
+### Parasitic currents: surfaceTension/staticDrop, acceleration/tiltedBox
+
+Both run NeoFOAM's built-in `incompressibleVoFNeoN` through `incompressibleVoFNeoNSweep`
+(`solvers/vof_neon.py`, the same spec and `run`, without the `--no-preprocess` option of
+the sweep's `solve` rule, which `Foam::argList` rejects). The solver writes no tables
+(NeoFOAM's `postProcess` model is wired into incompressibleFluidNeoN only), so each
+benchmark's `metrics.py` evaluates the written fields per case (`metrics` rule) and prunes
+the time directories. The maxima over time are sampled at the write times.
+
+**staticDrop** is NeoFOAM's `test/solver/incompressibleVoFNeoN/cases/stationaryDroplet`
+(neither numufoam nor TwoPhaseFlow has a static drop with surface tension driving the
+flow): a 2 mm water cylinder (setAlphaField) in air in an 8 mm box, open top, sigma 0.07,
+g = 0, MULES, Brackbill CSF with gradAlpha curvature, `deltaT 2e-5` to t = 4e-3, written
+every 10th step. Meshes n20, n40, n80 (R/dx = 5, 10, 20), all executors (9 cases, about
+1 min with `-c 1`). Metrics: max/mean |U| over time, Ca = mu_water max|U| / sigma, the
+Laplace jump `mean p_rgh(r < R/2) - mean p_rgh(r > 3R/2)` against sigma/R (R of the water
+volume) as NeoFOAM's test measures it. n40 reproduces the test (jump 29.9007 Pa, 14.7 %
+below sigma/R; end max|U| 0.19897 m/s), n80 interFoam's 9.6 %; Serial, CPU and GPU agree
+to 1e-10.
+
+**tiltedBox** is TwoPhaseFlow's `run/benchmark/acceleration/tiltedBox` (numufoam's with
+rho 1000/1): the unit box tilted 30 degrees about y, water below z = 0.1345, g = (0 0
+-9.81), sigma 0, adaptive time step (Co 0.2) to t = 0.1, written every 0.005. NeoFOAM
+has no transformPoints tool: the blockMeshDict's vertices are the rotated ones (another
+angle is a mesh variant with other vertices), and the plane initial condition is
+`tools/set_alpha_plane.py` (a `neofoam.plugins` tool; NeoFOAM's setAlphaField has no
+plane). Differences to TwoPhaseFlow: isoAdvector with gradAlpha (plicRDF), an open top
+with `p_rgh` fixedValue 0 (a closed box with pRefCell; incompressibleVoFNeoN has no
+pressure reference), no momentum predictor. Metrics: max/mean |U| over time, max|U| at
+t = 0.01 (TwoPhaseFlow's `results.csv`), the largest and mean |p - p_hydrostatic| relative
+to the hydrostatic range. n16, n32, n64 x executors: 9 cases, about 40 s.

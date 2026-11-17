@@ -43,7 +43,12 @@ def test_numufoam_mules_passes_the_checks_and_where_limits_the_bound_check() -> 
     statuses = {(r["check"], r["group"]): r["status"] for r in results}
     assert set(statuses.values()) == {"pass"}, results
     for cfl in ("CFL005", "CFL01", "CFL02", "CFL05"):
-        assert statuses["reference numufoam.csv", f"{cfl} Serial MULES"] == "pass"
+        reference = [
+            s
+            for (c, g), s in statuses.items()
+            if c.startswith("reference numufoam.csv") and g == f"{cfl} Serial MULES"
+        ]
+        assert reference == ["pass"]
     # numufoam's MULES overshoots at CFL 0.2 and 0.5: not held to the bound
     bounded = {g for c, g in statuses if c == "maximum Ebound"}
     assert bounded == {"CFL005 Serial MULES", "CFL01 Serial MULES"}
@@ -57,7 +62,7 @@ def test_maximum_check_fails_above_its_bound() -> None:
     (result,) = evaluate([check], mules, PAPER / "reference", ["CFL", "executor", "method"])
 
     assert result["status"] == "fail"
-    assert result["detail"].startswith("1.2e-01")
+    assert result["detail"].startswith("1.161e-01")
 
 
 def test_stored_twophaseflow_runs_pass_the_testsuite_checks() -> None:
@@ -73,7 +78,8 @@ def test_stored_twophaseflow_runs_pass_the_testsuite_checks() -> None:
         ["executor", "method"],
     )
 
-    statuses = {(r["check"], r["group"]): r["status"] for r in results}
+    # the reference check's label is "reference <file> <columns>": key it by the file
+    statuses = {(" ".join(r["check"].split()[:2]), r["group"]): r["status"] for r in results}
     assert statuses["reference twophaseflow_mules.csv", "Serial MULES"] == "pass"
     assert statuses["reference twophaseflow_mules.csv", "Serial isoAdvector"] == "skip"
     assert statuses["reference twophaseflow_isoadvection.csv", "Serial isoAdvector"] == "pass"

@@ -1,0 +1,25 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setAlphaFieldDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// The flat interface of the tilted box, numufoam's/TwoPhaseFlow's (water below z = 0.1345),
+// cut exactly by the setAlphaPlane tool (NeoFOAM's setAlphaField has no plane).
+field       alpha.water;
+type        plane;
+origin      (0 0 0.1345);
+normal      (0 0 -1);
+
+// ************************************************************************* //
