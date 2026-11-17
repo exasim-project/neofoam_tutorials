@@ -4,8 +4,13 @@ version = "0.1.0"
 description = "Verification of NeoFOAM's MULES VoF advection against OpenFOAM (TwoPhaseFlow benchmarks)"
 authors = [{ name = "Henning Scheufler", email = "henning.scheufler@web.de" }]
 requires-python = ">=3.10"
-# numpy and foamlib come from the pixi environment.
-dependencies = []
+# numpy, foamlib, PyYAML and snakemake come from the pixi environment; neofoam is built
+# into it from a checkout by `pixi run install-neofoam` (the pip installs use --no-deps).
+dependencies = ["neofoam"]
+
+# The NeoFOAM benchmark solvers: `neofoam solver <name>`.
+[project.entry-points."neofoam.solvers"]
+reconstructInterface = "neofoam_verification.solvers.reconstruct_interface:run"
 
 [build-system]
 requires = ["setuptools>=64"]
@@ -25,7 +30,7 @@ markers = [
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-extend-exclude = [".pixi/", "cases/"]
+extend-exclude = [".pixi/", "cases/", "results/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
@@ -40,5 +45,5 @@ python_version = "3.12"
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["foamlib", "foamlib.*"]
+module = ["foamlib", "foamlib.*", "yaml", "neofoam", "neofoam.*", "pybFoam", "pybFoam.*"]
 ignore_missing_imports = true

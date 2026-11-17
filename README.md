@@ -11,6 +11,8 @@ pixi run update-reconstruction-reference  # OpenFOAM-v2406 reconstruction refere
 pixi run update-advection-flux-reference  # OpenFOAM-v2406 isoAdvection face fluxes, rewrites reference/curvature*/advection/
 pixi run update-isoadvection-reference    # OpenFOAM-v2406 multi-step isoAdvection, rewrites reference/*/isoAdvection/
 pixi run update-twophaseflow-isoadvection-reference  # advectorVoF/isoAdvection, rewrites reference/*/*/twoPhaseFlowIsoAdvection/
+pixi run benchmark benchmarks/reconstruction/circle --smoke  # the benchmark suite, below; ~5 s
+pixi run install-neofoam [CHECKOUT]  # builds NeoFOAM (C++) into this env, below
 ```
 
 ## Layout
@@ -284,8 +286,98 @@ with the v2406 runs: Eshape to 2e-11 relative, final alpha to 3e-10
 
 Runnable verification cases laid out like numufoam's `benchmarksuite/<category>/<name>/`:
 a template case (`case/`, swept through `system/simulationParameters`) and the published
-reference (`reference/`). The run/sweep layer (generation, the NeoFOAM benchmark solver,
-the results table and report) is not in place yet.
+reference (`reference/`), and a `benchmark.py` that defines the run:
+
+```python
+BENCHMARK = Benchmark(
+    case=HERE / "case",
+    solver="reconstructInterface",          # each backend maps it to its command
+    sweep=Sweep(
+        resolutions=(8, 16, 32, 64, 128, 256, 512, 1024),
+        smoke=(8, 16),
+        methods=("gradAlpha",),
+        parameters=lambda n, method: {"nx": n, "nz": n, "reconScheme": method},
+    ),
+    prepare=(                               # one Snakemake rule each, under the backend's OpenFOAM
+        Step("blockMesh"),
+        Step("setAlphaField", "setAlphaField -dict system/initAlphaFieldDict"),
+        Step("alphaSamples", alpha_samples, backends=("neofoam",)),
+    ),
+    backends=("twophaseflow", "neofoam"),
+    table=FunctionObjectTable(ERROR_DAT.as_posix(), COLUMNS, timing=("k1", "k2")),
+    checks=(
+        Published("numufoam_error.csv", read_numufoam, (*NORMS, "length", "nCells"), rtol=1e-9,
+                  backends=("twophaseflow",)),
+        AgainstBackend("twophaseflow", (*NORMS, "length", "nCells"), rtol=1e-6),
+        Order("LCentre1", minimum=1.5),
+    ),
+)
+```
+
+### Running the benchmarks
+
+```bash
+pixi run benchmark FOLDER [--smoke] [--method NAME] [--backend NAME] [-j N] [--store-reference BACKEND]
+```
+
+runs every `benchmark.py` under FOLDER (`src/neofoam_verification/run.py`). Each is
+exported to a Snakemake workflow in `results/<category>/<name>/` (gitignored;
+`suite/workflow.py`) and run there: the sweep in NeoFOAM's paramspace format
+(`sweep.csv`, `params.yaml` with one dimension `simulation_parameters`,
+`configs/<case>/simulation_parameters.json`), `run.json`, and the `Snakefile` with the
+rules
+
+    generate -> blockMesh -> setAlphaField [-> alphaSamples] -> solve -> table -> verify -> report
+
+per backend and case (`cases/<backend>/<method>_n<n>/`, a copy of the template with
+`0.orig` -> `0` and the parameters written to `system/simulationParameters`), then per
+backend `tables/<backend>.csv`, `checks.json` and `report.md` (error table, observed
+orders between consecutive resolutions, the checks), and `results/summary.md` over all
+benchmarks. Snakemake reruns only what changed (a full sweep after a smoke run reuses the
+smoke cases; a changed reference table or `benchmark.py` reruns verify). The command
+fails when a check fails. `-j` is at most 4. A backend that cannot run here is left out
+of the workflow and reported as skipped with the reason. `--in-process` (without
+Snakemake) is not implemented.
+
+Backends (`suite/backends.py`): `twophaseflow` runs the solver name as a TwoPhaseFlow
+application under `$TWOPHASEFLOW_BASHRC` (v2506); `neofoam` runs `neofoam solver <name>`
+under `$NEOFOAM_BASHRC` (v2406), a benchmark solver of `neofoam_verification.solvers`
+registered by the `neofoam.solvers` entry point in `pyproject.toml`. NeoFOAM's benchmark
+solvers use NeoFOAM's models only; what they add is the benchmark's input/output
+convention (here: the alpha samples in, `reconstructionError`'s `error.dat` out).
+
+Checks (`suite/checks.py`): `Published` (a published table, per value), `AgainstBackend`
+(the verified table `reference/<backend>.csv`, which `--store-reference BACKEND` writes
+from a full run with no failing check of that backend, merged per method), `Order`
+(least-squares order over the run's resolutions).
+
+### Adding a benchmark / developing a new method
+
+* A benchmark is a folder `benchmarks/<category>/<name>/` with `case/` (its swept entries
+  in `system/simulationParameters`, which the dicts `#include`), `reference/` and
+  `benchmark.py`; `pixi run benchmark benchmarks/<category>/<name> --smoke` runs it.
+* A new method (e.g. a reconstruction scheme registered with NeoFOAM through a
+  `neofoam.plugins` entry point) needs no edit of the benchmark:
+  `pixi run benchmark benchmarks/reconstruction/circle --method myScheme --backend neofoam --smoke`
+  sets `reconScheme myScheme`, runs the cases `myScheme_n8`, `myScheme_n16` and reports
+  the errors, the observed orders and the checks. `Published`/`AgainstBackend` skip
+  the rows they have no stored value for; `Order` applies to every method unless
+  restricted (`methods=`).
+* A new backend is a `Backend` (`name`, `bashrc`, `unavailable(solver)`,
+  `solver_command(solver)`) passed to `suite.backends.register`.
+
+### NeoFOAM in this environment
+
+NeoFOAM is a dependency of this package (`pyproject.toml`), built from a checkout into
+the pixi environment: `pixi run install-neofoam [CHECKOUT]` (default `$NEOFOAM_SRC`,
+`scripts/install_neofoam.sh`) runs `pip install CHECKOUT --no-build-isolation --no-deps`
+with OpenFOAM-v2406 sourced (pybFoam), `NeoN_WITH_OMP=ON NeoN_WITH_THREADS=OFF` (Kokkos
+OpenMP; CUDA when `nvcc` is found; Ginkgo on by default), 4 jobs, under
+`NEOFOAM_BUILD_LOCK` (default `vof_scratch/plic_bench/build.lock`). The build directory is
+`.pixi/build/neofoam`, not the checkout's `_skbuild`. Compilers are the system's (gcc 13
+through ccache, `/usr/local/cuda`), the ones OpenFOAM-v2406 is built with; cmake, ninja,
+scikit-build-core, nanobind 3.0 and NeoFOAM's Python dependencies come from the pixi
+feature `neofoam`. Then `pixi run install` registers the benchmark solvers.
 
 ### reconstruction/circle
 
@@ -316,3 +408,14 @@ Observed order of numufoam's numbers (consecutive refinements, x8 -> x1024):
 plicRDF 1.6 ... 2.8 in LNormalInf, 1.8 ... 2.6 in LNormal1, 2.0 in both centre norms;
 isoAlpha's and gradAlpha's normal errors stop converging (gradAlpha's LNormalInf stays
 at 2.4e-3 from x32), as in the paper.
+
+`reference/twophaseflow.csv` is the TwoPhaseFlow (v2506) gradAlpha sweep x8 ... x1024
+(`pixi run benchmark benchmarks/reconstruction/circle --store-reference twophaseflow`,
+33 s with `-j 4`; x1024 takes 18 s), all `error.dat` columns but the timings. It
+agrees with numufoam to 1.9e-10 relative (LCentreInf at x1024); fitted order 1.92 in
+LCentre1 and 1.68 in LCentreInf (2.0 down to 1.2 between consecutive resolutions), the
+normal errors do not converge. The NeoFOAM backend's alpha samples (`alphaSamples`:
+setAlphaField v2406 per centre into time directory `i`) equal reconstructInterface's own
+bitwise (`tests/test_suite.py`, x8). The NeoFOAM `reconstructInterface` solver
+(`solvers/reconstruct_interface.py`) is pending NeoFOAM's reconstruction-scheme model
+family and an installed NeoFOAM; until then the backend is skipped.
