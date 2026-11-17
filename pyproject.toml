@@ -11,6 +11,11 @@ dependencies = ["neofoam"]
 # The NeoFOAM benchmark solvers: `neofoam solver <name>`.
 [project.entry-points."neofoam.solvers"]
 reconstructInterface = "neofoam_verification.solvers.reconstruct_interface"
+incompressibleVoFNeoNSweep = "neofoam_verification.solvers.vof_neon"
+
+# NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool.
+[project.entry-points."neofoam.plugins"]
+setAlphaPlane = "neofoam_verification.tools.set_alpha_plane"
 
 [build-system]
 requires = ["setuptools>=64"]
