@@ -20,11 +20,9 @@ Setup
 - Differences to TwoPhaseFlow: gradAlpha instead of plicRDF; an open top with
   ``p_rgh`` fixedValue 0 instead of a closed box with a pressure reference cell
   (``incompressibleVoFNeoN`` has no pressure reference); no momentum predictor.
-- Sweep: ``mesh`` n16, n32, n64 × 3 executors = 9 cases, about 40 s. Smoke: n16
-  ``Serial``.
 
 Inputs
-------
+~~~~~~
 
 ``benchmarks/acceleration/tiltedBox/``:
 
@@ -36,7 +34,7 @@ Inputs
 - ``reference/twophaseflow.csv``: TwoPhaseFlow's max\|U\| at t = 0.01 (n32, n64, n128)
 
 Metrics
--------
+~~~~~~~
 
 ``maxU``, ``meanU``, ``maxU_max``
    The largest and the volume-weighted mean cell \|U\|, and the largest ``maxU`` over
@@ -49,12 +47,49 @@ Metrics
    the initial interface with ``p_rgh = 0`` at the open top.
 
 Run
----
+~~~
 
 .. code-block:: bash
 
    pixi run benchmark benchmarks/acceleration/tiltedBox --smoke
    pixi run benchmark benchmarks/acceleration/tiltedBox
+
+Changed parameters
+------------------
+
+The sweep in ``benchmark.yaml``: ``mesh`` n16, n32, n64 × 3 executors = 9 cases, about 40 s. Smoke: n16 ``Serial``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 33 15
+
+   * - Dimension
+     - Variants
+     - Sets (first variant)
+     - Smoke
+   * - ``mesh``
+     - ``n16``, ``n32``, ``n64``
+     - ``{block_mesh_dict_config: {blocks: [{cells: [16, 1, 16]}]}}``
+     - ``n16``
+   * - ``neo_n_control_config``
+     - ``Serial``, ``CPU``, ``GPU``
+     - ``{executor: Serial}``
+     - ``Serial``
+
+Larger meshes
+~~~~~~~~~~~~~
+
+TwoPhaseFlow runs 32, 64 and 128 cells per side, and numufoam goes up to 512. Add:
+
+.. code-block:: yaml
+
+   mesh:
+     ...
+     n128: {block_mesh_dict_config: {blocks: [{cells: [128, 1, 128]}]}}
+
+The stored TwoPhaseFlow table already holds n128, so the ``reference`` check compares
+it. Another tilt angle is a mesh variant with other vertices:
+``{block_mesh_dict_config: {vertices: [...], ...}}``.
 
 Results
 -------
@@ -78,7 +113,7 @@ error over time.
 - **Executors.** CPU and GPU agree with Serial to 5.4e-15.
 
 Checks
-------
+~~~~~~
 
 .. include:: /_generated/acceleration/tiltedBox/checks.rst
 
@@ -89,18 +124,3 @@ Per executor:
 - ``maximum maxU_max`` ≤ 3.5 m/s, ``maximum p_err_max`` ≤ 0.025 and
   ``maximum p_err_mean`` ≤ 1.5e-3: regression bounds at about 1.2 × the measured values.
 - ``agreement executor`` to 1e-8.
-
-Larger meshes
--------------
-
-TwoPhaseFlow runs 32, 64 and 128 cells per side, and numufoam goes up to 512. Add:
-
-.. code-block:: yaml
-
-   mesh:
-     ...
-     n128: {block_mesh_dict_config: {blocks: [{cells: [128, 1, 128]}]}}
-
-The stored TwoPhaseFlow table already holds n128, so the ``reference`` check compares
-it. Another tilt angle is a mesh variant with other vertices:
-``{block_mesh_dict_config: {vertices: [...], ...}}``.

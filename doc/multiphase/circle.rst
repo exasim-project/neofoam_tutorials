@@ -18,11 +18,9 @@ Setup
 - Solver: ``reconstructInterface``, with the scheme read from
   ``solvers.alpha1.reconstructionScheme`` (default ``gradAlpha``, plane search
   ``volTaylor``).
-- Sweep: 8 meshes × 3 executors × 1 scheme = 24 cases. The full sweep takes about
-  1 min with ``-c 4``. Smoke: n8 and n16 on ``Serial``.
 
 Inputs
-------
+~~~~~~
 
 ``benchmarks/reconstruction/circle/``:
 
@@ -37,7 +35,7 @@ Inputs
   gradAlpha). Its column labels are shifted by one: ``LNormal_1`` holds LNormalInf.
 
 Metrics
--------
+~~~~~~~
 
 These are TwoPhaseFlow's ``reconstructionError`` norms, over the interface cells and
 the 10 samples:
@@ -56,12 +54,54 @@ the 10 samples:
    The solver's wall time, excluding imports.
 
 Run
----
+~~~
 
 .. code-block:: bash
 
    pixi run benchmark benchmarks/reconstruction/circle --smoke   # n8, n16 Serial
    pixi run benchmark benchmarks/reconstruction/circle           # the full sweep
+
+Changed parameters
+------------------
+
+The sweep in ``benchmark.yaml``: 8 meshes × 3 executors × 1 scheme = 24 cases. The full sweep takes about 1 min with ``-c 4``. Smoke: n8 and n16 on ``Serial``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 33 15
+
+   * - Dimension
+     - Variants
+     - Sets (first variant)
+     - Smoke
+   * - ``mesh``
+     - ``n8``, ``n16``, ``n32``, ``n64``, ``n128``, ``n256``, ``n512``, ``n1024``
+     - ``{block_mesh_dict_config: {blocks: [{cells: [8, 1, 8]}]}}``
+     - ``n8``, ``n16``
+   * - ``neo_n_control_config``
+     - ``Serial``, ``CPU``, ``GPU``
+     - ``{executor: Serial}``
+     - ``Serial``
+   * - ``reconstruction_scheme_config``
+     - ``gradAlpha``
+     - ``{reconstructionScheme: gradAlpha}``
+     - all
+
+Larger meshes
+~~~~~~~~~~~~~
+
+Add a variant to the ``mesh`` dimension of ``benchmark.yaml``:
+
+.. code-block:: yaml
+
+   mesh:
+     ...
+     n2048: {block_mesh_dict_config: {blocks: [{cells: [2048, 1, 2048]}]}}
+
+The stored TwoPhaseFlow table ends at n1024. A new resolution is therefore not
+compared with it (the ``reference`` check matches rows on ``nCells``), but it enters
+the order checks and the plots. Case data grows with n²; the full sweep up to n1024
+already needs about 1.5 GB while it runs.
 
 Results
 -------
@@ -92,7 +132,7 @@ What the full sweep shows:
   TwoPhaseFlow.
 
 Checks
-------
+~~~~~~
 
 .. include:: /_generated/reconstruction/circle/checks.rst
 
@@ -103,19 +143,3 @@ Per group (executor × method):
   known limit of the volTaylor tolerance, not a reconstruction error.
 - ``order LCentre1`` and ``order LCentreInf`` ≥ 1.5. No order is checked for the
   normal, because gradAlpha's normal does not converge.
-
-Larger meshes
--------------
-
-Add a variant to the ``mesh`` dimension of ``benchmark.yaml``:
-
-.. code-block:: yaml
-
-   mesh:
-     ...
-     n2048: {block_mesh_dict_config: {blocks: [{cells: [2048, 1, 2048]}]}}
-
-The stored TwoPhaseFlow table ends at n1024. A new resolution is therefore not
-compared with it (the ``reference`` check matches rows on ``nCells``), but it enters
-the order checks and the plots. Case data grows with n²; the full sweep up to n1024
-already needs about 1.5 GB while it runs.

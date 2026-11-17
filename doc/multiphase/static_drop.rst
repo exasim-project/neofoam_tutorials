@@ -16,14 +16,12 @@ Setup
 - σ = 0.07 N/m, g = 0. Water: ρ = 1000, ν = 1e-6. Air: ρ = 1, ν = 1.48e-5.
 - MULES (``MULESCorr yes``, ``nAlphaCorr 2``), CSF with gradAlpha curvature.
 - ``deltaT 2e-5`` to t = 4e-3 (200 steps), written every 10th step.
-- Sweep: ``mesh`` n20, n40, n80 (R/dx = 5, 10, 20) × 3 executors = 9 cases, about
-  1 min with ``-c 1``. Smoke: n20 ``Serial``.
 - Solver: ``incompressibleVoFNeoNSweep`` (NeoFOAM's ``incompressibleVoFNeoN``). It
   writes no tables, so ``metrics.py`` evaluates the written fields of each case, and
   the inner time directories are pruned after that.
 
 Inputs
-------
+~~~~~~
 
 ``benchmarks/surfaceTension/staticDrop/``:
 
@@ -36,7 +34,7 @@ Inputs
   deficit at n80
 
 Metrics
--------
+~~~~~~~
 
 ``maxU``, ``meanU``
    The largest and the volume-weighted mean cell \|U\|. Since the drop should be at
@@ -51,12 +49,54 @@ Metrics
    measured as in NeoFOAM's ``test_stationaryDroplet_surface_tension``.
 
 Run
----
+~~~
 
 .. code-block:: bash
 
    pixi run benchmark benchmarks/surfaceTension/staticDrop --smoke
    pixi run benchmark benchmarks/surfaceTension/staticDrop -c 1
+
+Changed parameters
+------------------
+
+The sweep in ``benchmark.yaml``: ``mesh`` n20, n40, n80 (R/dx = 5, 10, 20) × 3 executors = 9 cases, about 1 min with ``-c 1``. Smoke: n20 ``Serial``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 33 15
+
+   * - Dimension
+     - Variants
+     - Sets (first variant)
+     - Smoke
+   * - ``mesh``
+     - ``n20``, ``n40``, ``n80``
+     - ``{block_mesh_dict_config: {blocks: [{cells: [20, 20, 1]}]}}``
+     - ``n20``
+   * - ``neo_n_control_config``
+     - ``Serial``, ``CPU``, ``GPU``
+     - ``{executor: Serial}``
+     - ``Serial``
+
+Larger meshes
+~~~~~~~~~~~~~
+
+``deltaT 2e-5`` is 0.57 of the capillary time-step limit
+``sqrt(rho_avg dx^3 / (2 pi sigma))`` at n80. A finer mesh therefore needs a smaller
+time step as well. Add the mesh, and the time step as a further dimension:
+
+.. code-block:: yaml
+
+   mesh:
+     ...
+     n160: {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}
+   control_dict_config:
+     dt2e-5: {deltaT: 2.0e-5}
+     dt5e-6: {deltaT: 5.0e-6}
+
+A new dimension adds a group column, and therefore its own check results. To run only
+the new combination, run it as a separate benchmark, or narrow the checks with
+``where``.
 
 Results
 -------
@@ -82,7 +122,7 @@ What the full sweep shows:
 - **Executors.** Serial, CPU and GPU agree to 1e-10.
 
 Checks
-------
+~~~~~~
 
 .. include:: /_generated/surfaceTension/staticDrop/checks.rst
 
@@ -96,23 +136,3 @@ Per executor:
 - ``maximum maxU_max`` ≤ 0.5 m/s, a regression bound on the spurious current.
 - ``agreement executor`` to 1e-8: CPU and GPU against Serial. It is skipped when only
   one executor ran.
-
-Larger meshes
--------------
-
-``deltaT 2e-5`` is 0.57 of the capillary time-step limit
-``sqrt(rho_avg dx^3 / (2 pi sigma))`` at n80. A finer mesh therefore needs a smaller
-time step as well. Add the mesh, and the time step as a further dimension:
-
-.. code-block:: yaml
-
-   mesh:
-     ...
-     n160: {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}
-   control_dict_config:
-     dt2e-5: {deltaT: 2.0e-5}
-     dt5e-6: {deltaT: 5.0e-6}
-
-A new dimension adds a group column, and therefore its own check results. To run only
-the new combination, run it as a separate benchmark, or narrow the checks with
-``where``.

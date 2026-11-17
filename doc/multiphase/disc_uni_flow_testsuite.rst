@@ -14,10 +14,9 @@ Setup
 - ``maxAlphaCo 0.1`` gives a fixed dt = 1/300, i.e. 1200 steps.
 - Solver: ``advectorVoF``, methods NeoN ``isoAdvector`` (gradAlpha) and NeoN
   ``MULES``.
-- Sweep: 1 mesh × 3 executors × 2 methods = 6 cases. Smoke: ``Serial`` only.
 
 Inputs
-------
+~~~~~~
 
 ``benchmarks/advection/discUniFlowTestsuite/``:
 
@@ -31,18 +30,52 @@ Inputs
   isoAdvection and gradAlpha
 
 Metrics
--------
+~~~~~~~
 
 ``volumeFractionError`` at t = 4 (``Eshape``, ``Emass``, ``Ebound``) and the
 timings, as in :doc:`disc_uni_flow`.
 
 Run
----
+~~~
 
 .. code-block:: bash
 
    pixi run benchmark benchmarks/advection/discUniFlowTestsuite --smoke
    pixi run benchmark benchmarks/advection/discUniFlowTestsuite
+
+Changed parameters
+------------------
+
+The sweep in ``benchmark.yaml``: 1 mesh × 3 executors × 2 methods = 6 cases. Smoke: ``Serial`` only.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 33 15
+
+   * - Dimension
+     - Variants
+     - Sets (first variant)
+     - Smoke
+   * - ``mesh``
+     - ``n100x60``
+     - ``{block_mesh_dict_config: {blocks: [{cells: [100, 1, 60]}]}}``
+     - all
+   * - ``neo_n_control_config``
+     - ``Serial``, ``CPU``, ``GPU``
+     - ``{executor: Serial}``
+     - ``Serial``
+   * - ``advection_scheme_config``
+     - ``isoAdvector``, ``MULES``
+     - ``{advectionScheme: isoAdvector}``
+     - all
+
+Larger meshes
+~~~~~~~~~~~~~
+
+The stored TwoPhaseFlow runs are for 100 × 60 only. A finer mesh, e.g.
+``n200x120: {block_mesh_dict_config: {blocks: [{cells: [200, 1, 120]}]}}``, runs and
+is checked for mass and bounds, but the reference checks skip it. For convergence
+studies use :doc:`disc_uni_flow`.
 
 Results
 -------
@@ -66,7 +99,7 @@ TwoPhaseFlow's runs dashed.
   available in NeoN.
 
 Checks
-------
+~~~~~~
 
 .. include:: /_generated/advection/discUniFlowTestsuite/checks.rst
 
@@ -79,11 +112,3 @@ Per group (method × executor):
   skipped for that group.
 - ``maximum Emass`` ≤ 1e-13 and ``maximum Ebound`` ≤ 1e-8, the testsuite's
   assertions.
-
-Larger meshes
--------------
-
-The stored TwoPhaseFlow runs are for 100 × 60 only. A finer mesh, e.g.
-``n200x120: {block_mesh_dict_config: {blocks: [{cells: [200, 1, 120]}]}}``, runs and
-is checked for mass and bounds, but the reference checks skip it. For convergence
-studies use :doc:`disc_uni_flow`.

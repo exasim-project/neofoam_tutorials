@@ -13,14 +13,10 @@ Setup
   translated by U = (1, 1) for t = 0.5.
 - Solver: ``advectorVoF`` with a fixed time step from ``maxAlphaCo`` (``maxCo`` off, as
   in numufoam).
-- Sweep: ``mesh`` n10, n20, n40 × ``CFL`` (``maxAlphaCo``) 0.1, 0.5 × executor ×
-  ``method`` isoAdvector, MULES = 36 cases, about 1.5 min with ``-c 1``. numufoam's
-  finer meshes (n80 to n320) and CFLs 0.05 and 0.2 are commented-out variants in
-  ``benchmark.yaml``.
 - Smoke: n10, CFL 0.1, ``Serial``, both methods.
 
 Inputs
-------
+~~~~~~
 
 ``benchmarks/advection/discUniFlow/``:
 
@@ -33,7 +29,7 @@ Inputs
   at CFL 0.05 to 0.5, n10 to n320)
 
 Metrics
--------
+~~~~~~~
 
 These are TwoPhaseFlow's ``volumeFractionError`` at t = 0.5:
 
@@ -48,12 +44,60 @@ These are TwoPhaseFlow's ``volumeFractionError`` at t = 0.5:
    The wall time per alpha advection, the solver's wall time, and the number of steps.
 
 Run
----
+~~~
 
 .. code-block:: bash
 
    pixi run benchmark benchmarks/advection/discUniFlow --smoke
    pixi run benchmark benchmarks/advection/discUniFlow -c 1
+
+Changed parameters
+------------------
+
+The sweep in ``benchmark.yaml``: ``mesh`` n10, n20, n40 × ``CFL`` (``maxAlphaCo``) 0.1, 0.5 × executor × ``method`` isoAdvector, MULES = 36 cases, about 1.5 min with ``-c 1``. numufoam's finer meshes (n80 to n320) and CFLs 0.05 and 0.2 are commented-out variants in ``benchmark.yaml``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 33 15
+
+   * - Dimension
+     - Variants
+     - Sets (first variant)
+     - Smoke
+   * - ``mesh``
+     - ``n10``, ``n20``, ``n40``
+     - ``{block_mesh_dict_config: {blocks: [{cells: [10, 1, 10]}]}}``
+     - ``n10``
+   * - ``control_dict_config``
+     - ``CFL01``, ``CFL05``
+     - ``{maxAlphaCo: 0.1}``
+     - ``CFL01``
+   * - ``neo_n_control_config``
+     - ``Serial``, ``CPU``, ``GPU``
+     - ``{executor: Serial}``
+     - ``Serial``
+   * - ``advection_scheme_config``
+     - ``isoAdvector``, ``MULES``
+     - ``{advectionScheme: isoAdvector}``
+     - all
+
+Larger meshes
+~~~~~~~~~~~~~
+
+Uncomment the variants in ``benchmark.yaml``:
+
+.. code-block:: yaml
+
+   mesh:
+     ...
+     n80: {block_mesh_dict_config: {blocks: [{cells: [80, 1, 80]}]}}
+     n160: {block_mesh_dict_config: {blocks: [{cells: [160, 1, 160]}]}}
+     n320: {block_mesh_dict_config: {blocks: [{cells: [320, 1, 320]}]}}
+
+and, optionally, the order check
+``{type: order, column: Eshape, spacing: celltoCellDist, minimum: 0.6, where: {mesh:
+[n40, n80, n160, n320]}}``. n320 needs about 20 MB per case and 1–4 min on ``Serial``
+per CFL. Expect the ``reference`` check to fail there for MULES (see above).
 
 Results
 -------
@@ -102,7 +146,7 @@ t = 0.5 on n40 show the difference:
    ±0.06. This is the reconstruction NeoN still needs.
 
 Checks
-------
+~~~~~~
 
 .. include:: /_generated/advection/discUniFlow/checks.rst
 
@@ -117,21 +161,3 @@ Per group (method × CFL × executor):
   ``where`` filter), since MULES is not bounded at larger CFL.
 - No ``order`` check is enabled. On n10 to n40, neither method converges. A commented
   check (order ≥ 0.6 on n40 to n320) can be enabled together with the finer meshes.
-
-Larger meshes
--------------
-
-Uncomment the variants in ``benchmark.yaml``:
-
-.. code-block:: yaml
-
-   mesh:
-     ...
-     n80: {block_mesh_dict_config: {blocks: [{cells: [80, 1, 80]}]}}
-     n160: {block_mesh_dict_config: {blocks: [{cells: [160, 1, 160]}]}}
-     n320: {block_mesh_dict_config: {blocks: [{cells: [320, 1, 320]}]}}
-
-and, optionally, the order check
-``{type: order, column: Eshape, spacing: celltoCellDist, minimum: 0.6, where: {mesh:
-[n40, n80, n160, n320]}}``. n320 needs about 20 MB per case and 1–4 min on ``Serial``
-per CFL. Expect the ``reference`` check to fail there for MULES (see above).
