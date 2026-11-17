@@ -47,8 +47,14 @@ ruff = "0.14.2.*"
 mypy = "*"
 pre-commit = "*"
 
+# The documentation (doc/, `pixi run docs`): Sphinx with the Furo theme and Mermaid.
+[feature.docs.dependencies]
+sphinx = "*"
+furo = "*"
+sphinxcontrib-mermaid = "*"
+
 [environments]
-default = ["dev", "neofoam"]
+default = ["dev", "neofoam", "docs"]
 
 [tasks]
 install = 'pip install -e . --no-build-isolation --no-deps'
@@ -74,6 +80,9 @@ update-isoadvection-reference = { cmd = "python -m neofoam_verification.isoadvec
 # Re-runs TwoPhaseFlow's advectorVoF with its isoAdvection on the benchmarks (v2506, benchmark
 # context next to MULES) and rewrites reference/<case>/<resolution>/twoPhaseFlowIsoAdvection/.
 update-twophaseflow-isoadvection-reference = { cmd = "python -m neofoam_verification.isoadvection --twophaseflow", depends-on = ["install"] }
+# The documentation: copies the benchmark outputs of results/ into doc/_generated/ (the
+# committed snapshot), then builds doc/_build/html with warnings as errors.
+docs = "python doc/_scripts/sync_results.py && sphinx-build -W -b html doc doc/_build/html"
 lint = "ruff check src tests benchmarks && ruff format --check src tests benchmarks"
 format = "ruff format src tests benchmarks && ruff check --fix src tests benchmarks"
 type-check = "mypy"

@@ -1,0 +1,40 @@
+{
+  "checks": [
+    {
+      "check": "reference interfoam.csv dp",
+      "group": "Serial",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference interfoam.csv maxU",
+      "group": "Serial",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference interfoam.csv dp_err",
+      "group": "Serial",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "maximum dp_err",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "1.798e-01 (n20_Serial), maximum 0.2"
+    },
+    {
+      "check": "maximum maxU_max",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "1.531e-01 (n20_Serial), maximum 0.5"
+    },
+    {
+      "check": "agreement executor",
+      "group": "Serial",
+      "status": "skip",
+      "detail": "one executor variant"
+    }
+  ]
+}
