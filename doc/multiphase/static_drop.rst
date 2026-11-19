@@ -2,51 +2,105 @@ surfaceTension/staticDrop
 =========================
 
 A static drop: the parasitic currents of the Brackbill continuum surface force (CSF)
-with gradAlpha curvature, in NeoFOAM's full two-phase solver
-``incompressibleVoFNeoN``. The case is NeoFOAM's own
-``test/solver/incompressibleVoFNeoN/cases/stationaryDroplet``, and native interFoam on
-the same case is the reference. Neither numufoam nor TwoPhaseFlow has a static drop
-driven by surface tension.
+with gradAlpha curvature, in NeoFOAM's full two-phase solver ``incompressibleVoFNeoN``.
+The case is NeoFOAM's ``test/solver/incompressibleVoFNeoN/cases/stationaryDroplet``;
+native interFoam on the same case is the reference.
 
 Setup
 -----
 
-- A water cylinder of radius 2 mm (``setAlphaField``) in air, at the centre of an
-  8 mm box with an open top.
-- σ = 0.07 N/m, g = 0. Water: ρ = 1000, ν = 1e-6. Air: ρ = 1, ν = 1.48e-5.
-- MULES (``MULESCorr yes``, ``nAlphaCorr 2``), CSF with gradAlpha curvature.
-- ``deltaT 2e-5`` to t = 4e-3 (200 steps), written every 10th step.
-- Solver: ``incompressibleVoFNeoNSweep`` (NeoFOAM's ``incompressibleVoFNeoN``). It
-  writes no tables, so ``metrics.py`` evaluates the written fields of each case, and
-  the inner time directories are pruned after that.
+.. figure:: /_static/setup/staticDrop.png
+   :alt: Sketch: a 2 mm water drop in the centre of an 8 mm box, walls on three sides, open top
+
+   An 8 mm box (x-y, one cell in z) with a water cylinder of R = 2 mm at the centre,
+   no-slip walls and an open top, on the coarsest grid (n = 20).
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Quantity
+     - Value
+     - Where set
+   * - Domain
+     - 8 × 8 mm (x-y), 1 cell in z
+     - ``system/blockMeshDict`` (``scale 0.001``)
+   * - Drop radius R, centre
+     - 2 mm, (4, 4) mm
+     - ``system/setAlphaFieldDict``
+   * - Surface tension σ
+     - 0.07 N/m
+     - ``constant/transportProperties`` ``sigma``
+   * - Water ρ, ν
+     - 1000 kg/m³, 1e-6 m²/s
+     - ``constant/transportProperties``
+   * - Air ρ, ν
+     - 1 kg/m³, 1.48e-5 m²/s
+     - ``constant/transportProperties``
+   * - Gravity g
+     - 0
+     - ``constant/g``
+   * - Alpha advection
+     - MULES (``MULESCorr yes``, ``nAlphaCorr 2``)
+     - ``system/fvSolution`` (solver default scheme)
+   * - Surface force
+     - CSF, gradAlpha curvature
+     - ``incompressibleVoFNeoN``
+   * - Time step, end time
+     - ``deltaT`` 2e-5 s fixed, 4e-3 s (200 steps)
+     - ``system/controlDict``
+   * - Samples
+     - every 10th step
+     - ``controlDict`` ``writeInterval``; ``metrics.py``
+
+The drop should stay at rest, so every velocity is a spurious current, and the
+pressure jump should equal σ/R = 35 Pa. The solver writes no tables: ``metrics.py``
+evaluates the written fields, then the inner time directories are pruned.
 
 Inputs
 ~~~~~~
 
-``benchmarks/surfaceTension/staticDrop/``:
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
 
-- ``case/system/setAlphaFieldDict``: the cylinder
-- ``case/constant/transportProperties``: phases and σ
-- ``case/constant/g``
-- ``case/system/{controlDict,fvSchemes,fvSolution}``
-- ``metrics.py``: the metrics below, evaluated at every written time
-- ``reference/interfoam.csv``: interFoam's jump and max\|U\| at n40, and its jump
-  deficit at n80
+   * - File (``benchmarks/surfaceTension/staticDrop/``)
+     - Content
+   * - ``case/``
+     - base case (mesh, drop, phases, σ, schemes)
+   * - ``metrics.py``
+     - the metrics below, at every written time
+   * - ``reference/interfoam.csv``
+     - interFoam's jump and max\|U\| at n40, its jump deficit at n80
 
 Metrics
 ~~~~~~~
 
-``maxU``, ``meanU``
-   The largest and the volume-weighted mean cell \|U\|. Since the drop should be at
-   rest, all of this is spurious current. ``maxU_max`` is the largest ``maxU`` over the
-   written times.
-``Ca``, ``Ca_max``
-   Capillary numbers ``mu_water |U|max / sigma``.
-``dp``
-   The Laplace pressure jump ``mean p_rgh(r < R/2) - mean p_rgh(r > 3R/2)``.
-``sigma_R``, ``dp_err``
-   σ/R, with R taken from the water volume, and ``|dp / sigma_R - 1|``. These are
-   measured as in NeoFOAM's ``test_stationaryDroplet_surface_tension``.
+.. list-table::
+   :header-rows: 1
+   :widths: 22 38 40
+
+   * - Metric
+     - Meaning
+     - Formula
+   * - ``maxU``, ``meanU``
+     - spurious current [m/s]
+     - max and volume-weighted mean of cell \|U\|
+   * - ``maxU_max``
+     - largest spurious current over time
+     - max over written times of ``maxU``
+   * - ``Ca``, ``Ca_max``
+     - capillary number
+     - ``mu_water |U|max / σ``
+   * - ``dp``
+     - Laplace pressure jump [Pa]
+     - ``mean p_rgh(r < R/2) − mean p_rgh(r > 3R/2)``
+   * - ``sigma_R``
+     - exact jump [Pa]
+     - σ/R, with R from the water volume
+   * - ``dp_err``
+     - relative jump error
+     - ``|dp / sigma_R − 1|``
 
 Run
 ~~~
@@ -59,80 +113,38 @@ Run
 Changed parameters
 ------------------
 
-The sweep in ``benchmark.yaml``: ``mesh`` n20, n40, n80 (R/dx = 5, 10, 20) × 3 executors = 9 cases, about 1 min with ``-c 1``. Smoke: n20 ``Serial``.
+.. include:: /_generated/surfaceTension/staticDrop/params.rst
 
-.. list-table::
-   :header-rows: 1
-   :widths: 22 30 33 15
-
-   * - Dimension
-     - Variants
-     - Sets (first variant)
-     - Smoke
-   * - ``mesh``
-     - ``n20``, ``n40``, ``n80``
-     - ``{block_mesh_dict_config: {blocks: [{cells: [20, 20, 1]}]}}``
-     - ``n20``
-   * - ``neo_n_control_config``
-     - ``Serial``, ``CPU``, ``GPU``
-     - ``{executor: Serial}``
-     - ``Serial``
+The full sweep takes about 1 min with ``-c 1``.
 
 Larger meshes
 ~~~~~~~~~~~~~
 
-``deltaT 2e-5`` is 0.57 of the capillary time-step limit
-``sqrt(rho_avg dx^3 / (2 pi sigma))`` at n80. A finer mesh therefore needs a smaller
-time step as well. Add the mesh, and the time step as a further dimension:
-
-.. code-block:: yaml
-
-   mesh:
-     ...
-     n160: {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}
-   control_dict_config:
-     dt2e-5: {deltaT: 2.0e-5}
-     dt5e-6: {deltaT: 5.0e-6}
-
-A new dimension adds a group column, and therefore its own check results. To run only
-the new combination, run it as a separate benchmark, or narrow the checks with
-``where``.
+``deltaT`` 2e-5 is 0.57 of the capillary limit ``sqrt(rho_avg dx³ / (2π σ))`` at n80,
+so a finer mesh needs a smaller time step too: add
+``n160: {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}`` and a dimension
+``control_dict_config: {dt2e-5: {deltaT: 2.0e-5}, dt5e-6: {deltaT: 5.0e-6}}``. A new
+dimension adds its own check groups; narrow them with ``where``.
 
 Results
 -------
 
-``maxU`` and ``meanU`` show the spurious current over time per mesh and executor.
-``pressure_jump`` shows the end time's jump per mesh against σ/R, with interFoam's
-value.
-
 .. include:: /_generated/surfaceTension/staticDrop/plots.rst
 
-.. include:: /_generated/surfaceTension/staticDrop/results.rst
+.. include:: /_generated/surfaceTension/staticDrop/key_results.rst
 
-What the full sweep shows:
-
-- **interFoam parity at n40.** The jump is 29.9007 Pa against interFoam's 29.9009
-  (14.7 % below σ/R). The end time's max\|U\| is 0.19897 m/s against 0.19927.
-- **Curvature accuracy.** The jump misses σ/R by 18 %, 14.7 % and 9.6 % at
-  R/dx = 5, 10 and 20; the 9.6 % at n80 is interFoam's. gradAlpha's curvature
-  converges slowly.
-- **Parasitic currents.** max\|U\| over time is 0.15, 0.26 and 0.42 m/s
-  (Ca 2.2e-3, 3.7e-3, 6.1e-3). With CSF at a fixed time step, the current grows with
-  resolution.
-- **Executors.** Serial, CPU and GPU agree to 1e-10.
+- **interFoam parity at n40**: Δp = 29.90 Pa against interFoam's 29.9009, max\|U\| at
+  the end time 0.199 m/s.
+- **Curvature converges slowly**: Δp misses σ/R by 18 %, 14.7 % and 9.6 % at R/dx = 5,
+  10 and 20 (gradAlpha curvature; interFoam has the same deficit).
+- **Spurious current grows with resolution** at fixed ``deltaT``: max\|U\| over time
+  0.15, 0.26, 0.42 m/s (Ca up to 6.1e-3), a known CSF property.
+- **Executors**: CPU and GPU agree with Serial to 1e-10.
 
 Checks
 ~~~~~~
 
-.. include:: /_generated/surfaceTension/staticDrop/checks.rst
+.. include:: /_generated/surfaceTension/staticDrop/verdicts.rst
 
-Per executor:
-
-- ``reference interfoam.csv``: ``dp`` to 1e-4, ``maxU`` to 1.5e-2, ``dp_err`` to
-  1e-2. These are the NeoFOAM test's tolerances; the linear solvers stop at different
-  iterates. Only n40 (and n80 for ``dp_err``) are stored, so a smoke run on n20
-  skips them.
-- ``maximum dp_err`` ≤ 0.2: the jump within 20 % of σ/R.
-- ``maximum maxU_max`` ≤ 0.5 m/s, a regression bound on the spurious current.
-- ``agreement executor`` to 1e-8: CPU and GPU against Serial. It is skipped when only
-  one executor ran.
+A smoke run (n20 only) skips the ``reference`` checks: interFoam is stored for n40 and
+n80.

@@ -2,38 +2,69 @@ advection/discUniFlowTestsuite
 ==============================
 
 TwoPhaseFlow's testsuite variant of the disc in uniform flow
-(``testsuite/advection/test-discUniFlow``). It is a long run (t = 4, 1200 steps) on one
-mesh, compared with stored runs of TwoPhaseFlow's ``advectorVoF`` that use the same
-schemes. This is the parity test: NeoFOAM has to reproduce the C++ reference.
+(``testsuite/advection/test-discUniFlow``): a long run (t = 4, 1200 steps) on one mesh,
+compared with stored runs of TwoPhaseFlow's ``advectorVoF`` with the same schemes. This
+is the parity test: NeoFOAM has to reproduce the C++ reference.
 
 Setup
 -----
 
-- A disc of radius 0.25 at (0.5, 0.5) in a 5 × 3 domain (x-z), 100 × 60 cells
-  (dx = 0.05), translated by U = (1, 0.5) to t = 4.
-- ``maxAlphaCo 0.1`` gives a fixed dt = 1/300, i.e. 1200 steps.
-- Solver: ``advectorVoF``, methods NeoN ``isoAdvector`` (gradAlpha) and NeoN
-  ``MULES``.
+.. figure:: /_static/setup/discUniFlowTestsuite.png
+   :alt: Sketch: a disc of radius 0.25 moving from (0.5, 0.5) to (4.5, 2.5) in a 5 x 3 domain
+
+   The 5 × 3 domain (x-z, one cell in y) with its 100 × 60 grid. The disc moves from
+   (0.5, 0.5) to (4.5, 2.5).
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Quantity
+     - Value
+     - Where set
+   * - Domain, mesh
+     - 5 × 3 (x-z), 100 × 60 cells (dx = 0.05)
+     - ``system/blockMeshDict``
+   * - Disc radius R, start
+     - 0.25, (0.5, 0.5)
+     - ``system/setAlphaFieldDict``
+   * - Velocity U
+     - (1, 0.5), uniform, fixed
+     - ``0/U`` ``internalField``
+   * - End time
+     - 4 (end position (4.5, 2.5))
+     - ``system/controlDict`` ``endTime``
+   * - Time step
+     - ``maxAlphaCo`` 0.1 → dt = 1/300, 1200 steps
+     - ``system/controlDict``
+   * - Method
+     - isoAdvector (gradAlpha) or MULES
+     - ``system/fvSolution`` ``advectionScheme``
+   * - MULES gradient
+     - Gauss linear
+     - ``system/fvSchemes`` ``gradSchemes``
 
 Inputs
 ~~~~~~
 
-``benchmarks/advection/discUniFlowTestsuite/``:
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
 
-- ``case/system/setAlphaFieldDict``, ``case/0/U``
-- ``case/system/controlDict``: ``endTime 4``, ``maxAlphaCo 0.1``, write interval 1
-- ``case/system/fvSolution``, ``case/system/fvSchemes``: the advection scheme and,
-  for MULES, ``grad Gauss linear``
-- ``reference/twophaseflow_mules.csv``: TwoPhaseFlow ``advectorVoF`` with
-  ``MULESScheme`` (OpenFOAM-v2506)
-- ``reference/twophaseflow_isoadvection.csv``: TwoPhaseFlow ``advectorVoF`` with its
-  isoAdvection and gradAlpha
+   * - File (``benchmarks/advection/discUniFlowTestsuite/``)
+     - Content
+   * - ``case/``
+     - base case (mesh, disc, U, controls, schemes)
+   * - ``reference/twophaseflow_mules.csv``
+     - TwoPhaseFlow ``advectorVoF`` with ``MULESScheme`` (OpenFOAM-v2506)
+   * - ``reference/twophaseflow_isoadvection.csv``
+     - TwoPhaseFlow ``advectorVoF`` with isoAdvection and gradAlpha
 
 Metrics
 ~~~~~~~
 
-``volumeFractionError`` at t = 4 (``Eshape``, ``Emass``, ``Ebound``) and the
-timings, as in :doc:`disc_uni_flow`.
+``volumeFractionError`` at t = 4 (``Eshape``, ``Emass``, ``Ebound``) and the timings,
+as in :doc:`disc_uni_flow`.
 
 Run
 ~~~
@@ -46,69 +77,32 @@ Run
 Changed parameters
 ------------------
 
-The sweep in ``benchmark.yaml``: 1 mesh × 3 executors × 2 methods = 6 cases. Smoke: ``Serial`` only.
-
-.. list-table::
-   :header-rows: 1
-   :widths: 22 30 33 15
-
-   * - Dimension
-     - Variants
-     - Sets (first variant)
-     - Smoke
-   * - ``mesh``
-     - ``n100x60``
-     - ``{block_mesh_dict_config: {blocks: [{cells: [100, 1, 60]}]}}``
-     - all
-   * - ``neo_n_control_config``
-     - ``Serial``, ``CPU``, ``GPU``
-     - ``{executor: Serial}``
-     - ``Serial``
-   * - ``advection_scheme_config``
-     - ``isoAdvector``, ``MULES``
-     - ``{advectionScheme: isoAdvector}``
-     - all
+.. include:: /_generated/advection/discUniFlowTestsuite/params.rst
 
 Larger meshes
 ~~~~~~~~~~~~~
 
-The stored TwoPhaseFlow runs are for 100 × 60 only. A finer mesh, e.g.
-``n200x120: {block_mesh_dict_config: {blocks: [{cells: [200, 1, 120]}]}}``, runs and
-is checked for mass and bounds, but the reference checks skip it. For convergence
-studies use :doc:`disc_uni_flow`.
+The stored runs are for 100 × 60 only. A finer mesh
+(``n200x120: {block_mesh_dict_config: {blocks: [{cells: [200, 1, 120]}]}}``) is checked
+for mass and bounds only; for convergence use :doc:`disc_uni_flow`.
 
 Results
 -------
 
-``E1_and_time`` shows E1 at t = 4 and the time per step per executor, with
-TwoPhaseFlow's runs dashed.
-
 .. include:: /_generated/advection/discUniFlowTestsuite/plots.rst
 
-.. include:: /_generated/advection/discUniFlowTestsuite/results.rst
+.. include:: /_generated/advection/discUniFlowTestsuite/key_results.rst
 
-- **MULES** reproduces TwoPhaseFlow's E1 to 1.7e-14 relative (E1 = 0.03037).
-- **isoAdvector with gradAlpha** reproduces it to 4.7e-9 relative (E1 = 0.02253).
-  The remaining difference comes from the plane search. NeoN's ``volTaylor`` stops
-  within ``isoFaceTol`` (1e-8) of the target volume, and OpenFOAM's search stops
-  elsewhere in that band.
-- Mass is conserved to round-off (Emass ≤ 4e-16) and alpha is bounded.
-- In the full sweep, the same agreement holds on every executor.
-- The testsuite's own limit, E1 ≤ 0.0122, belongs to its plicRDF run (E1 = 0.0122).
-  gradAlpha and MULES do not reach it, so it is not checked. plicRDF is not yet
-  available in NeoN.
+- **MULES** reproduces TwoPhaseFlow's E1 = 0.03037 to 1.7e-14 relative (round-off).
+- **isoAdvector (gradAlpha)** reproduces E1 = 0.02253 to 4.7e-9: NeoN's ``volTaylor``
+  plane search stops elsewhere within ``isoFaceTol`` (1e-8) than OpenFOAM's.
+- **Mass and bounds**: mass error ≤ 4e-16, alpha stays in [0, 1], on every executor.
+- The testsuite's own limit E1 ≤ 0.0122 belongs to its plicRDF run; gradAlpha and
+  MULES do not reach it, so it is not checked.
 
 Checks
 ~~~~~~
 
-.. include:: /_generated/advection/discUniFlowTestsuite/checks.rst
+.. include:: /_generated/advection/discUniFlowTestsuite/verdicts.rst
 
-Per group (method × executor):
-
-- ``reference twophaseflow_mules.csv`` at rtol 1e-12: round-off.
-- ``reference twophaseflow_isoadvection.csv`` at rtol 1e-7: the plane-search
-  tolerance.
-- Each method is matched only against its own table, so the other reference is
-  skipped for that group.
-- ``maximum Emass`` ≤ 1e-13 and ``maximum Ebound`` ≤ 1e-8, the testsuite's
-  assertions.
+Each method is matched only against its own table, so the other reference skips.

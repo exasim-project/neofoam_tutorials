@@ -64,21 +64,28 @@ Outputs
 
 Each benchmark writes to ``results/<category>/<name>/`` (gitignored):
 
-``results.csv``
-   One row per case: its variant of each dimension (``mesh``, ``executor``,
-   ``method``, ...) and the last row of each collected table, i.e. the errors at the
-   end time.
-``checks.json``
-   Every check's result per group of cases (``pass``, ``fail`` or ``skip``) with a
-   detail line.
-``plots/``
-   The benchmark's plots, as PNG and PDF.
-``report.md``
-   The plots, the results table and the checks on one page.
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
 
-The sweep files (``Snakefile``, ``sweep.csv``, ``params.yaml``, ``configs/``) stay so
-the run can be repeated. The case and mesh data (``cases/``, ``meshes/``) are removed
-once the workflow succeeds; a failed run keeps them for inspection.
+   * - File
+     - Content
+   * - ``results.csv``
+     - one row per case: its variant of each dimension (``mesh``, ``executor``,
+       ``method``, ...) and the last row of each collected table (the errors at the end
+       time)
+   * - ``checks.json``
+     - every check's result per group of cases (``pass``, ``fail``, ``skip``) with a
+       detail line
+   * - ``plots/``
+     - the benchmark's plots, PNG and PDF
+   * - ``report.md``
+     - plots, results table and checks on one page
+   * - ``Snakefile``, ``sweep.csv``, ``params.yaml``, ``configs/``
+     - the exported sweep, kept so the run can be repeated
+   * - ``cases/``, ``meshes/``
+     - case and mesh data; removed once the workflow succeeds, kept on failure
+
 
 How a benchmark works
 ---------------------
@@ -238,3 +245,13 @@ without rerunning benchmarks. To update it, run the benchmarks and then build:
 that has a run in ``results/``, renders the tables, and builds the HTML with
 ``sphinx-build -W`` into ``doc/_build/html``. Commit ``doc/_generated/`` to keep the
 new snapshot. A page notes when its snapshot holds only part of the full sweep.
+
+The readable tables of each page (changed parameters, key results, check verdicts) are
+rendered from ``benchmark.yaml``, ``results.csv`` and ``checks.json`` at build time by
+``doc/_scripts/page_tables.py``. The setup sketches in ``doc/_static/setup/`` are drawn
+from the case files; after changing a case, redraw and commit them:
+
+.. code-block:: bash
+
+   pixi run python doc/_scripts/setup_sketches.py                  # all
+   pixi run python doc/_scripts/setup_sketches.py reconstruction/circle

@@ -9,9 +9,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "_scripts"))
 
+import page_tables  # noqa: E402
 import sync_results  # noqa: E402
 
 sync_results.render_all()
+page_tables.render_all()
 
 project = "neofoam_verification"
 copyright = "2025, NeoFOAM authors"

@@ -2,46 +2,93 @@ advection/discUniFlow
 =====================
 
 A disc translated in a uniform flow: the paper's advection test (Scheufler & Roenby,
-arXiv 1801.05382, sec. 4.2.1, as in numufoam). It compares NeoN's isoAdvector
-(``gradAlpha`` reconstruction) and NeoN's MULES with numufoam's stored errors, over
+arXiv 1801.05382, sec. 4.2.1, as in numufoam). NeoN's isoAdvector (``gradAlpha``
+reconstruction) and NeoN's MULES are compared with numufoam's stored errors over
 resolution and Courant number.
 
 Setup
 -----
 
-- A disc of radius 0.2 at (0.25, 0.25) in the unit square (x-z, one cell thick),
-  translated by U = (1, 1) for t = 0.5.
-- Solver: ``advectorVoF`` with a fixed time step from ``maxAlphaCo`` (``maxCo`` off, as
-  in numufoam).
-- Smoke: n10, CFL 0.1, ``Serial``, both methods.
+.. figure:: /_static/setup/discUniFlow.png
+   :alt: Sketch: a disc of radius 0.2 moving from (0.25, 0.25) to (0.75, 0.75) in the unit square
+
+   The unit square (x-z, one cell in y) on the coarsest grid (n = 10). The disc starts
+   at (0.25, 0.25) and ends at (0.75, 0.75) after U t.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Quantity
+     - Value
+     - Where set
+   * - Domain
+     - 1 × 1 (x-z), 1 cell in y
+     - ``system/blockMeshDict``
+   * - Disc radius R, start
+     - 0.2, (0.25, 0.25)
+     - ``system/setAlphaFieldDict``
+   * - Velocity U
+     - (1, 1), uniform, fixed
+     - ``0/U`` ``internalField``
+   * - End time
+     - 0.5 (end position (0.75, 0.75))
+     - ``system/controlDict`` ``endTime``
+   * - Time step
+     - fixed, from ``maxAlphaCo`` (``maxCo`` off)
+     - ``system/controlDict``
+   * - Method
+     - isoAdvector (gradAlpha, ``volTaylor``) or MULES
+     - ``system/fvSolution`` ``advectionScheme``
+   * - MULES gradient
+     - Gauss linear
+     - ``system/fvSchemes`` ``gradSchemes``
+   * - Solver
+     - ``advectorVoF``
+     - ``benchmark.yaml`` ``solver``
+
+Only alpha is transported; the velocity stays fixed. The errors are measured once,
+at t = 0.5, against the exactly cut disc at its end position.
 
 Inputs
 ~~~~~~
 
-``benchmarks/advection/discUniFlow/``:
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
 
-- ``case/system/setAlphaFieldDict``: the disc
-- ``case/0/U``: the uniform velocity
-- ``case/system/controlDict``: ``endTime 0.5``, ``maxAlphaCo``, ``writeInterval``,
-  and the ``volumeFractionError`` function object's write interval
-- ``case/system/fvSolution``: ``advectionScheme`` and the alpha controls
-- ``reference/numufoam.csv``: numufoam's ``error.csv`` (isoAlpha, plicRDF and MULES
-  at CFL 0.05 to 0.5, n10 to n320)
+   * - File (``benchmarks/advection/discUniFlow/``)
+     - Content
+   * - ``case/``
+     - base case (mesh, disc, U, controls incl. the ``volumeFractionError`` function)
+   * - ``reference/numufoam.csv``
+     - numufoam's ``error.csv``: isoAlpha, plicRDF, MULES at CFL 0.05 to 0.5, n10 to
+       n320
 
 Metrics
 ~~~~~~~
 
-These are TwoPhaseFlow's ``volumeFractionError`` at t = 0.5:
+TwoPhaseFlow's ``volumeFractionError`` at t = 0.5.
 
-``Eshape`` (E1)
-   ``Σ V |alpha - alpha_exact|``, absolute, not normalised. ``alpha_exact`` is the
-   ``cutCellIso`` volume fraction of the initial disc moved by ``U t``.
-``Emass``
-   ``|Σ V alpha - initial mass|``.
-``Ebound``
-   ``max(-min alpha, max alpha - 1)``.
-``Tadv``, ``wall_s``, ``steps``
-   The wall time per alpha advection, the solver's wall time, and the number of steps.
+.. list-table::
+   :header-rows: 1
+   :widths: 22 38 40
+
+   * - Metric
+     - Meaning
+     - Formula
+   * - ``Eshape`` (E1)
+     - shape error (absolute)
+     - ``Σ V |alpha − alpha_exact|``, ``alpha_exact``: the initial disc moved by U t
+   * - ``Emass``
+     - mass error
+     - ``|Σ V alpha − initial mass|``
+   * - ``Ebound``
+     - boundedness error
+     - ``max(−min alpha, max alpha − 1)``
+   * - ``Tadv``, ``wall_s``, ``steps``
+     - timings, step count
+     - wall time per advection, solver wall time, number of steps
 
 Run
 ~~~
@@ -54,84 +101,36 @@ Run
 Changed parameters
 ------------------
 
-The sweep in ``benchmark.yaml``: ``mesh`` n10, n20, n40 × ``CFL`` (``maxAlphaCo``) 0.1, 0.5 × executor × ``method`` isoAdvector, MULES = 36 cases, about 1.5 min with ``-c 1``. numufoam's finer meshes (n80 to n320) and CFLs 0.05 and 0.2 are commented-out variants in ``benchmark.yaml``.
+.. include:: /_generated/advection/discUniFlow/params.rst
 
-.. list-table::
-   :header-rows: 1
-   :widths: 22 30 33 15
-
-   * - Dimension
-     - Variants
-     - Sets (first variant)
-     - Smoke
-   * - ``mesh``
-     - ``n10``, ``n20``, ``n40``
-     - ``{block_mesh_dict_config: {blocks: [{cells: [10, 1, 10]}]}}``
-     - ``n10``
-   * - ``control_dict_config``
-     - ``CFL01``, ``CFL05``
-     - ``{maxAlphaCo: 0.1}``
-     - ``CFL01``
-   * - ``neo_n_control_config``
-     - ``Serial``, ``CPU``, ``GPU``
-     - ``{executor: Serial}``
-     - ``Serial``
-   * - ``advection_scheme_config``
-     - ``isoAdvector``, ``MULES``
-     - ``{advectionScheme: isoAdvector}``
-     - all
+About 1.5 min with ``-c 1``. numufoam's CFLs 0.05 and 0.2 are commented-out variants
+too.
 
 Larger meshes
 ~~~~~~~~~~~~~
 
-Uncomment the variants in ``benchmark.yaml``:
-
-.. code-block:: yaml
-
-   mesh:
-     ...
-     n80: {block_mesh_dict_config: {blocks: [{cells: [80, 1, 80]}]}}
-     n160: {block_mesh_dict_config: {blocks: [{cells: [160, 1, 160]}]}}
-     n320: {block_mesh_dict_config: {blocks: [{cells: [320, 1, 320]}]}}
-
-and, optionally, the order check
-``{type: order, column: Eshape, spacing: celltoCellDist, minimum: 0.6, where: {mesh:
-[n40, n80, n160, n320]}}``. n320 needs about 20 MB per case and 1–4 min on ``Serial``
-per CFL. Expect the ``reference`` check to fail there for MULES (see above).
+Uncomment ``n80``, ``n160``, ``n320`` in ``benchmark.yaml`` and, optionally, the
+commented ``order`` check on n40 to n320. n320 needs about 20 MB per case and 1–4 min
+on ``Serial`` per CFL; the ``reference`` check then fails for MULES (see Checks).
 
 Results
 -------
 
-``E1_vs_n`` shows E1 against n per CFL, with numufoam's isoAlpha, plicRDF and MULES
-dashed. ``E1_vs_CFL`` shows E1 against CFL per method. ``time_per_step`` shows the
-advection and solver time per step.
-
 .. include:: /_generated/advection/discUniFlow/plots.rst
 
-.. include:: /_generated/advection/discUniFlow/results.rst
+.. include:: /_generated/advection/discUniFlow/key_results.rst
 
-What the sweep shows:
+- **Mass and bounds**: mass is conserved to round-off for both methods. isoAdvector
+  stays in [0, 1]; MULES does only at CFL 0.1 (bound error 1.5e-2 at CFL 0.5).
+- **MULES vs numufoam**: E1 is 0.84–0.92 × numufoam's at n10 and n20 (CFL 0.1) and
+  1.67 × at n40; NeoN uses a Gauss linear interface normal, numufoam
+  ``pointCellsLeastSquares``.
+- **isoAdvector with gradAlpha does not converge** on this sharp disc: E1 = 6.9e-3,
+  7.4e-3, 8.4e-3 on n10 to n40 at CFL 0.1. OpenFOAM's gradAlpha behaves the same
+  (see :doc:`disc_uni_flow_testsuite` for exact parity); plicRDF and isoAlpha are not
+  yet in NeoN.
 
-- **Mass and bounds.** Mass is conserved to round-off for both methods. Alpha stays
-  in [0, 1] for isoAdvector, and for MULES up to CFL 0.1. At CFL 0.5, MULES
-  overshoots (Ebound 0.11 at n320; numufoam's MULES gives 0.12).
-- **MULES against numufoam.** NeoN's MULES is 0.84–1.05 × numufoam's E1 at n10 and n20.
-  The ratio grows to 1.1–1.8 × at n40 and 3.5 × at n320 (CFL 0.1). The two differ
-  only in the interface-normal gradient: NeoN uses Gauss linear, numufoam
-  ``pointCellsLeastSquares``. NeoN's MULES stalls (observed order 0.7 from n40 to n320
-  at CFL 0.1, none at CFL 0.5), while OpenFOAM's MULES with ``pointCellsLeastSquares``
-  is first order.
-- **isoAdvector with gradAlpha does not converge on this case.** At CFL 0.1, E1 is
-  6.9e-3, 7.4e-3 and 8.5e-3 on n10, n20 and n40, and the observed order from n40 to
-  n320 is 0.8. numufoam ran no gradAlpha case; its isoAlpha and plicRDF are other
-  reconstructions, so the plots compare trends only.
-
-Is NeoFOAM's isoAdvector wrong? No. On the same setup, NeoFOAM reproduces OpenFOAM /
-TwoPhaseFlow's ``advectorVoF``: isoAdvector with gradAlpha to 2e-9, and MULES with a
-Gauss linear gradient to 1e-15 (see also :doc:`disc_uni_flow_testsuite`). OpenFOAM's
-gradAlpha does not converge on this sharp disc either. The second-order
-reconstructions, plicRDF and isoAlpha, are not yet in NeoN. The alpha fields at
-t = 0.5 on n40 show the difference:
+The alpha fields at t = 0.5 on n40 show the difference:
 
 .. figure:: /_static/discuniflow/isoAdvector_n40_neofoam.png
    :alt: alpha and alpha - alpha_exact at t = 0 and t = 0.5, NeoFOAM isoAdvector gradAlpha, n40
@@ -148,16 +147,7 @@ t = 0.5 on n40 show the difference:
 Checks
 ~~~~~~
 
-.. include:: /_generated/advection/discUniFlow/checks.rst
+.. include:: /_generated/advection/discUniFlow/verdicts.rst
 
-Per group (method × CFL × executor):
-
-- ``reference numufoam.csv`` with rtol 1.0 on ``Eshape``. Only MULES has a
-  counterpart; the isoAdvector groups are skipped. The default meshes pass. **The
-  finer meshes fail this band** (3.5 × at n320) because of the stalling Gauss linear
-  normal.
-- ``maximum Emass`` ≤ 1e-12 (the testsuite asserts 1e-13).
-- ``maximum Ebound`` ≤ 1e-8 for isoAdvector, and for MULES at CFL ≤ 0.1 only (the
-  ``where`` filter), since MULES is not bounded at larger CFL.
-- No ``order`` check is enabled. On n10 to n40, neither method converges. A commented
-  check (order ≥ 0.6 on n40 to n320) can be enabled together with the finer meshes.
+No ``order`` check is enabled: neither method converges on n10 to n40. On n320, MULES
+reaches 3.5 × numufoam's E1 and fails the ``reference`` band.
