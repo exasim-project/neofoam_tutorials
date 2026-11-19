@@ -13,6 +13,7 @@ dependencies = ["neofoam"]
 reconstructInterface = "neofoam_verification.solvers.reconstruct_interface"
 advectorVoF = "neofoam_verification.solvers.advector_vof"
 incompressibleVoFNeoNSweep = "neofoam_verification.solvers.vof_neon"
+incompressibleFluidNeoNSweep = "neofoam_verification.solvers.fluid_neon"
 
 # NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool.
 [project.entry-points."neofoam.plugins"]

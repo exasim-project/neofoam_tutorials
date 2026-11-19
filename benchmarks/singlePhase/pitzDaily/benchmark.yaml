@@ -1,0 +1,83 @@
+# pitzDaily: OpenFOAM's simpleFoam tutorial (incompressible/simpleFoam/pitzDaily), the
+# backward-facing step of Pitz & Daily (1983), AIAA J. 21(11), 1565-1570: step height
+# h = 25.4 mm, inlet U = 10 m/s, nu = 1e-5 (Re_h = 25400), k-epsilon with wall functions.
+# NeoFOAM's tutorial pitzDaily_steady: plain SIMPLE (consistent no) with p 0.3 / U 0.7
+# relaxation (the upstream tutorial is SIMPLEC), here 1500 iterations (NeoN has no
+# residualControl). Compared with OpenFOAM-v2406 simpleFoam on the same case and meshes
+# (reference/openfoam*.csv: openfoam_reference.py) and, loosely, with the measured
+# reattachment length. Swept over mesh x executor.
+# NeoFOAM's incompressibleFluidNeoN (solvers/fluid_neon.py: without the sweep's
+# --no-preprocess)
+solver: incompressibleFluidNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # the cells of the tutorial's five blocks; coarse halves them (13 / 14 for 25 / 27).
+  # A finer mesh doubles them: fine is {cells: [36, 60, 1]}, [360, 54, 1], [360, 60, 1],
+  # [50, 54, 1], [50, 60, 1]
+  mesh:
+    coarse:
+      block_mesh_dict_config:
+        blocks:
+          - {cells: [9, 15, 1]}
+          - {cells: [90, 14, 1]}
+          - {cells: [90, 15, 1]}
+          - {cells: [13, 14, 1]}
+          - {cells: [13, 15, 1]}
+    tutorial:
+      block_mesh_dict_config:
+        blocks:
+          - {cells: [18, 30, 1]}
+          - {cells: [180, 27, 1]}
+          - {cells: [180, 30, 1]}
+          - {cells: [25, 27, 1]}
+          - {cells: [25, 30, 1]}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [coarse]
+  neo_n_control_config: [Serial]
+# per case, after the solve: metrics.py's table (a row per iteration; the fields written
+# every 500) as postProcessing/metrics.dat, then the time directories but 0 and the last
+# removed
+metrics: {script: metrics.py, prune: true}
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (iteration 1500) of the metrics table
+collect:
+  tables:
+    - postProcessing/metrics.dat
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# per executor (the dimensions but mesh)
+checks:
+  # OpenFOAM-v2406 simpleFoam, same case, mesh and iteration count; the linear solvers
+  # differ (GAMG / smoothSolver there, Ginkgo multigrid-CG / BiCGStab here), so the
+  # converged fields agree to the residual level, not round-off. Loose until tuned
+  - type: reference
+    file: openfoam.csv
+    match: [mesh]
+    columns: [x_r_h, Umin_xh1, Umin_xh3, Umin_xh5]
+    rtol: 0.05
+  # the iterations to the tutorial's residualControl depend on the linear solvers
+  - {type: reference, file: openfoam.csv, match: [mesh], columns: [iterations], rtol: 0.5}
+  # the profiles against OpenFOAM's (RMS / U_inlet, largest station)
+  - {type: maximum, column: profile_err, maximum: 0.01}
+  # converged: the initial residuals at the last iteration
+  - {type: maximum, column: p_res, maximum: 1.0e-2}
+  - {type: maximum, column: Ux_res, maximum: 1.0e-3}
+  # Pitz & Daily's measured x_r / h = 7.0 (the experiment; k-epsilon is known to fall
+  # short of it): a loose sanity check, rtol 0.2
+  - {type: reference, file: pitz_daily_1983.csv, match: [mesh], columns: [x_r_h], rtol: 0.2}
+  # CPU and GPU against Serial: the same algorithm to the residual level
+  - type: agreement
+    across: executor
+    base: Serial
+    columns: [x_r_h, Umin_xh1, Umin_xh3, Umin_xh5]
+    rtol: 1.0e-3
+# the columns of report.md's results table
+report: [nCells, x_r_h, Umin_xh1, Umin_xh3, Umin_xh5, profile_err, iterations, wall_s]

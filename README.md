@@ -480,3 +480,32 @@ with `p_rgh` fixedValue 0 (a closed box with pRefCell; incompressibleVoFNeoN has
 pressure reference), no momentum predictor. Metrics: max/mean |U| over time, max|U| at
 t = 0.01 (TwoPhaseFlow's `results.csv`), the largest and mean |p - p_hydrostatic| relative
 to the hydrostatic range. n16, n32, n64 x executors: 9 cases, about 40 s.
+
+### Single phase: singlePhase/cavity, singlePhase/pitzDaily
+
+Both run NeoFOAM's built-in `incompressibleFluidNeoN` (NeoN executors) through
+`incompressibleFluidNeoNSweep` (`solvers/fluid_neon.py`, without the sweep's
+`--no-preprocess`, which `Foam::argList` rejects); each `metrics.py` evaluates the
+solver log and the written fields per case.
+
+**cavity** is the lid-driven cavity at Re = 100 (OpenFOAM's icoFoam cavity on the unit
+square, U_lid 1, nu 0.01; the tutorial's 0.1 m square is Re = 10): PISO with 2 correctors,
+Gauss linear, adaptive time step (Co 0.5) to t = 20 (steady). Metrics: the L2 / Linf error
+of u on the vertical and v on the horizontal centreline against Ghia, Ghia & Shin (1982),
+J. Comput. Phys. 48, 387-411, Tables I and II (`reference/ghia1982.csv`), the change of U
+over the last 2 s, wall time and time per step. Reference also: OpenFOAM-v2406 icoFoam on
+the same case and meshes (fixed dt 0.001), evaluated by the same `metrics.py`
+(`pixi run python benchmarks/singlePhase/cavity/openfoam_reference.py [WORKDIR]` rewrites
+`reference/icofoam.csv`). n20, n40, n80 x executors: 9 cases, about 7 min with `-c 1`.
+
+**pitzDaily** is NeoFOAM's `pitzDaily_steady` tutorial (OpenFOAM's simpleFoam pitzDaily
+with plain SIMPLE and p 0.3 / U 0.7 relaxation), k-epsilon with wall functions, 1500
+iterations (NeoN has no residualControl; the metrics report the first iteration that
+meets the tutorial's tolerances). Metrics: the reattachment length (sign change of the
+lower wall's near-wall Ux downstream of the step), the backflow and the Ux profiles at
+x/h = 1, 3, 5, 7, residuals, wall time. Reference: OpenFOAM-v2406 simpleFoam on the same
+case and meshes, evaluated by the same `metrics.py`
+(`pixi run python benchmarks/singlePhase/pitzDaily/openfoam_reference.py [WORKDIR]`
+rewrites `reference/openfoam*.csv`), and the measured x_r/h = 7.0 of Pitz & Daily (1983)
+as a loose check. Meshes coarse (the tutorial's cells halved) and tutorial x executors:
+6 cases, about 5 min with `-c 1`.

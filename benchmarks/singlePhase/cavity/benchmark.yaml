@@ -1,0 +1,67 @@
+# Lid-driven cavity at Re = 100: the unit square, lid U = (1 0 0), nu = 0.01 (OpenFOAM's
+# icoFoam cavity has a 0.1 m square, Re = 10), laminar, PISO (2 correctors) with Gauss
+# linear, adaptive time step (Co 0.5) to t = 20, the steady state. The centreline
+# velocities are compared with Ghia, Ghia & Shin (1982), J. Comput. Phys. 48, 387-411,
+# Tables I and II, Re = 100 (reference/ghia1982.csv), and with OpenFOAM's icoFoam on
+# the same case (reference/icofoam.csv). Swept over resolution x executor.
+# NeoFOAM's incompressibleFluidNeoN (solvers/fluid_neon.py: without the sweep's
+# --no-preprocess)
+solver: incompressibleFluidNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # OpenFOAM's tutorial: 20 x 20; Ghia: 129 x 129. n160 is
+  # {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}
+  mesh:
+    n20: {block_mesh_dict_config: {blocks: [{cells: [20, 20, 1]}]}}
+    n40: {block_mesh_dict_config: {blocks: [{cells: [40, 40, 1]}]}}
+    n80: {block_mesh_dict_config: {blocks: [{cells: [80, 80, 1]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [n20]
+  neo_n_control_config: [Serial]
+# per case, after the solve: metrics.py's table from the written fields (every 2 s) as
+# postProcessing/metrics.dat, then the time directories but 0 and the last removed
+metrics: {script: metrics.py, prune: true}
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (t = 20) of the metrics table
+collect:
+  tables:
+    - postProcessing/metrics.dat
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# per executor (the dimensions but mesh)
+checks:
+  # OpenFOAM-v2406 icoFoam, same case and meshes (reference/icofoam.csv:
+  # openfoam_reference.py). Its time step is the fixed 0.001 (no adaptive dt), and the
+  # PISO steady state depends weakly on dt (the Rhie-Chow flux): u_L2 15 / 12 / 1.5 %
+  # apart (n20 / n40 / n80), at most 19 % (v_Linf n20)
+  - type: reference
+    file: icofoam.csv
+    match: [mesh]
+    columns: [u_L2, u_Linf, v_L2, v_Linf]
+    rtol: 0.2
+  # Gauss linear is second order: u_L2 falls with order 2.9 from n20 to n40, but rises
+  # again at n80 (as icoFoam's does), where the error reaches Ghia's own (129 x 129);
+  # v_L2 levels off at 4.5e-3 already at n40 (icoFoam too). So only n20 -> n40 of u
+  - {type: order, column: u_L2, spacing: h, minimum: 1.5, where: {mesh: [n20, n40]}}
+  # regression bounds on the coarsest mesh's error (the largest): measured 1.35e-2 /
+  # 1.05e-2, loose
+  - {type: maximum, column: u_Linf, maximum: 0.05}
+  - {type: maximum, column: v_Linf, maximum: 0.05}
+  # the steady state: max |U(20) - U(18)| (measured 1.1e-5 on every mesh)
+  - {type: maximum, column: dU, maximum: 5.0e-5}
+  # CPU and GPU against Serial: iterative solves to 1e-8, measured 6.4e-8
+  - type: agreement
+    across: executor
+    base: Serial
+    columns: [u_L2, u_Linf, v_L2, v_Linf]
+    rtol: 1.0e-4
+# the columns of report.md's results table
+report: [h, u_L2, u_Linf, v_L2, v_Linf, dU, steps, wall_s, time_per_step_s]
