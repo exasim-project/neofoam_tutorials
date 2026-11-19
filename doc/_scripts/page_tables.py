@@ -88,6 +88,10 @@ CONTROL_DICT = {
 NOTES: dict[str, dict[str, str]] = {
     "surfaceTension/staticDrop": {"mesh": "R/dx = n/4"},
     "advection/discUniFlow": {"mesh": "n80 … n320 commented out"},
+    "singlePhase/pitzDaily": {
+        "mesh": "shown: the first of five blocks; ``tutorial`` is OpenFOAM's mesh (12 225 "
+        "cells), ``coarse`` halves every block (3 122 cells)"
+    },
 }
 
 
@@ -149,6 +153,8 @@ KEY = {
     "advection/discUniFlowTestsuite": ["Eshape", "Emass", "Ebound", "steps"],
     "surfaceTension/staticDrop": ["dp", "sigma_R", "dp_err", "maxU_max", "Ca_max"],
     "acceleration/tiltedBox": ["maxU_10ms", "maxU_max", "p_err_max", "p_err_mean"],
+    "singlePhase/cavity": ["u_L2", "u_Linf", "v_L2", "v_Linf", "dU", "steps"],
+    "singlePhase/pitzDaily": ["nCells", "x_r_h", "Umin_xh1", "Umin_xh3", "Umin_xh5"],
 }
 
 #: results.csv column -> readable header
@@ -172,6 +178,16 @@ HEADERS = {
     "maxU_10ms": "max\\|U\\| at 0.01 s [m/s]",
     "p_err_max": "p error max",
     "p_err_mean": "p error mean",
+    "u_L2": "u error L2 [m/s]",
+    "u_Linf": "u error L∞ [m/s]",
+    "v_L2": "v error L2 [m/s]",
+    "v_Linf": "v error L∞ [m/s]",
+    "dU": "\\|ΔU\\| last 2 s [m/s]",
+    "nCells": "cells",
+    "x_r_h": "x_r / h",
+    "Umin_xh1": "min Ux/U, x/h = 1",
+    "Umin_xh3": "x/h = 3",
+    "Umin_xh5": "x/h = 5",
 }
 
 EXECUTOR, BASE, WALL = "executor", "Serial", "wall_s"
@@ -267,6 +283,26 @@ WHY: dict[str, dict[str, str]] = {
         "reference": "Magnitude only: the setup differs from TwoPhaseFlow's (gradAlpha, open top).",
         "maximum maxU_max": "Regression bound on the spurious current.",
         "maximum p_err": "Regression bound on the hydrostatic pressure error.",
+        "agreement": "CPU and GPU reproduce Serial.",
+    },
+    "singlePhase/cavity": {
+        "reference": "NeoN reproduces OpenFOAM icoFoam's errors (the coarse meshes differ "
+        "by the time step, which the PISO steady state depends on weakly).",
+        "order": "Second order from n20 to n40; at n80 the error reaches Ghia's own, also "
+        "for icoFoam.",
+        "maximum u_Linf": "Regression bound on the coarsest mesh's error.",
+        "maximum v_Linf": "Regression bound on the coarsest mesh's error.",
+        "maximum dU": "The run reached the steady state.",
+        "agreement": "CPU and GPU reproduce Serial (iterative solves to 1e-8).",
+    },
+    "singlePhase/pitzDaily": {
+        "reference openfoam.csv x_r_h": "Same case, mesh and iterations as OpenFOAM's simpleFoam.",
+        "reference openfoam.csv iterations": "The convergence rate depends on the linear "
+        "solvers (Ginkgo here, GAMG / smoothSolver in OpenFOAM).",
+        "maximum profile_err": "The velocity profiles match OpenFOAM's.",
+        "maximum p_res": "Converged to the tutorial's residual tolerance.",
+        "maximum Ux_res": "Converged to the tutorial's residual tolerance.",
+        "reference pitz_daily_1983": "Loose sanity check against the experiment.",
         "agreement": "CPU and GPU reproduce Serial.",
     },
 }

@@ -130,6 +130,7 @@ are NeoFOAM solvers registered through the ``neofoam.solvers`` entry point in
 - ``reconstructInterface``: TwoPhaseFlow's ``reconstructInterface``.
 - ``advectorVoF``: TwoPhaseFlow's ``advectorVoF``, with NeoN isoAdvector or MULES.
 - ``incompressibleVoFNeoNSweep``: NeoFOAM's ``incompressibleVoFNeoN``.
+- ``incompressibleFluidNeoNSweep``: NeoFOAM's ``incompressibleFluidNeoN`` (single phase).
 
 They are built from NeoFOAM's models only, and write tables with the same columns as
 the reference applications. Snakemake tracks ``benchmark.yaml``, ``plots.py``,

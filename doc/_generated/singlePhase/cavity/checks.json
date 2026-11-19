@@ -1,0 +1,106 @@
+{
+  "checks": [
+    {
+      "check": "reference icofoam.csv u_L2,u_Linf,v_L2,v_Linf",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "max rel diff 1.9e-01 (v_Linf n20_CPU), rtol 0.2, 3 cases"
+    },
+    {
+      "check": "reference icofoam.csv u_L2,u_Linf,v_L2,v_Linf",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "max rel diff 1.9e-01 (v_Linf n20_GPU), rtol 0.2, 3 cases"
+    },
+    {
+      "check": "reference icofoam.csv u_L2,u_Linf,v_L2,v_Linf",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "max rel diff 1.9e-01 (v_Linf n20_Serial), rtol 0.2, 3 cases"
+    },
+    {
+      "check": "order u_L2",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "2.90 (>= 1.5)"
+    },
+    {
+      "check": "order u_L2",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "2.90 (>= 1.5)"
+    },
+    {
+      "check": "order u_L2",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "2.90 (>= 1.5)"
+    },
+    {
+      "check": "maximum u_Linf",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "1.352e-02 (n20_CPU), maximum 0.05"
+    },
+    {
+      "check": "maximum u_Linf",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "1.352e-02 (n20_GPU), maximum 0.05"
+    },
+    {
+      "check": "maximum u_Linf",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "1.352e-02 (n20_Serial), maximum 0.05"
+    },
+    {
+      "check": "maximum v_Linf",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "1.046e-02 (n20_CPU), maximum 0.05"
+    },
+    {
+      "check": "maximum v_Linf",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "1.046e-02 (n20_GPU), maximum 0.05"
+    },
+    {
+      "check": "maximum v_Linf",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "1.046e-02 (n20_Serial), maximum 0.05"
+    },
+    {
+      "check": "maximum dU",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "1.153e-05 (n40_CPU), maximum 5e-05"
+    },
+    {
+      "check": "maximum dU",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "1.153e-05 (n40_GPU), maximum 5e-05"
+    },
+    {
+      "check": "maximum dU",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "1.153e-05 (n40_Serial), maximum 5e-05"
+    },
+    {
+      "check": "agreement executor",
+      "group": "CPU vs Serial",
+      "status": "pass",
+      "detail": "max rel diff 5.5e-08 (u_L2 n40_CPU), rtol 0.0001, 3 cases"
+    },
+    {
+      "check": "agreement executor",
+      "group": "GPU vs Serial",
+      "status": "pass",
+      "detail": "max rel diff 1.8e-08 (u_Linf n40_GPU), rtol 0.0001, 3 cases"
+    }
+  ]
+}
