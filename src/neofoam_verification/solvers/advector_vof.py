@@ -17,7 +17,9 @@ onto the write interval. For a uniform velocity that is advectorVoF's step; NeoF
 adaptive time step damps the growth instead (interFoam).
 
 Writes ``volumeFractionError.dat`` (:mod:`.volume_fraction_error_io`) at the function
-object's write times and ``timing.dat`` at the end.
+object's write times and ``timing.dat`` at the end, and evaluates NeoFOAM's in-situ
+``postProcess`` tables (``system/postProcess.yaml``, as incompressibleVoFNeoN: the
+registry fields ``alpha1`` and ``U``) after each field write.
 
 A ``neofoam.solvers`` entry point (pyproject): this module exports the ``advectorVoF``
 spec, with the configs a sweep varies (mesh, executor, time step, scheme), and
@@ -61,6 +63,7 @@ from neofoam.framework.solver import Solver
 from neofoam.framework.tools import PreprocessConfig
 from neofoam.framework.types import OperationMetadata
 from neofoam.io import OF, BaseConfig, IOStrategy
+from neofoam.postprocess import PostProcessConfig
 from neofoam.solver.incompressibleVoF.configs import ControlDictConfig
 from neofoam.solver.neon_runtime import NeoNControlConfig
 from neofoam.tools.block_mesh import BlockMeshDictConfig
@@ -94,6 +97,8 @@ for _config in (
     NeoNControlConfig,
     ControlDictConfig,
     AdvectionSchemeConfig,
+    # in-situ tables; only the ``internal`` source works on NeoN fields
+    PostProcessConfig,
 ):
     advectorVoF.config(_config)
 
@@ -119,12 +124,16 @@ def _runtime_steps(argv: list[str]) -> list[InitStep]:
         lazy("_foam_time", lambda ctx: pyf.Time(ctx["_arg_list"]), depends_on=["_arg_list"]),
         lazy("_neon_runtime", create_neon_runtime, depends_on=["_foam_time"]),
         init_model("neon_runtime", lambda ctx: ctx["_neon_runtime"], depends_on=["_neon_runtime"]),
+        # the adapter's mesh (an fvMesh) on Context.mesh: the postProcess cell geometry
+        lazy("mesh", lambda ctx: ctx["_neon_runtime"].mesh, depends_on=["_neon_runtime"]),
     ]
 
 
 def create_init() -> StagedInitRunner:
-    """LOAD the advection member, loop, writer and time step; BUILD runtime, U, the member."""
+    """LOAD the advection member, loop, writer, postProcess and time step; BUILD runtime, U,
+    the member."""
     from neofoam import neofoam_bindings as nfb
+    from neofoam.postprocess import postProcess
     from neofoam.solver.incompressibleFluidNeoN.models.field_writer import fieldWriter
     from neofoam.solver.incompressibleFluidNeoN.models.solution_loop import (
         neon_loop_backend_steps,
@@ -148,6 +157,7 @@ def create_init() -> StagedInitRunner:
                 advectionModelNeoN.detect_and_create(),
                 solutionLoop.instantiate(case, "main"),
                 fieldWriter.instantiate(case, "main"),
+                postProcess.instantiate(case, "main"),
             ],
             optional_models=[advectorVoFTimeStep.instantiate(case, advectorVoFTimeStep.name)],
         )
@@ -158,11 +168,15 @@ def create_init() -> StagedInitRunner:
 
     @spec_builder.build  # type: ignore[untyped-decorator]
     def build_lazy(core_models: list[Any], optional_models: list[Any]) -> list[InitStep]:
-        alpha_model, loop_model, writer_model = core_models
+        alpha_model, loop_model, writer_model, post_model = core_models
         builder = InitializerBuilder()
         builder.extend(_runtime_steps(runner.argv))
         builder.add_core_models(
-            [("solution_loop_model", loop_model), ("field_writer_model", writer_model)]
+            [
+                ("solution_loop_model", loop_model),
+                ("field_writer_model", writer_model),
+                ("post_process_model", post_model),
+            ]
         )
         builder.extend(neon_loop_backend_steps())
         builder.extend(neon_vof_writer_backend_steps())
@@ -225,15 +239,17 @@ def _op(name: str, func: Any) -> Operation:
 
 @advectorVoF.execution_graph_step  # type: ignore[untyped-decorator]
 def execution_graph(self: Any, ctx: Context) -> tuple[StepBuilder, Operations]:
-    """set_time_step -> increment_time -> alpha_advection -> volumeFractionError -> write."""
+    """set_time_step -> increment_time -> alpha_advection -> volumeFractionError -> write
+    -> post_process."""
     from neofoam.solver.incompressibleFluidNeoN.models.solution_loop import (
         SolutionLoopPredicate,
     )
 
-    alpha_model, loop_model, writer_model = self.state.core_models
+    alpha_model, loop_model, writer_model, post_model = self.state.core_models
     alpha_ops = Operations(alpha_model.build_operations_for(alpha_model))
     loop_ops = Operations(_runtime_of(loop_model).operations)
     writer_ops = Operations(_runtime_of(writer_model).operations)
+    post_ops = Operations(_runtime_of(post_model).operations)
     monitor = _Monitor(ctx)
     ctx.models["volume_fraction_error"] = monitor
 
@@ -248,6 +264,8 @@ def execution_graph(self: Any, ctx: Context) -> tuple[StepBuilder, Operations]:
         step.step(alpha_ops["alpha_advection"])
         step.step(_op("volume_fraction_error", monitor.toc))
         step.step(writer_ops["write_output"])
+        # last: a pure reader, so a table row and the time directory describe one state
+        step.step(post_ops["post_process"])
     return builder, Operations()
 
 
