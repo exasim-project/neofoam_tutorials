@@ -1,7 +1,7 @@
 """The cavity's plots: the centreline profiles against Ghia, the errors, the run times.
 
 * ``profiles`` -- u(0.5, y) and v(x, 0.5) of each mesh (the first executor; the others
-  agree), from the cases' ``postProcessing/profiles.csv``, with Ghia et al. (1982) as
+  agree), from collect's profiles.csv, with Ghia et al. (1982) as
   black circles (reference/ghia1982.csv);
 * ``error_vs_n`` -- the L2 and Linf centreline errors against Ghia over n, with OpenFOAM's
   icoFoam on the same meshes dashed black (reference/icofoam.csv);
@@ -13,17 +13,17 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from neofoam_verification.suite.plots import error_plot, save, timing_plot
+from neofoam_verification.suite.plots import error_plot, profiles, save, timing_plot
 
 BY = ["executor"]
-PROFILES = "cases/{case}/postProcessing/profiles.csv"
 
 
 def profiles_plot(results: pd.DataFrame, ghia: pd.DataFrame) -> plt.Figure:
     fig, (left, right) = plt.subplots(1, 2, figsize=(10, 4.5))
     first = results[results["executor"] == results["executor"].iloc[0]]
+    stored = profiles()
     for row in first.itertuples(index=False):
-        profile = pd.read_csv(PROFILES.format(case=row.case))
+        profile = stored[stored["case"] == row.case]
         label = f"{row.mesh} {row.executor}"
         left.plot(profile["u"], profile["y"], label=label)
         right.plot(profile["x"], profile["v"], label=label)

@@ -1,14 +1,21 @@
-"""The static drop's metrics per written time, from the case's fields (``metrics.dat``).
+"""The static drop's derived columns (``collect.derive``), per write time.
 
-* ``maxU``, ``meanU`` -- the largest and the volume-weighted mean cell ``|U|`` (the
-  spurious currents; the drop is at rest), ``maxU_max`` the largest ``maxU`` so far;
+From the case's ``postProcess`` tables (``case/system/postProcess.yaml``: ``maxU`` --
+the largest cell ``|U|``, the spurious current; ``magU_integral``, ``volume`` -- the
+volume integral of ``|U|`` and the mesh volume; ``p_inside``, ``p_outside`` -- the mean
+``p_rgh`` within ``r < R/2`` and beyond ``r > 3R/2`` of the cylinder axis; ``water`` --
+``sum alpha V``) and the case's files:
+
+* ``meanU`` -- the volume-weighted mean ``|U|``;
+* ``maxU_max`` -- the largest ``maxU`` so far;
 * ``Ca``, ``Ca_max`` -- the capillary numbers ``mu_drop |U|max / sigma`` of both;
-* ``dp`` -- the Laplace pressure ``mean p_rgh(r < R/2) - mean p_rgh(r > 3R/2)`` (g = 0:
-  p_rgh is p), ``r`` the distance to the cylinder axis of ``setAlphaFieldDict``;
-* ``sigma_R`` -- ``sigma / R``, ``R`` the radius of the water volume (``sum alpha V``
-  over the extruded thickness); ``dp_err`` -- ``|dp / sigma_R - 1|``.
+* ``dp`` -- the Laplace pressure ``p_inside - p_outside`` (g = 0: p_rgh is p);
+* ``sigma_R`` -- ``sigma / R``, ``R`` the radius of the water volume (``water`` over the
+  extruded thickness); ``dp_err`` -- ``|dp / sigma_R - 1|``.
 
-As NeoFOAM's ``test_stationaryDroplet_surface_tension`` measures them.
+As NeoFOAM's ``test_stationaryDroplet_surface_tension`` measures them. The tables'
+selectors use the nominal R = 2 mm of ``setAlphaFieldDict``; on n20, n40, n80 they
+select the same cells as R of the water volume (0.3 ... 1 % smaller).
 """
 
 from __future__ import annotations
@@ -19,44 +26,25 @@ import numpy as np
 import pandas as pd
 from foamlib import FoamFile
 
-from neofoam_verification.foam import PolyMesh, read_internal_field
-from neofoam_verification.suite.workflow import time_directories
-
-ALPHA = "alpha.water"
+from neofoam_verification.foam import PolyMesh
 
 
-def metrics(case: Path) -> pd.DataFrame:
-    mesh = PolyMesh.read(case)
-    centres, volumes, n = mesh.cell_centres, mesh.cell_volumes, mesh.n_cells
+def derive(history: pd.DataFrame, case: Path) -> pd.DataFrame:
     transport = FoamFile(case / "constant" / "transportProperties")
     drop = transport[transport["phases"][0]]
     sigma, mu = float(transport["sigma"]), float(drop["rho"]) * float(drop["nu"])
-    cylinder = FoamFile(case / "system" / "setAlphaFieldDict")
-    axis = np.asarray(cylinder["direction"], dtype=float)
+    axis = np.asarray(FoamFile(case / "system" / "setAlphaFieldDict")["direction"], dtype=float)
     axis /= np.linalg.norm(axis)
-    thickness = float(np.ptp(mesh.points @ axis))
-    offset = centres - np.asarray(cylinder["origin"], dtype=float)
-    r = np.linalg.norm(offset - np.outer(offset @ axis, axis), axis=1)
+    thickness = float(np.ptp(PolyMesh.read(case).points @ axis))
 
-    rows = []
-    for time in time_directories(case):
-        alpha = read_internal_field(time / ALPHA, n)
-        mag_u = np.linalg.norm(read_internal_field(time / "U", n), axis=1)
-        p_rgh = read_internal_field(time / "p_rgh", n)
-        radius = float(np.sqrt(alpha @ volumes / (np.pi * thickness)))
-        dp = p_rgh[r < 0.5 * radius].mean() - p_rgh[r > 1.5 * radius].mean()
-        rows.append(
-            {
-                "Time": float(time.name),
-                "maxU": mag_u.max(),
-                "meanU": mag_u @ volumes / volumes.sum(),
-                "dp": dp,
-                "sigma_R": sigma / radius,
-            }
-        )
-    table = pd.DataFrame(rows)
-    table.insert(3, "maxU_max", table["maxU"].cummax())
-    table.insert(4, "Ca", mu * table["maxU"] / sigma)
-    table.insert(5, "Ca_max", mu * table["maxU_max"] / sigma)
+    radius = np.sqrt(history["water"] / (np.pi * thickness))
+    table = history.assign(
+        meanU=history["magU_integral"] / history["volume"],
+        maxU_max=history["maxU"].cummax(),
+        Ca=mu * history["maxU"] / sigma,
+        dp=history["p_inside"] - history["p_outside"],
+        sigma_R=sigma / radius,
+    )
+    table["Ca_max"] = mu * table["maxU_max"] / sigma
     table["dp_err"] = (table["dp"] / table["sigma_R"] - 1.0).abs()
     return table

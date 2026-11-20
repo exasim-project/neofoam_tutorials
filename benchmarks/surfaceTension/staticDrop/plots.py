@@ -1,6 +1,6 @@
 """The static drop's plots: the spurious current over time and the pressure jump vs mesh.
 
-``maxU`` (and ``meanU``) over time per mesh and executor, from the cases' metrics tables;
+``maxU`` (and ``meanU``) over time per mesh and executor, from collect's histories.csv;
 the end time's Laplace pressure jump ``dp`` per mesh against ``sigma/R``, with interFoam's
 jump (reference/interfoam.csv, n40) and the relative error ``dp_err``.
 """
@@ -16,7 +16,7 @@ BY = ["mesh", "executor"]
 
 
 def plot(results: pd.DataFrame, references: dict[str, pd.DataFrame], out: Path) -> None:
-    history = histories(results, BY)
+    history = histories()
     history = history[history["Time"] > 0]
     save(history_plot(history, "maxU", "max |U| [m/s]", BY), out / "maxU")
     save(history_plot(history, "meanU", "mean |U| [m/s]", BY), out / "meanU")

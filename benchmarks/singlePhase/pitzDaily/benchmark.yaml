@@ -42,14 +42,22 @@ smoke:
   mesh: [coarse]
   neo_n_control_config: [Serial]
 # per case, after the solve: metrics.py's table (a row per iteration; the fields written
-# every 500) as postProcessing/metrics.dat, then the time directories but 0 and the last
-# removed
+# every 500) as postProcessing/metrics.dat, its final profiles as
+# postProcessing/profiles.csv, then the time directories but 0 and the last removed. Not
+# NeoFOAM's postProcess: the residuals come from the log (its residuals source reads the
+# fvMesh's solverPerformanceDict, which NeoN's Ginkgo solves never fill), and the
+# reattachment length interpolates the lower wall's near-wall Ux at the wall faces' x
+# (its patch source cannot sample a NeoN field), so metrics.py reads U anyway
 metrics: {script: metrics.py, prune: true}
 # results.csv: one row per case, a column per dimension (renamed here) holding the
-# variant name, then the last row (iteration 1500) of the metrics table
+# variant name, then the last row (iteration 1500) of the metrics table; histories.csv:
+# every row (the residuals per iteration); profiles.csv: the final Ux profiles
 collect:
   tables:
     - postProcessing/metrics.dat
+  history: true
+  profiles:
+    - postProcessing/profiles.csv
   columns:
     mesh: mesh
     neo_n_control_config: executor

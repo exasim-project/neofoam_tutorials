@@ -1,7 +1,7 @@
 """The tilted box's plots: the spurious current and the hydrostatic pressure error over time.
 
-``maxU``, ``meanU`` and ``p_err_mean`` over time per mesh and executor, from the cases'
-metrics tables; TwoPhaseFlow's ``maxU`` at t = 0.01 of the swept meshes
+``maxU``, ``meanU`` and ``p_err_mean`` over time per mesh and executor, from collect's
+histories.csv; TwoPhaseFlow's ``maxU`` at t = 0.01 of the swept meshes
 (reference/twophaseflow.csv) as black crosses on the ``maxU`` plot.
 """
 
@@ -15,7 +15,7 @@ BY = ["mesh", "executor"]
 
 
 def plot(results: pd.DataFrame, references: dict[str, pd.DataFrame], out: Path) -> None:
-    history = histories(results, BY)
+    history = histories()
     history = history[history["Time"] > 0]
     fig = history_plot(history, "maxU", "max |U| [m/s]", BY)
     reference = references["twophaseflow"]

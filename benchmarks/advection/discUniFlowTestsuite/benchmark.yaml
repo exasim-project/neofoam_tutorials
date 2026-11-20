@@ -23,11 +23,22 @@ method: {dimension: advection_scheme_config, entry: advectionScheme}
 smoke:
   neo_n_control_config: [Serial]
 # results.csv: one row per case, a column per dimension (renamed here) holding the
-# variant name, then the last row (t = 4) of each table
+# variant name, then the last row (t = 4) of the case's tables merged on the time (a later
+# table's column replaces an earlier one): the solver's volumeFractionError.dat (Tadv and
+# the mesh columns; its Eshape, Emass, Ebound are replaced) and timing.dat, then the
+# postProcess tables of case/system/postProcess.yaml (Eshape, mass, mass0, alpha_min,
+# alpha_max), from which metrics.py derives Emass and Ebound. histories.csv: every row
 collect:
   tables:
     - postProcessing/volumeFractionError/0/volumeFractionError.dat
     - postProcessing/volumeFractionError/0/timing.dat
+    - postProcessing/Eshape.csv
+    - postProcessing/mass.csv
+    - postProcessing/mass0.csv
+    - postProcessing/alpha_min.csv
+    - postProcessing/alpha_max.csv
+  derive: metrics.py
+  history: true
   columns:
     mesh: mesh
     neo_n_control_config: executor

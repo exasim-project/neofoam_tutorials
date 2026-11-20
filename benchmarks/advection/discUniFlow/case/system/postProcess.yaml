@@ -1,0 +1,31 @@
+# NeoFOAM's in-situ tables (postProcessing/<name>.csv), evaluated at the
+# volumeFractionError function object's write times (controlDict: every 0.1):
+# TwoPhaseFlow's Eshape = sum V |alpha - alpha_exact| (the disc of setAlphaFieldDict
+# moved by U t), and the water volume, its start value and alpha's extrema, from which
+# collect derives Emass and Ebound (metrics.py).
+tables:
+  - name: Eshape
+    source:
+      type: shapeError
+      function_type: cylinder
+      origin: [0.25, 0, 0.25]
+      radius: 0.2
+      direction: [0, 1, 0]
+    pipeline: [{type: volIntegrate, name: Eshape}]
+    write_control: {write_control_type: runTime, interval: 0.1}
+  - name: mass
+    source: {type: internal, field: alpha1}
+    pipeline: [{type: volIntegrate, name: mass}]
+    write_control: {write_control_type: runTime, interval: 0.1}
+  - name: mass0
+    source: {type: startField, field: alpha.water}
+    pipeline: [{type: volIntegrate, name: mass0}]
+    write_control: {write_control_type: runTime, interval: 0.1}
+  - name: alpha_min
+    source: {type: internal, field: alpha1}
+    pipeline: [{type: min, name: alpha_min}]
+    write_control: {write_control_type: runTime, interval: 0.1}
+  - name: alpha_max
+    source: {type: internal, field: alpha1}
+    pipeline: [{type: max, name: alpha_max}]
+    write_control: {write_control_type: runTime, interval: 0.1}

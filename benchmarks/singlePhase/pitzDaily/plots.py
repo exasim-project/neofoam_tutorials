@@ -1,10 +1,10 @@
 """pitzDaily's plots: the velocity profiles against OpenFOAM, the residuals, the run time.
 
 * ``profiles`` -- Ux / U_inlet over y at x / h = 1, 3, 5, 7 per mesh (the first executor;
-  the others agree), from the cases' ``postProcessing/profiles.csv``, with OpenFOAM's on
+  the others agree), from collect's profiles.csv, with OpenFOAM's on
   the same mesh dashed black (reference/openfoam_profiles.csv);
-* ``residuals`` -- the initial residuals of Ux and p over the iterations per case, the
-  tutorial's tolerances dotted;
+* ``residuals`` -- the initial residuals of Ux and p over the iterations per case (collect's
+  histories.csv), the tutorial's tolerances dotted;
 * ``reattachment`` -- x_r / h per mesh and executor, with OpenFOAM's and the measured;
 * ``wall_time`` -- the wall time of the 1500 iterations per mesh and executor.
 """
@@ -14,10 +14,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from neofoam_verification.suite.plots import MARKERS, histories, history_plot, save
+from neofoam_verification.suite.plots import MARKERS, histories, history_plot, profiles, save
 
 BY = ["mesh", "executor"]
-PROFILES = "cases/{case}/postProcessing/profiles.csv"
 STATIONS = (1, 3, 5, 7)
 STEP, U_INLET = 0.0254, 10.0
 
@@ -25,8 +24,9 @@ STEP, U_INLET = 0.0254, 10.0
 def profiles_plot(results: pd.DataFrame, openfoam: pd.DataFrame) -> plt.Figure:
     fig, axes = plt.subplots(1, len(STATIONS), figsize=(12, 4.5), sharey=True)
     first = results[results["executor"] == results["executor"].iloc[0]]
+    computed = profiles()
     for row in first.itertuples(index=False):
-        profile = pd.read_csv(PROFILES.format(case=row.case))
+        profile = computed[computed["case"] == row.case]
         stored = openfoam[openfoam["nCells"] == profile["nCells"].iloc[0]]
         for ax, station in zip(axes, STATIONS):
             ours = profile[profile["x_h"] == station]
@@ -84,7 +84,7 @@ def wall_time_plot(results: pd.DataFrame) -> plt.Figure:
 
 def plot(results: pd.DataFrame, references: dict[str, pd.DataFrame], out: Path) -> None:
     save(profiles_plot(results, references["openfoam_profiles"]), out / "profiles")
-    history = histories(results, BY)
+    history = histories()
     fig = history_plot(history, "Ux_res", "initial residual", BY)
     ax = fig.axes[0]
     for i, (_, rows) in enumerate(history.sort_values("Time").groupby(BY)):

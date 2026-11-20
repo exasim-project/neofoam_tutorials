@@ -1,0 +1,37 @@
+# NeoFOAM's in-situ tables (postProcessing/<name>.csv), at the field write times
+# (write_control stepper: controlDict's every 10th step), on incompressibleVoFNeoN's
+# registry fields: the spurious current (max |U|, the volume integral of |U| and the mesh
+# volume, for the volume-weighted mean), the Laplace pressure's
+# mean p_rgh inside r < R/2 and outside r > 3R/2 of the drop's axis (R = 2 mm; the
+# sphere's centre is on the mid-plane of the one-cell-thick mesh, so its distance is r)
+# and the water volume; collect derives meanU, dp, sigma/R, Ca and dp_err (metrics.py).
+tables:
+  - name: maxU
+    source: {type: internal, field: U}
+    pipeline: [{type: mag}, {type: max, name: maxU}]
+    write_control: {write_control_type: stepper}
+  - name: magU_integral
+    source: {type: internal, field: U}
+    pipeline: [{type: mag}, {type: volIntegrate, name: magU_integral}]
+    write_control: {write_control_type: stepper}
+  - name: volume
+    source: {type: internal, field: p_rgh}
+    pipeline: [{type: area}, {type: sum, name: volume}]
+    write_control: {write_control_type: stepper}
+  - name: p_inside
+    source: {type: internal, field: p_rgh}
+    pipeline:
+      - {type: sphere, center: [0.004, 0.004, 0.0001], radius: 0.001}
+      - {type: mean, name: p_inside}
+    write_control: {write_control_type: stepper}
+  - name: p_outside
+    source: {type: internal, field: p_rgh}
+    pipeline:
+      - type: not
+        region: {type: sphere, center: [0.004, 0.004, 0.0001], radius: 0.003}
+      - {type: mean, name: p_outside}
+    write_control: {write_control_type: stepper}
+  - name: water
+    source: {type: internal, field: alpha1}
+    pipeline: [{type: volIntegrate, name: water}]
+    write_control: {write_control_type: stepper}

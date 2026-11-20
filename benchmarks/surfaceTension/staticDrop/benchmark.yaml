@@ -24,14 +24,20 @@ dimensions:
 smoke:
   mesh: [n20]
   neo_n_control_config: [Serial]
-# per case, after the solve: metrics.py's table from the written fields (every 10th
-# step) as postProcessing/metrics.dat, then the time directories but 0 and the last removed
-metrics: {script: metrics.py, prune: true}
 # results.csv: one row per case, a column per dimension (renamed here) holding the
-# variant name, then the last row (the end time; maxU_max, Ca_max over time) of each table
+# variant name, then the last row (the end time; maxU_max, Ca_max over time) of the case's
+# postProcess tables (case/system/postProcess.yaml, at the field write times: every 10th
+# step) merged on the time, with metrics.py's derived columns; histories.csv: every row
 collect:
   tables:
-    - postProcessing/metrics.dat
+    - postProcessing/maxU.csv
+    - postProcessing/magU_integral.csv
+    - postProcessing/volume.csv
+    - postProcessing/p_inside.csv
+    - postProcessing/p_outside.csv
+    - postProcessing/water.csv
+  derive: metrics.py
+  history: true
   columns:
     mesh: mesh
     neo_n_control_config: executor
