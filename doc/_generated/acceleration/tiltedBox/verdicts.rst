@@ -24,5 +24,5 @@
      - Regression bound on the hydrostatic pressure error.
    * - agreement executor
      - **PASS** 2/2
-     - CPU vs Serial: max rel diff 5.4e-15 (meanU n64_CPU), rtol 1e-08, 3 cases
+     - CPU vs Serial: max rel diff 4.5e-12 (p_err_mean n64_CPU), rtol 1e-08, 3 cases
      - CPU and GPU reproduce Serial.

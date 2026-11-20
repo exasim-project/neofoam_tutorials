@@ -75,4 +75,4 @@
    * - agreement executor
      - GPU vs Serial
      - **PASS**
-     - max rel diff 1.8e-08 (u_Linf n40_GPU), rtol 0.0001, 3 cases
+     - max rel diff 1.9e-08 (u_Linf n40_GPU), rtol 0.0001, 3 cases

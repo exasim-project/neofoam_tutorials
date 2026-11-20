@@ -10,17 +10,17 @@
      - wall [s] Serial / CPU / GPU
    * - MULES
      - 0.03037
-     - 5.551e-17
+     - 1.11e-16
      - 3.675e-19
      - 1200
-     - 4.9 / 5 / 3
+     - 5 / 5.1 / 3.1
    * - isoAdvector
      - 0.02253
-     - 3.886e-16
+     - 4.718e-16
      - 0
      - 1200
-     - 2.7 / 2.8 / 3.2
+     - 2.9 / 2.9 / 3.3
 
-Rows: the Serial executor. CPU and GPU agree with it to 3e-15 (relative, in these columns; round-off values below 1e-10 left out).
+Rows: the Serial executor. CPU and GPU are bitwise identical to it in these columns.
 
 All 6 cases and columns: :download:`results.csv </_generated/advection/discUniFlowTestsuite/results.csv>`, per-group checks: :download:`checks.json </_generated/advection/discUniFlowTestsuite/checks.json>`.

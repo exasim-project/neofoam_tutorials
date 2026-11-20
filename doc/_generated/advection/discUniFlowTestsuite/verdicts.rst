@@ -16,7 +16,7 @@
      - isoAdvector reproduces TwoPhaseFlow within the plane-search tolerance.
    * - maximum Emass
      - **PASS** 6/6
-     - MULES CPU: 5.551e-17 (MULES_n100x60_CPU), maximum 1e-13
+     - MULES CPU: 1.110e-16 (MULES_n100x60_CPU), maximum 1e-13
      - The testsuite's mass assertion.
    * - maximum Ebound
      - **PASS** 6/6

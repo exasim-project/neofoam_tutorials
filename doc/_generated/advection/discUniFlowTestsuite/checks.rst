@@ -15,7 +15,7 @@
    * - reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells
      - MULES GPU
      - **PASS**
-     - max rel diff 2.0e-14 (Eshape MULES_n100x60_GPU), rtol 1e-12, 1 cases
+     - max rel diff 1.7e-14 (Eshape MULES_n100x60_GPU), rtol 1e-12, 1 cases
    * - reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells
      - MULES Serial
      - **PASS**
@@ -59,27 +59,27 @@
    * - maximum Emass
      - MULES CPU
      - **PASS**
-     - 5.551e-17 (MULES_n100x60_CPU), maximum 1e-13
+     - 1.110e-16 (MULES_n100x60_CPU), maximum 1e-13
    * - maximum Emass
      - MULES GPU
      - **PASS**
-     - 0.000e+00 (MULES_n100x60_GPU), maximum 1e-13
+     - 3.886e-16 (MULES_n100x60_GPU), maximum 1e-13
    * - maximum Emass
      - MULES Serial
      - **PASS**
-     - 5.551e-17 (MULES_n100x60_Serial), maximum 1e-13
+     - 1.110e-16 (MULES_n100x60_Serial), maximum 1e-13
    * - maximum Emass
      - isoAdvector CPU
      - **PASS**
-     - 3.886e-16 (isoAdvector_n100x60_CPU), maximum 1e-13
+     - 4.718e-16 (isoAdvector_n100x60_CPU), maximum 1e-13
    * - maximum Emass
      - isoAdvector GPU
      - **PASS**
-     - 3.886e-16 (isoAdvector_n100x60_GPU), maximum 1e-13
+     - 4.718e-16 (isoAdvector_n100x60_GPU), maximum 1e-13
    * - maximum Emass
      - isoAdvector Serial
      - **PASS**
-     - 3.886e-16 (isoAdvector_n100x60_Serial), maximum 1e-13
+     - 4.718e-16 (isoAdvector_n100x60_Serial), maximum 1e-13
    * - maximum Ebound
      - MULES CPU
      - **PASS**
@@ -87,7 +87,7 @@
    * - maximum Ebound
      - MULES GPU
      - **PASS**
-     - 3.780e-19 (MULES_n100x60_GPU), maximum 1e-08
+     - 7.956e-19 (MULES_n100x60_GPU), maximum 1e-08
    * - maximum Ebound
      - MULES Serial
      - **PASS**

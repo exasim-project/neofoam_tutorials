@@ -59,51 +59,51 @@
    * - maximum Emass
      - MULES CFL01 CPU
      - **PASS**
-     - 2.776e-17 (MULES_CFL01_n40_CPU), maximum 1e-12
+     - 8.327e-17 (MULES_CFL01_n40_CPU), maximum 1e-12
    * - maximum Emass
      - MULES CFL01 GPU
      - **PASS**
-     - 1.388e-17 (MULES_CFL01_n10_GPU), maximum 1e-12
+     - 8.327e-17 (MULES_CFL01_n40_GPU), maximum 1e-12
    * - maximum Emass
      - MULES CFL01 Serial
      - **PASS**
-     - 2.776e-17 (MULES_CFL01_n40_Serial), maximum 1e-12
+     - 8.327e-17 (MULES_CFL01_n40_Serial), maximum 1e-12
    * - maximum Emass
      - MULES CFL05 CPU
      - **PASS**
-     - 1.388e-17 (MULES_CFL05_n10_CPU), maximum 1e-12
+     - 5.551e-17 (MULES_CFL05_n20_CPU), maximum 1e-12
    * - maximum Emass
      - MULES CFL05 GPU
      - **PASS**
-     - 1.388e-17 (MULES_CFL05_n10_GPU), maximum 1e-12
+     - 5.551e-17 (MULES_CFL05_n20_GPU), maximum 1e-12
    * - maximum Emass
      - MULES CFL05 Serial
      - **PASS**
-     - 1.388e-17 (MULES_CFL05_n10_Serial), maximum 1e-12
+     - 5.551e-17 (MULES_CFL05_n20_Serial), maximum 1e-12
    * - maximum Emass
      - isoAdvector CFL01 CPU
      - **PASS**
-     - 8.327e-17 (isoAdvector_CFL01_n40_CPU), maximum 1e-12
+     - 1.388e-16 (isoAdvector_CFL01_n40_CPU), maximum 1e-12
    * - maximum Emass
      - isoAdvector CFL01 GPU
      - **PASS**
-     - 8.327e-17 (isoAdvector_CFL01_n40_GPU), maximum 1e-12
+     - 6.939e-17 (isoAdvector_CFL01_n20_GPU), maximum 1e-12
    * - maximum Emass
      - isoAdvector CFL01 Serial
      - **PASS**
-     - 8.327e-17 (isoAdvector_CFL01_n40_Serial), maximum 1e-12
+     - 1.388e-16 (isoAdvector_CFL01_n40_Serial), maximum 1e-12
    * - maximum Emass
      - isoAdvector CFL05 CPU
      - **PASS**
-     - 1.388e-17 (isoAdvector_CFL05_n20_CPU), maximum 1e-12
+     - 5.551e-17 (isoAdvector_CFL05_n40_CPU), maximum 1e-12
    * - maximum Emass
      - isoAdvector CFL05 GPU
      - **PASS**
-     - 1.388e-17 (isoAdvector_CFL05_n20_GPU), maximum 1e-12
+     - 1.388e-17 (isoAdvector_CFL05_n10_GPU), maximum 1e-12
    * - maximum Emass
      - isoAdvector CFL05 Serial
      - **PASS**
-     - 1.388e-17 (isoAdvector_CFL05_n20_Serial), maximum 1e-12
+     - 5.551e-17 (isoAdvector_CFL05_n40_Serial), maximum 1e-12
    * - maximum Ebound
      - isoAdvector CFL01 CPU
      - **PASS**
@@ -135,7 +135,7 @@
    * - maximum Ebound
      - MULES CFL01 GPU
      - **PASS**
-     - 1.557e-18 (MULES_CFL01_n20_GPU), maximum 1e-08
+     - 1.284e-18 (MULES_CFL01_n40_GPU), maximum 1e-08
    * - maximum Ebound
      - MULES CFL01 Serial
      - **PASS**

@@ -10,7 +10,7 @@
       "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
       "group": "MULES GPU",
       "status": "pass",
-      "detail": "max rel diff 2.0e-14 (Eshape MULES_n100x60_GPU), rtol 1e-12, 1 cases"
+      "detail": "max rel diff 1.7e-14 (Eshape MULES_n100x60_GPU), rtol 1e-12, 1 cases"
     },
     {
       "check": "reference twophaseflow_mules.csv Eshape,celltoCellDist,Ncells",
@@ -76,37 +76,37 @@
       "check": "maximum Emass",
       "group": "MULES CPU",
       "status": "pass",
-      "detail": "5.551e-17 (MULES_n100x60_CPU), maximum 1e-13"
+      "detail": "1.110e-16 (MULES_n100x60_CPU), maximum 1e-13"
     },
     {
       "check": "maximum Emass",
       "group": "MULES GPU",
       "status": "pass",
-      "detail": "0.000e+00 (MULES_n100x60_GPU), maximum 1e-13"
+      "detail": "3.886e-16 (MULES_n100x60_GPU), maximum 1e-13"
     },
     {
       "check": "maximum Emass",
       "group": "MULES Serial",
       "status": "pass",
-      "detail": "5.551e-17 (MULES_n100x60_Serial), maximum 1e-13"
+      "detail": "1.110e-16 (MULES_n100x60_Serial), maximum 1e-13"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CPU",
       "status": "pass",
-      "detail": "3.886e-16 (isoAdvector_n100x60_CPU), maximum 1e-13"
+      "detail": "4.718e-16 (isoAdvector_n100x60_CPU), maximum 1e-13"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector GPU",
       "status": "pass",
-      "detail": "3.886e-16 (isoAdvector_n100x60_GPU), maximum 1e-13"
+      "detail": "4.718e-16 (isoAdvector_n100x60_GPU), maximum 1e-13"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector Serial",
       "status": "pass",
-      "detail": "3.886e-16 (isoAdvector_n100x60_Serial), maximum 1e-13"
+      "detail": "4.718e-16 (isoAdvector_n100x60_Serial), maximum 1e-13"
     },
     {
       "check": "maximum Ebound",
@@ -118,7 +118,7 @@
       "check": "maximum Ebound",
       "group": "MULES GPU",
       "status": "pass",
-      "detail": "3.780e-19 (MULES_n100x60_GPU), maximum 1e-08"
+      "detail": "7.956e-19 (MULES_n100x60_GPU), maximum 1e-08"
     },
     {
       "check": "maximum Ebound",

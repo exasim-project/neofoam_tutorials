@@ -59,8 +59,8 @@
    * - agreement executor
      - CPU vs Serial
      - **PASS**
-     - max rel diff 5.4e-15 (meanU n64_CPU), rtol 1e-08, 3 cases
+     - max rel diff 4.5e-12 (p_err_mean n64_CPU), rtol 1e-08, 3 cases
    * - agreement executor
      - GPU vs Serial
      - **PASS**
-     - max rel diff 4.7e-15 (meanU n32_GPU), rtol 1e-08, 3 cases
+     - max rel diff 4.5e-12 (p_err_mean n64_GPU), rtol 1e-08, 3 cases

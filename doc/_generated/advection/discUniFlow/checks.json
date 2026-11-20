@@ -76,73 +76,73 @@
       "check": "maximum Emass",
       "group": "MULES CFL01 CPU",
       "status": "pass",
-      "detail": "2.776e-17 (MULES_CFL01_n40_CPU), maximum 1e-12"
+      "detail": "8.327e-17 (MULES_CFL01_n40_CPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "MULES CFL01 GPU",
       "status": "pass",
-      "detail": "1.388e-17 (MULES_CFL01_n10_GPU), maximum 1e-12"
+      "detail": "8.327e-17 (MULES_CFL01_n40_GPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "MULES CFL01 Serial",
       "status": "pass",
-      "detail": "2.776e-17 (MULES_CFL01_n40_Serial), maximum 1e-12"
+      "detail": "8.327e-17 (MULES_CFL01_n40_Serial), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "MULES CFL05 CPU",
       "status": "pass",
-      "detail": "1.388e-17 (MULES_CFL05_n10_CPU), maximum 1e-12"
+      "detail": "5.551e-17 (MULES_CFL05_n20_CPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "MULES CFL05 GPU",
       "status": "pass",
-      "detail": "1.388e-17 (MULES_CFL05_n10_GPU), maximum 1e-12"
+      "detail": "5.551e-17 (MULES_CFL05_n20_GPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "MULES CFL05 Serial",
       "status": "pass",
-      "detail": "1.388e-17 (MULES_CFL05_n10_Serial), maximum 1e-12"
+      "detail": "5.551e-17 (MULES_CFL05_n20_Serial), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CFL01 CPU",
       "status": "pass",
-      "detail": "8.327e-17 (isoAdvector_CFL01_n40_CPU), maximum 1e-12"
+      "detail": "1.388e-16 (isoAdvector_CFL01_n40_CPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CFL01 GPU",
       "status": "pass",
-      "detail": "8.327e-17 (isoAdvector_CFL01_n40_GPU), maximum 1e-12"
+      "detail": "6.939e-17 (isoAdvector_CFL01_n20_GPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CFL01 Serial",
       "status": "pass",
-      "detail": "8.327e-17 (isoAdvector_CFL01_n40_Serial), maximum 1e-12"
+      "detail": "1.388e-16 (isoAdvector_CFL01_n40_Serial), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CFL05 CPU",
       "status": "pass",
-      "detail": "1.388e-17 (isoAdvector_CFL05_n20_CPU), maximum 1e-12"
+      "detail": "5.551e-17 (isoAdvector_CFL05_n40_CPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CFL05 GPU",
       "status": "pass",
-      "detail": "1.388e-17 (isoAdvector_CFL05_n20_GPU), maximum 1e-12"
+      "detail": "1.388e-17 (isoAdvector_CFL05_n10_GPU), maximum 1e-12"
     },
     {
       "check": "maximum Emass",
       "group": "isoAdvector CFL05 Serial",
       "status": "pass",
-      "detail": "1.388e-17 (isoAdvector_CFL05_n20_Serial), maximum 1e-12"
+      "detail": "5.551e-17 (isoAdvector_CFL05_n40_Serial), maximum 1e-12"
     },
     {
       "check": "maximum Ebound",
@@ -190,7 +190,7 @@
       "check": "maximum Ebound",
       "group": "MULES CFL01 GPU",
       "status": "pass",
-      "detail": "1.557e-18 (MULES_CFL01_n20_GPU), maximum 1e-08"
+      "detail": "1.284e-18 (MULES_CFL01_n40_GPU), maximum 1e-08"
     },
     {
       "check": "maximum Ebound",

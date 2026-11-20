@@ -100,7 +100,7 @@
       "check": "agreement executor",
       "group": "GPU vs Serial",
       "status": "pass",
-      "detail": "max rel diff 1.8e-08 (u_Linf n40_GPU), rtol 0.0001, 3 cases"
+      "detail": "max rel diff 1.9e-08 (u_Linf n40_GPU), rtol 0.0001, 3 cases"
     }
   ]
 }

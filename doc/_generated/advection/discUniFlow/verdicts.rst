@@ -12,7 +12,7 @@
      - MULES within a factor 2 of numufoam's E1; isoAdvector has no numufoam counterpart (gradAlpha), so its groups skip.
    * - maximum Emass
      - **PASS** 12/12
-     - MULES CFL01 CPU: 2.776e-17 (MULES_CFL01_n40_CPU), maximum 1e-12
+     - MULES CFL01 CPU: 8.327e-17 (MULES_CFL01_n40_CPU), maximum 1e-12
      - Mass is conserved to round-off.
    * - maximum Ebound
      - **PASS** 9/9

@@ -75,4 +75,4 @@
    * - agreement executor
      - GPU vs Serial
      - **PASS**
-     - max rel diff 1.7e-10 (maxU n40_GPU), rtol 1e-08, 3 cases
+     - max rel diff 6.2e-11 (maxU n40_GPU), rtol 1e-08, 3 cases

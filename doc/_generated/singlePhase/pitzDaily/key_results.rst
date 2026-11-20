@@ -15,14 +15,14 @@
      - -0.09117
      - -0.2578
      - -0.05101
-     - 14 / 15 / 34
+     - 15 / 15 / 33
    * - tutorial
      - 12225
      - 7.025
      - -0.08755
      - -0.2462
      - -0.1602
-     - 92 / 84 / 40
+     - 93 / 84 / 39
 
 Rows: the Serial executor. CPU and GPU agree with it to 0.0007 (relative, in these columns; round-off values below 1e-10 left out).
 
