@@ -2,9 +2,11 @@
 
 The x axis is a resolution column (``n``, cells per side), both axes logarithmic, one
 line per group of cases (``by``: executor and method); a reference table is drawn
-dashed black. :func:`history_plot` draws a per-case time series (:func:`histories`, the
-cases' ``metrics.dat`` in the workflow directory) instead. :func:`save` writes a figure
-as ``<stem>.png`` and ``.pdf``.
+dashed black. :func:`history_plot` draws a per-case time series (:func:`histories`,
+collect's ``histories.csv``) instead; :func:`profiles` is collect's ``profiles.csv``. Both
+are in the workflow directory (the working directory of the plots rule), so the plots
+never read the cases, which are removed after a successful run. :func:`save` writes a
+figure as ``<stem>.png`` and ``.pdf``.
 """
 
 from __future__ import annotations
@@ -19,12 +21,10 @@ import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-from .workflow import read_table
+from .workflow import HISTORIES, PROFILES
 
 MARKERS = ("o", "s", "^", "v", "D", "x")
 BY = ("executor", "method")
-#: a case's metrics table (benchmark.yaml ``metrics``), relative to the workflow directory
-METRICS_TABLE = "cases/{case}/postProcessing/metrics.dat"
 
 
 def _lines(
@@ -104,13 +104,14 @@ def timing_plot(
     return fig
 
 
-def histories(results: pd.DataFrame, columns: Sequence[str]) -> pd.DataFrame:
-    """Every case's metrics table, with the case's ``columns`` of ``results`` (its variants)."""
-    tables = []
-    for row in results[["case", *columns]].itertuples(index=False):
-        table = read_table(Path(METRICS_TABLE.format(case=row.case)))
-        tables.append(table.assign(**dict(zip(["case", *columns], row))))
-    return pd.concat(tables, ignore_index=True)
+def histories() -> pd.DataFrame:
+    """collect's ``histories.csv``: every case's rows over time, with its variant columns."""
+    return pd.read_csv(HISTORIES)
+
+
+def profiles() -> pd.DataFrame:
+    """collect's ``profiles.csv``: the cases' ``collect.profiles`` tables, with their variants."""
+    return pd.read_csv(PROFILES)
 
 
 def history_plot(

@@ -36,6 +36,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         snakefile = export(folder, RESULTS / name(folder), args.smoke, args.method)
         workdir = os.path.relpath(snakefile.parent)
         command = ["snakemake", "-s", f"{workdir}/Snakefile", "-d", workdir, "-c", str(args.cores)]
+        # report.md, not the Snakefile's `all` (which wants the cases): once cases/ is
+        # removed, a changed check or plots.py reruns verify/plots/report alone
+        command.append("report.md")
         print(" ".join(command), flush=True)
         if subprocess.run(command).returncode != 0:
             failed.append(name(folder))
