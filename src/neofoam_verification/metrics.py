@@ -21,6 +21,7 @@ advection), which are timings and are not reproduced.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -87,3 +88,16 @@ def mesh_measures(mesh: PolyMesh) -> dict[str, float]:
         "Ncells": float(mesh.n_cells),
         "avgCellVol": float(np.mean(mesh.cell_volumes)),
     }
+
+
+def table_errors(history: Any) -> Any:
+    """Emass and Ebound from the ``postProcess`` tables of a benchmark (``collect.derive``).
+
+    ``history`` holds ``mass`` (``sum V alpha``), ``mass0`` (that of the start time's
+    field), ``alpha_min`` and ``alpha_max`` per write time (a pandas DataFrame); returns it
+    with :func:`mass_error`'s and :func:`bound_error`'s columns ``Emass`` and ``Ebound``.
+    """
+    return history.assign(
+        Emass=(history["mass"] - history["mass0"]).abs(),
+        Ebound=np.maximum(-history["alpha_min"], history["alpha_max"] - 1.0).abs(),
+    )

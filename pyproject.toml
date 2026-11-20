@@ -15,9 +15,11 @@ advectorVoF = "neofoam_verification.solvers.advector_vof"
 incompressibleVoFNeoNSweep = "neofoam_verification.solvers.vof_neon"
 incompressibleFluidNeoNSweep = "neofoam_verification.solvers.fluid_neon"
 
-# NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool.
+# NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool and the postProcess
+# sources and nodes (shapeError, startField, hydrostaticError, change).
 [project.entry-points."neofoam.plugins"]
 setAlphaPlane = "neofoam_verification.tools.set_alpha_plane"
+verificationPostProcess = "neofoam_verification.postprocess"
 
 [build-system]
 requires = ["setuptools>=64"]

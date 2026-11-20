@@ -1,0 +1,16 @@
+"""NeoFOAM ``postProcess`` members of the benchmarks (the ``neofoam.plugins`` entry point).
+
+Importing the package registers them, so their ``type`` is valid in a case's
+``system/postProcess.yaml``:
+
+* source ``shapeError`` -- ``|alpha - alpha_exact|`` per cell, TwoPhaseFlow's
+  ``volumeFractionError`` integrand (``volIntegrate`` it for Eshape);
+* source ``startField`` -- a field as written at the start time (the initial mass);
+* node ``hydrostaticError`` -- ``|p - p_hydrostatic|`` over the hydrostatic range;
+* node ``change`` -- the largest component of ``|U - U_previous|`` since the table's
+  previous evaluation.
+"""
+
+from . import change, hydrostatic, volume_fraction
+
+__all__ = ["change", "hydrostatic", "volume_fraction"]
