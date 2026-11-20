@@ -51,7 +51,7 @@ Setup
      - ``system/controlDict``
    * - Samples
      - every 0.005 s
-     - ``controlDict`` ``writeInterval``; ``metrics.py``
+     - ``controlDict`` ``writeInterval``; ``postProcess.yaml`` (``stepper``)
 
 The fluids should stay at rest. NeoFOAM has no ``transformPoints``, so the mesh is
 rotated in ``blockMeshDict``, and the plane comes from this repository's
@@ -69,8 +69,11 @@ Inputs
      - Content
    * - ``case/``
      - base case (rotated mesh, plane, g, phases, schemes)
+   * - ``case/system/postProcess.yaml``
+     - the in-situ tables: ``maxU``, ``magU_integral``, ``p_err_max``,
+       ``p_err_integral``, ``volume``, at every written time
    * - ``metrics.py``
-     - the metrics below, at every written time
+     - ``derive``: the means, ``maxU_max`` and ``maxU_10ms`` from the tables
    * - ``reference/twophaseflow.csv``
      - TwoPhaseFlow's max\|U\| at t = 0.01 (n32, n64, n128)
 
@@ -86,7 +89,8 @@ Metrics
      - Formula
    * - ``maxU``, ``meanU``
      - spurious current [m/s]
-     - max and volume-weighted mean of cell \|U\|
+     - max and volume-weighted mean of cell \|U\| (``mag | max``; ``mag | volIntegrate``
+       over ``area | sum``: the rotated cells differ in volume by 1e-6)
    * - ``maxU_max``
      - largest spurious current over time
      - max over written times of ``maxU``
@@ -95,7 +99,9 @@ Metrics
      - ``maxU`` at t = 0.01
    * - ``p_err_max``, ``p_err_mean``
      - hydrostatic pressure error
-     - max and mean of ``|p − p_hydrostatic|`` / hydrostatic range in the box
+     - max and volume-weighted mean of ``|p − p_hydrostatic|`` / hydrostatic range in the
+       box (this repository's ``hydrostaticError`` node, then ``max``; ``volIntegrate``
+       over ``area | sum``)
 
 Run
 ~~~

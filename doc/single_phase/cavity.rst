@@ -66,14 +66,19 @@ Inputs
      - Content
    * - ``case/``
      - base case (mesh, lid, ν, PISO, schemes)
+   * - ``case/system/postProcess.yaml``
+     - the in-situ tables at every written time (every 2 s): ``u_vertical`` and
+       ``v_horizontal`` (``box | rows``: U of the cells next to the centrelines),
+       ``maxU`` (``mag | max``), ``dU`` (this repository's ``change`` node, ``max``)
    * - ``metrics.py``
-     - the metrics below, at every written time (every 2 s)
+     - the centreline errors from the ``rows`` tables and the run's cost from
+       ``log.solver``; the final profiles for the plot
    * - ``reference/ghia1982.csv``
      - Ghia, Ghia & Shin (1982), J. Comput. Phys. 48, 387–411, Table I (u on the
        vertical centreline) and Table II (v on the horizontal centreline), Re = 100
    * - ``reference/icofoam.csv``
      - OpenFOAM-v2406 ``icoFoam`` on the same case and meshes (fixed dt 0.001), evaluated
-       by the same ``metrics.py``
+       by the same ``metrics.py`` (the tables written from its fields)
    * - ``openfoam_reference.py``
      - reruns icoFoam and rewrites ``reference/icofoam.csv`` (below)
 
@@ -103,6 +108,9 @@ Metrics
    * - ``dU``
      - distance to the steady state [m/s]
      - max over cells of ``|U(20) − U(18)|``
+   * - ``maxU``
+     - largest velocity in the cells [m/s]
+     - max over cells of \|U\|
    * - ``h``
      - cell size [m]
      - 1 / cells per side
@@ -112,6 +120,9 @@ Metrics
 
 The centreline values are interpolated linearly between the two cell columns (rows)
 next to the line, then linearly along it through the cell centres and the wall values.
+NeoN has no line sampling, so the cells next to the lines come from a ``box`` of
+half-width 0.03 about each line (it holds the two neighbours up to n = 160) and the
+``rows`` node, which writes them every 2 s; the profile is the same as from all cells.
 
 Run
 ~~~

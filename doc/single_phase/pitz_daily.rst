@@ -70,7 +70,11 @@ Inputs
    * - ``case/``
      - base case (mesh, fields, k-ε, SIMPLE, schemes)
    * - ``metrics.py``
-     - the metrics below, per iteration from ``log.solver`` and at the written fields
+     - the metrics below, per iteration from ``log.solver`` and at the written fields;
+       the final profiles for the plot. Not NeoFOAM ``postProcess`` tables: its
+       ``residuals`` source reads the solver performance OpenFOAM records, which NeoN's
+       Ginkgo solves never fill, and the reattachment length needs the near-wall Ux at
+       the lower wall's face centres, which its ``patch`` source cannot sample on NeoN
    * - ``reference/openfoam.csv``, ``reference/openfoam_profiles.csv``
      - OpenFOAM-v2406 ``simpleFoam`` on the same case and meshes, 1500 iterations,
        evaluated by the same ``metrics.py``

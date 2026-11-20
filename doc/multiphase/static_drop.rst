@@ -51,11 +51,12 @@ Setup
      - ``system/controlDict``
    * - Samples
      - every 10th step
-     - ``controlDict`` ``writeInterval``; ``metrics.py``
+     - ``controlDict`` ``writeInterval``; ``postProcess.yaml`` (``stepper``)
 
 The drop should stay at rest, so every velocity is a spurious current, and the
-pressure jump should equal σ/R = 35 Pa. The solver writes no tables: ``metrics.py``
-evaluates the written fields, then the inner time directories are pruned.
+pressure jump should equal σ/R = 35 Pa. The solver evaluates the metrics in-run as
+NeoFOAM ``postProcess`` tables at the field write times; ``metrics.py`` derives the
+rest when they are collected.
 
 Inputs
 ~~~~~~
@@ -68,8 +69,11 @@ Inputs
      - Content
    * - ``case/``
      - base case (mesh, drop, phases, σ, schemes)
+   * - ``case/system/postProcess.yaml``
+     - the in-situ tables: ``maxU``, ``magU_integral``, ``volume``, ``p_inside``,
+       ``p_outside``, ``water``, at every written time
    * - ``metrics.py``
-     - the metrics below, at every written time
+     - ``derive``: the derived metrics below, from the tables
    * - ``reference/interfoam.csv``
      - interFoam's jump and max\|U\| at n40, its jump deficit at n80
 
@@ -85,7 +89,8 @@ Metrics
      - Formula
    * - ``maxU``, ``meanU``
      - spurious current [m/s]
-     - max and volume-weighted mean of cell \|U\|
+     - max and volume-weighted mean of cell \|U\| (``mag | max``; ``mag | volIntegrate``
+       over ``area | sum``)
    * - ``maxU_max``
      - largest spurious current over time
      - max over written times of ``maxU``
@@ -94,10 +99,12 @@ Metrics
      - ``mu_water |U|max / σ``
    * - ``dp``
      - Laplace pressure jump [Pa]
-     - ``mean p_rgh(r < R/2) − mean p_rgh(r > 3R/2)``
+     - ``mean p_rgh(r < R/2) − mean p_rgh(r > 3R/2)`` (``sphere`` and ``not sphere`` of
+       radius R/2, 3R/2 about the axis on the mid-plane, ``mean``; R = 2 mm selects the
+       same cells as R of the water volume)
    * - ``sigma_R``
      - exact jump [Pa]
-     - σ/R, with R from the water volume
+     - σ/R, with R from the water volume (``alpha1 | volIntegrate``)
    * - ``dp_err``
      - relative jump error
      - ``|dp / sigma_R − 1|``

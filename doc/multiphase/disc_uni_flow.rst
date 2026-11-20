@@ -61,6 +61,11 @@ Inputs
      - Content
    * - ``case/``
      - base case (mesh, disc, U, controls incl. the ``volumeFractionError`` function)
+   * - ``case/system/postProcess.yaml``
+     - the in-situ tables at the function's write times (every 0.1): ``Eshape``,
+       ``mass``, ``mass0``, ``alpha_min``, ``alpha_max``
+   * - ``metrics.py``
+     - ``derive``: ``Emass`` and ``Ebound`` from the tables
    * - ``reference/numufoam.csv``
      - numufoam's ``error.csv``: isoAlpha, plicRDF, MULES at CFL 0.05 to 0.5, n10 to
        n320
@@ -68,7 +73,9 @@ Inputs
 Metrics
 ~~~~~~~
 
-TwoPhaseFlow's ``volumeFractionError`` at t = 0.5.
+TwoPhaseFlow's ``volumeFractionError`` at t = 0.5, from NeoFOAM ``postProcess`` tables.
+The solver's ``volumeFractionError.dat`` (the same errors, to round-off) supplies the
+timing and mesh columns.
 
 .. list-table::
    :header-rows: 1
@@ -80,12 +87,14 @@ TwoPhaseFlow's ``volumeFractionError`` at t = 0.5.
    * - ``Eshape`` (E1)
      - shape error (absolute)
      - ``Σ V |alpha − alpha_exact|``, ``alpha_exact``: the initial disc moved by U t
+       (this repository's ``shapeError`` source, NeoFOAM's ``cutCellIso``; ``volIntegrate``)
    * - ``Emass``
      - mass error
-     - ``|Σ V alpha − initial mass|``
+     - ``|Σ V alpha − initial mass|`` (``alpha1 | volIntegrate``; the start time's
+       ``alpha.water``: this repository's ``startField`` source)
    * - ``Ebound``
      - boundedness error
-     - ``max(−min alpha, max alpha − 1)``
+     - ``max(−min alpha, max alpha − 1)`` (``alpha1 | min``, ``max``)
    * - ``Tadv``, ``wall_s``, ``steps``
      - timings, step count
      - wall time per advection, solver wall time, number of steps

@@ -50,11 +50,15 @@ The command prints the one Snakemake command it runs, for example:
 
 .. code-block:: text
 
-   snakemake -s results/reconstruction/circle/Snakefile -d results/reconstruction/circle -c 4
+   snakemake -s results/reconstruction/circle/Snakefile -d results/reconstruction/circle -c 4 report.md
 
 Inside the pixi environment, with OpenFOAM-v2406 sourced, this command alone
 reproduces the run. Snakemake reruns only what changed. It does not track the solver's
-source code, so after changing a method, add ``--forcerun solve``.
+source code, so after changing a method, add ``--forcerun solve``. The command targets
+``report.md``: once the cases are removed, a changed ``plots.py``, check or reference
+table reruns ``verify``, ``plots`` and ``report`` only (``--forcerun plots`` redraws the
+plots), as they read the collected tables, never the case folders. Snakemake's default
+target ``all`` also wants every case and would rerun the solvers.
 
 The command exits non-zero if a workflow failed. A failed **check** does not fail the
 workflow; it is recorded in ``checks.json`` and in the report.
@@ -72,8 +76,14 @@ Each benchmark writes to ``results/<category>/<name>/`` (gitignored):
      - Content
    * - ``results.csv``
      - one row per case: its variant of each dimension (``mesh``, ``executor``,
-       ``method``, ...) and the last row of each collected table (the errors at the end
-       time)
+       ``method``, ...) and the last row of its collected tables merged on the time
+       (the errors at the end time, maxima over time)
+   * - ``histories.csv``
+     - with ``collect: {history: true}``: every row of every case's tables (the time
+       series the plots draw), with the case's variant columns
+   * - ``profiles.csv``
+     - with ``collect: {profiles: [...]}``: the cases' profile tables (cavity, pitzDaily),
+       with the case's variant columns
    * - ``checks.json``
      - every check's result per group of cases (``pass``, ``fail``, ``skip``) with a
        detail line
@@ -96,14 +106,17 @@ A benchmark is a folder ``benchmarks/<category>/<name>/``:
    The solver, the sweep and what to do with its results (keys below).
 ``case/``
    The base case in OpenFOAM format, with ``system/preprocess.yaml`` listing the
-   preprocess tools (``blockMesh``, ``setAlphaField``, ...).
+   preprocess tools (``blockMesh``, ``setAlphaField``, ...) and
+   ``system/postProcess.yaml`` the in-situ tables the solver writes (below).
 ``reference/``
    Stored tables (CSV), read by the checks and the plots.
 ``plots.py``
    ``plot(results, references, out)``, using helpers from
    ``neofoam_verification.suite.plots``.
 ``metrics.py`` (optional)
-   ``metrics(case) -> DataFrame``, for solvers that write no tables of their own.
+   What the in-situ tables cannot do: ``derive(history, case) -> DataFrame``, columns
+   derived from a case's tables when they are collected (a maximum over time, a ratio),
+   and/or ``metrics(case) -> DataFrame``, a table per case from its log or fields.
 
 ``pixi run benchmark`` exports ``benchmark.yaml`` as a NeoFOAM ``Sweep`` and runs it:
 
@@ -137,6 +150,35 @@ the reference applications. Snakemake tracks ``benchmark.yaml``, ``plots.py``,
 ``metrics.py`` and the reference tables, so changing a check reruns only ``verify`` and
 ``report``.
 
+In-situ tables
+~~~~~~~~~~~~~~
+
+The solvers run NeoFOAM's ``postProcess`` model: ``case/system/postProcess.yaml``
+declares tables, each a source, a pipeline of nodes and a write control, and the solver
+appends a row per evaluation to ``postProcessing/<name>.csv`` (NeoFOAM's
+``doc/reference/postprocessing.rst``). For example the static drop's spurious current
+and the pressure inside the drop, at the field write times:
+
+.. code-block:: yaml
+
+   tables:
+     - name: maxU
+       source: {type: internal, field: U}
+       pipeline: [{type: mag}, {type: max, name: maxU}]
+       write_control: {write_control_type: stepper}
+     - name: p_inside
+       source: {type: internal, field: p_rgh}
+       pipeline:
+         - {type: sphere, center: [0.004, 0.004, 0.0001], radius: 0.001}
+         - {type: mean, name: p_inside}
+       write_control: {write_control_type: stepper}
+
+On the NeoN solvers only the ``internal`` source works, on the registry fields
+(``alpha1``, ``U``, ``p_rgh``, ``p``, ``rho``). This repository adds the sources
+``shapeError`` (TwoPhaseFlow's Eshape integrand) and ``startField`` (a field at the start
+time) and the nodes ``hydrostaticError`` and ``change``, registered through the
+``neofoam.plugins`` entry point ``neofoam_verification.postprocess``.
+
 ``benchmark.yaml`` keys
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -157,8 +199,12 @@ the reference applications. Snakemake tracks ``benchmark.yaml``, ``plots.py``,
    ``{script, prune}``: the per-case metrics script, and whether to prune time
    directories.
 ``collect``
-   ``tables`` (function-object ``.dat`` files, last row taken) and ``columns``
-   (dimension → column name in ``results.csv``).
+   ``tables``: the case's tables, NeoFOAM ``postProcess`` CSVs and function-object
+   ``.dat`` files, merged on the time (a later table's column replaces an earlier one);
+   ``derive``: ``metrics.py`` with ``derive(history, case)``, columns added to the
+   merged table; ``history``: ``true`` writes ``histories.csv``; ``profiles``: per-case
+   files concatenated into ``profiles.csv``; ``columns``: dimension → column name in
+   ``results.csv``, whose row per case is the last row of the merged table.
 ``checks``
    A list of checks (below).
 ``report``
@@ -194,8 +240,13 @@ Add a benchmark
    ``system/preprocess.yaml``), ``benchmark.yaml``, ``plots.py`` and the stored tables
    in ``reference/``. Copying the closest existing benchmark is the quickest start.
 2. Give the case literal values. The dimensions' payloads override them per case.
-3. If the solver writes no tables, add ``metrics.py`` and ``metrics: {script:
-   metrics.py, prune: true}``, and collect ``postProcessing/metrics.dat``.
+3. Declare the metrics as in-situ tables in ``case/system/postProcess.yaml`` and list
+   their CSVs in ``collect.tables``; derive what a table cannot hold (a maximum over
+   time, a ratio of two tables) in ``metrics.py``'s ``derive`` (``collect.derive``). For
+   what needs the log or a whole field, add ``metrics(case)`` and ``metrics: {script:
+   metrics.py, prune: true}``, and collect ``postProcessing/metrics.dat``. Plots read
+   ``histories.csv`` and ``profiles.csv`` (``histories()``, ``profiles()``), never the
+   cases.
 4. Run ``pixi run benchmark benchmarks/<category>/<name> --smoke`` and check
    ``report.md``.
 

@@ -55,6 +55,9 @@ Inputs
      - Content
    * - ``case/``
      - base case (mesh, disc, U, controls, schemes)
+   * - ``case/system/postProcess.yaml``, ``metrics.py``
+     - the in-situ tables (every 1 s) and the derived ``Emass``, ``Ebound``, as in
+       :doc:`disc_uni_flow`
    * - ``reference/twophaseflow_mules.csv``
      - TwoPhaseFlow ``advectorVoF`` with ``MULESScheme`` (OpenFOAM-v2506)
    * - ``reference/twophaseflow_isoadvection.csv``
