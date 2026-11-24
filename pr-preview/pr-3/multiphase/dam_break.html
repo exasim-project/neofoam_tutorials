@@ -1,0 +1,569 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="prev" title="acceleration/tiltedBox" href="tilted_box.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>freeSurface/damBreak - NeoFOAM verification</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">NeoFOAM verification</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">NeoFOAM verification</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../single_phase/index.html">Single phase</a><input aria-label="Toggle navigation of Single phase" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../single_phase/cavity.html">singlePhase/cavity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../single_phase/pitz_daily.html">singlePhase/pitzDaily</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Multiphase</a><input aria-label="Toggle navigation of Multiphase" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="circle.html">reconstruction/circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="disc_uni_flow.html">advection/discUniFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="disc_uni_flow_testsuite.html">advection/discUniFlowTestsuite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static_drop.html">surfaceTension/staticDrop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tilted_box.html">acceleration/tiltedBox</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">freeSurface/damBreak</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/multiphase/dam_break.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="freesurface-dambreak">
+<h1>freeSurface/damBreak<a class="headerlink" href="#freesurface-dambreak" title="Link to this heading">¶</a></h1>
+<section id="why-and-what-is-tested">
+<h2>Why and what is tested<a class="headerlink" href="#why-and-what-is-tested" title="Link to this heading">¶</a></h2>
+<p>A water column that collapses under gravity puts NeoFOAM’s full two-phase solver
+<code class="docutils literal notranslate"><span class="pre">incompressibleVoFNeoN</span></code> (MULES advection, gravity across a density ratio of 1000, the
+PIMPLE pressure-velocity coupling) through a fast free-surface flow. The speed of the
+surge front along the floor is the classic measurable of this flow: Martin &amp; Moyce (1952)
+recorded it for collapsing columns twice as high as wide, the shape of the OpenFOAM
+<code class="docutils literal notranslate"><span class="pre">damBreak</span></code> tutorial’s column. The benchmark reproduces NeoFOAM’s tests
+<code class="docutils literal notranslate"><span class="pre">test_damBreak_comparison</span></code> (fixed time step) and <code class="docutils literal notranslate"><span class="pre">test_damBreak_adaptive_time_step</span></code>
+(interFoam’s adaptive time step) and shows the front against the experiment and against
+native interFoam on the same meshes.</p>
+</section>
+<section id="case">
+<h2>Case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
+<p>OpenFOAM’s <code class="docutils literal notranslate"><span class="pre">damBreak</span></code> tutorial, 0.584 m × 0.584 m (x-y, one cell in z) in five blocks:
+a water column a = 0.1461 m wide and 0.292 m high (n² = 2) against the left wall, an
+obstacle 0.024 m wide and 0.048 m high at x = 0.292 m on the floor, walls on three sides
+and an open top (<code class="docutils literal notranslate"><span class="pre">atmosphere</span></code>). Water and air (ρ = 1000/1, ν = 1e-6/1.48e-5), g =
+9.81 m/s², no surface tension (σ = 0), MULES, to t = 0.2 s. The column is set by
+<code class="docutils literal notranslate"><span class="pre">setAlphaField</span></code> with <code class="docutils literal notranslate"><span class="pre">system/setAlphaField.py</span></code> (the cells whose centre is in the
+box, as the tutorial’s <code class="docutils literal notranslate"><span class="pre">setFieldsDict</span></code>; NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">setFields</span></code> fails on the
+atmosphere’s <code class="docutils literal notranslate"><span class="pre">inletOutlet</span></code> before the first flux exists). Both solvers
+use a diagonal preconditioner for <code class="docutils literal notranslate"><span class="pre">p_rgh</span></code> and diagonal PBiCGStab for the MULES
+corrector, as NeoFOAM’s tests (NeoN’s DIC factorisation fails on this matrix).</p>
+<p>The front is the largest x of the cell centres with α &gt; 0.5 in the bottom cells (y ≤
+0.01 m; this repository’s <code class="docutils literal notranslate"><span class="pre">phaseExtent</span></code> node), written every time step and shown as
+Martin &amp; Moyce’s Z = x/a over T = n t (g/a)^½. On a mesh it moves in steps of one cell
+width (ΔZ = 0.087 on <code class="docutils literal notranslate"><span class="pre">x1</span></code>). The comparison with the experiment holds until the front
+reaches the obstacle at Z = 2.0.</p>
+<section id="reference-data">
+<h3>Reference data<a class="headerlink" href="#reference-data" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">reference/martin_moyce.csv</span></code>: Martin, J. C. &amp; Moyce, W. J. (1952), Part IV. An
+experimental study of the collapse of liquid columns on a rigid horizontal plane,
+<em>Phil. Trans. R. Soc. A</em> 244, 312–324, Table 2 (rectangular section, n² = 2): the mean
+T at each Z of the runs with a = 1⅛ in. (28.6 mm) and a = 2¼ in. (57.2 mm). The paper
+shifts the time of every run so that T = 1.19 at Z = 1.44, as the instant of release is
+uncertain; the simulation’s T counts from the release. Five points lie before the
+obstacle (Z = 1.11 … 1.89).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reference/interfoam_front.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">interfoam_time_steps.csv</span></code>: interFoam of
+OpenFOAM-v2406 on this case per mesh and time step: the front at the field write times
+(every 0.01 s, the same definition) and the adaptive time steps.</p></li>
+</ul>
+</section>
+</section>
+<section id="parameter-changes">
+<h2>Parameter changes<a class="headerlink" href="#parameter-changes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16.0%" />
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 14.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Meaning</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Smoke run</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Mesh</p></td>
+<td><p>cells per direction (<code class="docutils literal notranslate"><span class="pre">blockMeshDict</span></code> blocks); shown: the first of five blocks; <code class="docutils literal notranslate"><span class="pre">x1</span></code> is OpenFOAM’s tutorial mesh (2 268 cells), <code class="docutils literal notranslate"><span class="pre">x2</span></code> doubles every block (9 072 cells)</p></td>
+<td><p>23 × 8, 46 × 16</p></td>
+<td><p>23 × 8</p></td>
+</tr>
+<tr class="row-odd"><td><p>Time step (<code class="docutils literal notranslate"><span class="pre">adjustTimeStep</span></code>)</p></td>
+<td><p>fixed <code class="docutils literal notranslate"><span class="pre">deltaT</span></code> or adaptive (<code class="docutils literal notranslate"><span class="pre">maxCo</span></code>, <code class="docutils literal notranslate"><span class="pre">maxAlphaCo</span></code>); fixed: <code class="docutils literal notranslate"><span class="pre">deltaT</span></code> 1e-3; adaptive: <code class="docutils literal notranslate"><span class="pre">maxCo</span></code> = <code class="docutils literal notranslate"><span class="pre">maxAlphaCo</span></code> = 1</p></td>
+<td><p>False, True</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>Executor</p></td>
+<td><p>NeoN backend (<code class="docutils literal notranslate"><span class="pre">controlDict</span></code> <code class="docutils literal notranslate"><span class="pre">executor</span></code>)</p></td>
+<td><p>Serial, CPU (OpenMP), GPU (CUDA)</p></td>
+<td><p>Serial</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>12 cases</strong> (2 × 2 × 3); the smoke run (<code class="docutils literal notranslate"><span class="pre">--smoke</span></code>) has 1. The raw payloads are in <code class="docutils literal notranslate"><span class="pre">benchmarks/freeSurface/damBreak/benchmark.yaml</span></code>.</p>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
+<figure class="align-default" id="id1">
+<img alt="deltaT" src="../_images/deltaT.png" />
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">deltaT</span></code></span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id2">
+<img alt="front_adaptive" src="../_images/front_adaptive.png" />
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">front_adaptive</span></code></span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id3">
+<img alt="front_fixed" src="../_images/front_fixed.png" />
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">front_fixed</span></code></span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Time step</p></th>
+<th class="head"><p>Mesh</p></th>
+<th class="head"><p>steps</p></th>
+<th class="head"><p>T at Z = 1.89</p></th>
+<th class="head"><p>water volume change</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>adaptive</p></td>
+<td><p>x1</p></td>
+<td><p>84</p></td>
+<td><p>1.506</p></td>
+<td><p>-2.428e-07</p></td>
+</tr>
+<tr class="row-odd"><td><p>adaptive</p></td>
+<td><p>x2</p></td>
+<td><p>142</p></td>
+<td><p>1.332</p></td>
+<td><p>-6.712e-07</p></td>
+</tr>
+<tr class="row-even"><td><p>fixed</p></td>
+<td><p>x1</p></td>
+<td><p>200</p></td>
+<td><p>1.402</p></td>
+<td><p>-4.831e-07</p></td>
+</tr>
+<tr class="row-odd"><td><p>fixed</p></td>
+<td><p>x2</p></td>
+<td><p>200</p></td>
+<td><p>1.344</p></td>
+<td><p>-6.939e-07</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Rows: the Serial executor. CPU and GPU agree with it to 1e-08 (relative, in these columns; round-off values below 1e-10 left out).</p>
+<p>All 12 cases and columns: <a class="reference download internal" download="" href="../_downloads/3500c5ef40a6c48fb845b95a08255dad/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, changes against the previous snapshot: <a class="reference download internal" download="" href="../_downloads/78150417266a4d66f1fcd06afbb93275/changes.json"><code class="xref download docutils literal notranslate"><span class="pre">changes.json</span></code></a>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">front_fixed</span></code>, <code class="docutils literal notranslate"><span class="pre">front_adaptive</span></code>: NeoFOAM’s front is in the same cell as
+interFoam’s (crosses) at every write time, on both meshes, both time steps and every
+executor; the executors agree to round-off. It reaches Z = 1.89 at T = 1.40 (<code class="docutils literal notranslate"><span class="pre">x1</span></code>)
+and 1.34 (<code class="docutils literal notranslate"><span class="pre">x2</span></code>) with the fixed step, 1.51 and 1.33 with the adaptive one, and stops
+in the last bottom cell before the obstacle (Z = 1.96, 1.98).</p></li>
+<li><p>Against Martin &amp; Moyce the front runs ahead: it reaches Z = 1.44 at T = 0.89 … 0.93,
+the experiment at 1.19; Z = 1.89 at T = 1.33 … 1.51, the experiment at 1.58 (a =
+28 mm) and 1.63 (57 mm). Much of the lead is the experiment’s time origin (each run’s
+T is shifted to 1.19 at Z = 1.44, as the release is not instantaneous). The mean speed
+over Z = 1.44 … 1.89, ΔZ/ΔT, is 0.78 … 1.0 in the simulations (one cell is ΔZ =
+0.087 on <code class="docutils literal notranslate"><span class="pre">x1</span></code>) and 1.15 and 1.02 in the experiment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deltaT</span></code>: the adaptive time steps are interFoam’s, step for step (84 steps on
+<code class="docutils literal notranslate"><span class="pre">x1</span></code>, 142 on <code class="docutils literal notranslate"><span class="pre">x2</span></code>), to the 8 digits the logs print.</p></li>
+<li><p>The water volume changes by less than 1e-6 (MULES with <code class="docutils literal notranslate"><span class="pre">cAlpha</span></code> 1 and the open top).</p></li>
+</ul>
+<p>Against the previous snapshot: 0 flagged (a metric off by more than a factor 2, a case missing or NaN), 12 new cases.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>column</p></th>
+<th class="head"><p>change</p></th>
+<th class="head"><p>snapshot</p></th>
+<th class="head"><p>run</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>adaptive_x1_CPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>adaptive_x2_CPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>adaptive_x1_GPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>adaptive_x2_GPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>adaptive_x1_Serial</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>adaptive_x2_Serial</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>fixed_x1_CPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>fixed_x2_CPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>fixed_x1_GPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>fixed_x2_GPU</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>fixed_x1_Serial</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>fixed_x2_Serial</p></td>
+<td></td>
+<td><p><strong>new</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="tilted_box.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">acceleration/tiltedBox</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, NeoFOAM authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">freeSurface/damBreak</a><ul>
+<li><a class="reference internal" href="#why-and-what-is-tested">Why and what is tested</a></li>
+<li><a class="reference internal" href="#case">Case</a><ul>
+<li><a class="reference internal" href="#reference-data">Reference data</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parameter-changes">Parameter changes</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
