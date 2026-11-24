@@ -1,9 +1,0 @@
-# The tutorial's setFieldsDict: water (alpha.water 1) in the cells whose centre is in the
-# box x <= 0.1461, y <= 0.292, the column a = 0.1461 wide and 2a high (Martin & Moyce's
-# n^2 = 2); air elsewhere.
-defaults:
-  alpha.water: 0
-regions:
-  - region: {type: box, min: [0, 0, -1], max: [0.1461, 0.292, 1]}
-    values:
-      alpha.water: 1

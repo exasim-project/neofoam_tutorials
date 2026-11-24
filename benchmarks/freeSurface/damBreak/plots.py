@@ -16,7 +16,7 @@ import pandas as pd
 from neofoam_tutorials.suite.plots import histories, history_plot, save
 
 BY = ["mesh", "executor"]
-#: the case's column (system/setFields.yaml) and g, for interFoam's front
+#: the case's column (system/setAlphaField.py) and g, for interFoam's front
 WIDTH, HEIGHT, G = 0.1461, 0.292, 9.81
 OBSTACLE_Z = 0.292 / WIDTH
 INTERFOAM_MARKERS = {"x1": "kx", "x2": "k+"}

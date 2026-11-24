@@ -21,8 +21,10 @@ OpenFOAM's ``damBreak`` tutorial, 0.584 m × 0.584 m (x-y, one cell in z) in fiv
 a water column a = 0.1461 m wide and 0.292 m high (n² = 2) against the left wall, an
 obstacle 0.024 m wide and 0.048 m high at x = 0.292 m on the floor, walls on three sides
 and an open top (``atmosphere``). Water and air (ρ = 1000/1, ν = 1e-6/1.48e-5), g =
-9.81 m/s², no surface tension (σ = 0), MULES, to t = 0.2 s. The column is set with
-``setFields`` (cell centres in the box), as the tutorial's ``setFieldsDict``. Both solvers
+9.81 m/s², no surface tension (σ = 0), MULES, to t = 0.2 s. The column is set by
+``setAlphaField`` with ``system/setAlphaField.py`` (the cells whose centre is in the
+box, as the tutorial's ``setFieldsDict``; NeoFOAM's ``setFields`` fails on the
+atmosphere's ``inletOutlet`` before the first flux exists). Both solvers
 use a diagonal preconditioner for ``p_rgh`` and diagonal PBiCGStab for the MULES
 corrector, as NeoFOAM's tests (NeoN's DIC factorisation fails on this matrix).
 

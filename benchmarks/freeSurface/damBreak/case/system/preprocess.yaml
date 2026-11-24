@@ -1,6 +1,7 @@
-# blockMesh runs once per mesh variant of a sweep, setFields per case: the water column
-# of system/setFields.yaml (the tutorial's setFieldsDict boxToCell) into 0/alpha.water.
+# blockMesh runs once per mesh variant of a sweep, setAlphaField per case: the water column
+# of the tutorial's setFieldsDict (boxToCell, by cell centre) into 0/alpha.water by
+# system/setAlphaField.py.
 tools:
   - tool: blockMesh
-  - tool: setFields
+  - tool: setAlphaField
     depends_on: [blockMesh]

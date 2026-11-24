@@ -6,7 +6,7 @@ the largest x of the bottom cells' centres with alpha > 0.5, every step; ``water
 
 * ``Z``, ``T`` -- Martin & Moyce's non-dimensional front ``x/a`` and time
   ``n t sqrt(g/a)``, ``a`` the column's width and ``n^2 a`` its height
-  (``system/setFields.yaml``'s box), ``g`` of ``constant/g``;
+  (``COLUMN`` of ``system/setAlphaField.py``), ``g`` of ``constant/g``;
 * ``deltaT``, ``steps`` -- the time step and the number of steps so far;
 * ``T_Z189`` -- ``T`` when the front first reaches Z = 1.89, Martin & Moyce's last
   point before the obstacle (NaN before);
@@ -15,19 +15,18 @@ the largest x of the bottom cells' centres with alpha > 0.5, every step; ``water
 
 from __future__ import annotations
 
+import runpy
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import yaml
 from foamlib import FoamFile
 
 Z_LAST_BEFORE_OBSTACLE = 1.89
 
 
 def derive(history: pd.DataFrame, case: Path) -> pd.DataFrame:
-    setfields = yaml.safe_load((case / "system" / "setFields.yaml").read_text())
-    width, height, _ = setfields["regions"][0]["region"]["max"]
+    width, height, _ = runpy.run_path(str(case / "system" / "setAlphaField.py"))["COLUMN"][1]
     g = float(np.linalg.norm(FoamFile(case / "constant" / "g")["value"]))
 
     time = history["Time"].to_numpy()
