@@ -268,8 +268,8 @@ in ``benchmark.yaml``.
 Change sweeps
 -------------
 
-Edit ``benchmark.yaml``. To add a resolution, add a variant to ``mesh`` (each
-benchmark page lists its larger meshes). Then rerun the printed Snakemake command: only
+Edit ``benchmark.yaml``. To add a resolution, add a variant to ``mesh`` (most
+``benchmark.yaml`` files note their larger meshes in a comment). Then rerun the printed Snakemake command: only
 the affected steps run again.
 
 .. _refresh-the-results:

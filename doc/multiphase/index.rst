@@ -3,8 +3,8 @@ Multiphase
 
 These benchmarks cover the building blocks of a geometric VoF solver: interface
 reconstruction, interface advection, surface tension, and gravity across the interface.
-Each page describes the setup, the metrics, the current results and the changes since
-the previous snapshot.
+Each page says what is tested and why, describes the case and the parameter changes,
+and shows and explains the results.
 
 .. list-table::
    :header-rows: 1
