@@ -10,6 +10,6 @@ Path-scoped rules, loaded when Claude works on matching files:
 - **[`.claude/rules/code-style.md`](.claude/rules/code-style.md)**: `src/`, `benchmarks/`, `doc/_scripts/`
 - **[`.claude/rules/test-style.md`](.claude/rules/test-style.md)**: `test/`, `benchmarks/**/test_*.py`
 - **[`.claude/rules/benchmarks.md`](.claude/rules/benchmarks.md)**: `benchmarks/` (reproducible runs, solver outputs, shared gathering and plots)
-- **[`.claude/rules/docs.md`](.claude/rules/docs.md)**: `doc/` (benchmark pages, snapshot)
+- **[`.claude/rules/docs.md`](.claude/rules/docs.md)**: `doc/` (what is tested, case, parameter table, results)
 
 Never delete or weaken an existing test to get green — surface the conflict instead.
