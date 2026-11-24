@@ -1,0 +1,17 @@
+# NeoFOAM's in-situ tables (postProcessing/<name>.csv) on incompressibleVoFNeoN's registry
+# fields: the surge front, every time step -- the largest x of the cell centres with
+# alpha > 0.5 in the bottom cells (y <= 0.01; phaseExtent, this repository's node) -- and
+# the water volume at the field write times (every 0.01). collect derives the
+# non-dimensional front Z = x/a and time T = t sqrt(2g/a) (metrics.py).
+tables:
+  - name: front
+    source: {type: internal, field: alpha1}
+    pipeline:
+      - {type: phaseExtent, direction: [1, 0, 0]}
+      - {type: box, min: [-1, -1, -1], max: [1, 0.01, 1]}
+      - {type: max, name: front}
+    write_control: {write_control_type: timeStep, interval: 1}
+  - name: water
+    source: {type: internal, field: alpha1}
+    pipeline: [{type: volIntegrate, name: water}]
+    write_control: {write_control_type: stepper}

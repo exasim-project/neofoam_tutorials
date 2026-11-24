@@ -79,6 +79,10 @@ CONTROL_DICT = {
     "maxAlphaCo": ("CFL (``maxAlphaCo``)", "interface Courant number; sets the fixed dt"),
     "deltaT": ("Time step (``deltaT``)", "fixed time step [s]"),
     "endTime": ("End time (``endTime``)", "simulated time [s]"),
+    "adjustTimeStep": (
+        "Time step (``adjustTimeStep``)",
+        "fixed ``deltaT`` or adaptive (``maxCo``, ``maxAlphaCo``)",
+    ),
 }
 
 #: benchmark -> dimension -> a remark appended to the meaning
@@ -88,6 +92,11 @@ NOTES: dict[str, dict[str, str]] = {
     "singlePhase/pitzDaily": {
         "mesh": "shown: the first of five blocks; ``tutorial`` is OpenFOAM's mesh (12 225 "
         "cells), ``coarse`` halves every block (3 122 cells)"
+    },
+    "freeSurface/damBreak": {
+        "mesh": "shown: the first of five blocks; ``x1`` is OpenFOAM's tutorial mesh (2 268 "
+        "cells), ``x2`` doubles every block (9 072 cells)",
+        "control_dict_config": "fixed: ``deltaT`` 1e-3; adaptive: ``maxCo`` = ``maxAlphaCo`` = 1",
     },
 }
 
@@ -150,6 +159,7 @@ KEY = {
     "advection/discUniFlowTestsuite": ["Eshape", "Emass", "Ebound", "steps"],
     "surfaceTension/staticDrop": ["dp", "sigma_R", "dp_err", "maxU_max", "Ca_max"],
     "acceleration/tiltedBox": ["maxU_10ms", "maxU_max", "p_err_max", "p_err_mean"],
+    "freeSurface/damBreak": ["steps", "T_Z189", "water_change"],
     "singlePhase/cavity": ["u_L2", "u_Linf", "v_L2", "v_Linf", "dU", "steps"],
     "singlePhase/pitzDaily": ["nCells", "x_r_h", "Umin_xh1", "Umin_xh3", "Umin_xh5"],
 }
@@ -158,6 +168,7 @@ KEY = {
 HEADERS = {
     "mesh": "Mesh",
     "method": "Method",
+    "time_step": "Time step",
     "CFL": "CFL",
     "LNormalInf": "normal L∞",
     "LNormal1": "normal L1",
@@ -175,6 +186,8 @@ HEADERS = {
     "maxU_10ms": "max\\|U\\| at 0.01 s [m/s]",
     "p_err_max": "p error max",
     "p_err_mean": "p error mean",
+    "T_Z189": "T at Z = 1.89",
+    "water_change": "water volume change",
     "u_L2": "u error L2 [m/s]",
     "u_Linf": "u error L∞ [m/s]",
     "v_L2": "v error L2 [m/s]",

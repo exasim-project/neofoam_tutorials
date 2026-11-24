@@ -2,10 +2,10 @@
 
 * ``shapeError`` -- ``|alpha - alpha_exact|`` per cell, so ``volIntegrate`` is Eshape
   (``sum V |alpha - alpha_exact|``). ``alpha_exact`` is the cut-cell volume fraction
-  (NeoFOAM's ``cutCellIso``: :func:`neofoam.preprocess.cut_cell_iso.volume_fraction`) of
-  the implicit function (:func:`neofoam.preprocess.implicit_functions.implicit_function_value`)
-  moved by ``U0 t`` when ``|U|`` is uniform (``max |U| - min |U| <= SMALL``, ``U0`` the
-  velocity of cell 0), else of the shape itself, as the function object does::
+  (TwoPhaseFlow's ``cutCellIso``: :func:`neofoam_tutorials.cut_cell.exact_alpha`) of
+  the implicit function (:mod:`neofoam_tutorials.shapes`) moved by ``U0 t`` when ``|U|``
+  is uniform (``max |U| - min |U| <= SMALL``, ``U0`` the velocity of cell 0), else of the
+  shape itself, as the function object does::
 
       - name: Eshape
         source: {type: shapeError, function_type: cylinder, origin: [0.25, 0, 0.25],
@@ -33,11 +33,11 @@ from typing import Any, Literal, Optional
 import numpy as np
 from neofoam.framework.context import Context
 from neofoam.postprocess import InternalDataSet, Source
-from neofoam.preprocess.cut_cell_iso import SMALL, PolyMeshTopology, volume_fraction
-from neofoam.preprocess.implicit_functions import implicit_function_value
 from pydantic import PrivateAttr
 
-from ..foam import read_internal_field
+from ..cut_cell import SMALL, exact_alpha
+from ..foam import PolyMesh, read_internal_field
+from ..shapes import Cylinder, Sphere
 from ._host import HostCells, internal_values
 
 Point = tuple[float, float, float]
@@ -59,23 +59,27 @@ class ShapeError(Source):  # type: ignore[misc]
     radius: float
     direction: Optional[Point] = None
 
-    _topology: Any = PrivateAttr(default=None)
+    _poly_mesh: Any = PrivateAttr(default=None)
 
     def resolve(self, ctx: Context) -> InternalDataSet:
-        if self._topology is None:
-            self._topology = PolyMeshTopology.read(Path("."))
+        if self._poly_mesh is None:
+            self._poly_mesh = PolyMesh.read(Path("."))
         cells = _cells(ctx.mesh)
         velocities = internal_values(ctx.fields[self.velocity])
         mag_u = np.sqrt(np.einsum("ij,ij->i", velocities, velocities))
         origin = np.asarray(self.origin, dtype=float)
         if mag_u.max() - mag_u.min() <= SMALL:
             origin = origin + velocities[0] * ctx.time.value
-        f = implicit_function_value(
-            self.function_type, self._topology.points, origin, self.radius, self.direction
-        )
-        exact = volume_fraction(self._topology, f, cells.volumes())
+        exact = exact_alpha(self._poly_mesh, self._shape(origin).value(self._poly_mesh.points))
         alpha = internal_values(ctx.fields[self.field])
         return InternalDataSet(name="shapeError", field=np.abs(alpha - exact), geometry=cells)
+
+    def _shape(self, origin: Any) -> Cylinder | Sphere:
+        centre = (float(origin[0]), float(origin[1]), float(origin[2]))
+        if self.function_type == "sphere":
+            return Sphere(origin=centre, radius=self.radius)
+        assert self.direction is not None, "shapeError: a cylinder needs a direction"
+        return Cylinder(origin=centre, radius=self.radius, direction=self.direction)
 
 
 @Source.register

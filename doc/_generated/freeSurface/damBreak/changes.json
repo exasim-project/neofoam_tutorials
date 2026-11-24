@@ -1,0 +1,88 @@
+{
+  "changes": [
+    {
+      "case": "adaptive_x1_CPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "adaptive_x2_CPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "adaptive_x1_GPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "adaptive_x2_GPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "adaptive_x1_Serial",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "adaptive_x2_Serial",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "fixed_x1_CPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "fixed_x2_CPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "fixed_x1_GPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "fixed_x2_GPU",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "fixed_x1_Serial",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    },
+    {
+      "case": "fixed_x2_Serial",
+      "column": "",
+      "kind": "new",
+      "old": null,
+      "new": null
+    }
+  ]
+}

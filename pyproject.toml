@@ -8,15 +8,22 @@ requires-python = ">=3.10"
 # into it from a checkout by `pixi run install-neofoam` (the pip installs use --no-deps).
 dependencies = ["neofoam"]
 
-# The NeoFOAM benchmark solvers: `neofoam solver <name>`.
+# The NeoFOAM benchmark solvers: `neofoam solver <name>` runs the `run(argv)` of
+# neofoam.solvers; a sweep resolves the solver spec (its configs) of neofoam.region_solvers.
 [project.entry-points."neofoam.solvers"]
-reconstructInterface = "neofoam_tutorials.solvers.reconstruct_interface"
-advectorVoF = "neofoam_tutorials.solvers.advector_vof"
-incompressibleVoFNeoNSweep = "neofoam_tutorials.solvers.vof_neon"
-incompressibleFluidNeoNSweep = "neofoam_tutorials.solvers.fluid_neon"
+reconstructInterface = "neofoam_tutorials.solvers.reconstruct_interface:run"
+advectorVoF = "neofoam_tutorials.solvers.advector_vof:run"
+incompressibleVoFNeoNSweep = "neofoam_tutorials.solvers.vof_neon:run"
+incompressibleFluidNeoNSweep = "neofoam_tutorials.solvers.fluid_neon:run"
+
+[project.entry-points."neofoam.region_solvers"]
+reconstructInterface = "neofoam_tutorials.solvers.reconstruct_interface:reconstructInterface"
+advectorVoF = "neofoam_tutorials.solvers.advector_vof:advectorVoF"
+incompressibleVoFNeoNSweep = "neofoam_tutorials.solvers.vof_neon:incompressibleVoFNeoNSweep"
+incompressibleFluidNeoNSweep = "neofoam_tutorials.solvers.fluid_neon:incompressibleFluidNeoNSweep"
 
 # NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool and the postProcess
-# sources and nodes (shapeError, startField, hydrostaticError, change).
+# sources and nodes (shapeError, startField, phaseExtent, hydrostaticError, change).
 [project.entry-points."neofoam.plugins"]
 setAlphaPlane = "neofoam_tutorials.tools.set_alpha_plane"
 verificationPostProcess = "neofoam_tutorials.postprocess"

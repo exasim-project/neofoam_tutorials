@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     interFoam;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+// the surge front reaches the obstacle (x = 0.292) at about t = 0.14
+endTime         0.2;
+deltaT          0.001;
+
+// the fields every 0.01 (the front's postProcess table is written every step); with the
+// adaptive time step (benchmark.yaml) the steps are snapped to these write times
+writeControl    adjustable;
+writeInterval   0.01;
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable no;
+
+// the fixed step; benchmark.yaml's time_step dimension switches to the adaptive one
+adjustTimeStep  no;
+maxCo           1;
+maxAlphaCo      1;
+maxDeltaT       1;
+
+// the NeoN executor (NeoNControlConfig); the sweep sets it
+executor        Serial;
+
+// ************************************************************************* //

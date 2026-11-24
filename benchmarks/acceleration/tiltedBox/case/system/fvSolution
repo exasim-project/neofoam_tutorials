@@ -15,9 +15,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// isoAdvector with gradAlpha (TwoPhaseFlow: isoAdvection with plicRDF, which NeoFOAM has
-// not), interIsoFoam's controls; p_rgh as TwoPhaseFlow's tolerances.
-advectionScheme isoAdvector;
+// MULES with OpenFOAM's default controls: NeoFOAM's VoF stack has no geometric VoF yet;
+// the isoAdvector variant (gradAlpha, interIsoFoam's controls; TwoPhaseFlow: isoAdvection
+// with plicRDF) follows with it. p_rgh as TwoPhaseFlow's tolerances.
+advectionScheme MULES;
 
 solvers
 {
@@ -31,6 +32,9 @@ solvers
         clip            true;
         nAlphaSubCycles 1;
         cAlpha          1;
+        nAlphaCorr      2;
+        MULESCorr       no;
+        nLimiterIter    3;
     }
 
     p_rgh
