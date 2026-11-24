@@ -245,12 +245,18 @@
         <article role="main" id="furo-main-content">
           <section id="reconstruction-circle">
 <h1>reconstruction/circle<a class="headerlink" href="#reconstruction-circle" title="Link to this heading">¶</a></h1>
-<p>Interface reconstruction of a circle on hexahedral meshes. NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">gradAlpha</span></code>
-(Youngs) PLIC reconstruction is compared with TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">reconstructInterface</span></code>
-and with numufoam’s published errors (Scheufler &amp; Roenby, arXiv 1801.05382,
+<section id="why-and-what-is-tested">
+<h2>Why and what is tested<a class="headerlink" href="#why-and-what-is-tested" title="Link to this heading">¶</a></h2>
+<p>Interface reconstruction places a plane (normal and centre) in each interface cell from
+the volume fraction alone; every geometric VoF step starts with it. This benchmark
+reconstructs an exactly initialised circle once, without flow, and measures how far
+NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">gradAlpha</span></code> (Youngs) PLIC planes lie from the exact circle as the mesh is
+refined, next to TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">reconstructInterface</span></code> on the same case (its gradAlpha
+errors are numufoam’s published ones, Scheufler &amp; Roenby, arXiv 1801.05382,
 sec. 4.1.1).</p>
-<section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+</section>
+<section id="case">
+<h2>Case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id1">
 <img alt="Sketch: a disc of radius 0.5 in the 2 x 2 square, an 8 x 8 grid, the box of the 10 random centres" src="../_images/circle.png" />
 <figcaption>
@@ -258,134 +264,13 @@ sec. 4.1.1).</p>
 10 samples moves the disc centre to a random point of the dashed box.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Quantity</p></th>
-<th class="head"><p>Value</p></th>
-<th class="head"><p>Where set</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Domain</p></td>
-<td><p>2 × 2 (x-z), 1 cell in y</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/blockMeshDict</span></code> <code class="docutils literal notranslate"><span class="pre">vertices</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Disc radius R</p></td>
-<td><p>0.49999999</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/setAlphaFieldDict</span></code> <code class="docutils literal notranslate"><span class="pre">radius</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Disc centre o</p></td>
-<td><p>(1.01, 0, 1.01), drawn in [0.9 o, 1.1 o]</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">setAlphaFieldDict</span></code> <code class="docutils literal notranslate"><span class="pre">origin</span></code>; <code class="docutils literal notranslate"><span class="pre">Random(1234567)</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Samples per mesh</p></td>
-<td><p>10</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/preprocess.yaml</span></code> <code class="docutils literal notranslate"><span class="pre">samples</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Alpha field</p></td>
-<td><p>exact cut (<code class="docutils literal notranslate"><span class="pre">cutCellIso</span></code>)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">setAlphaField</span></code> tool</p></td>
-</tr>
-<tr class="row-odd"><td><p>Scheme</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">gradAlpha</span></code>, plane search <code class="docutils literal notranslate"><span class="pre">volTaylor</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code> <code class="docutils literal notranslate"><span class="pre">reconstructionScheme</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Plane tolerance</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">isoFaceTol</span></code> 1e-8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Solver</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">reconstructInterface</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code> <code class="docutils literal notranslate"><span class="pre">solver</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>There is no flow and no time stepping: each sample is reconstructed once and compared
-with the exact circle. The alpha field agrees with OpenFOAM-v2406’s <code class="docutils literal notranslate"><span class="pre">setAlphaField</span></code>
-to round-off.</p>
-<section id="inputs">
-<h3>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 40.0%" />
-<col style="width: 60.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>File (<code class="docutils literal notranslate"><span class="pre">benchmarks/reconstruction/circle/</span></code>)</p></th>
-<th class="head"><p>Content</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">case/</span></code></p></td>
-<td><p>base case (mesh, alpha, scheme, executor)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference/twophaseflow.csv</span></code></p></td>
-<td><p>TwoPhaseFlow (v2506) gradAlpha sweep, n8 to n1024</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference/numufoam_error.csv</span></code></p></td>
-<td><p>numufoam’s table (isoAlpha, plicRDF, gradAlpha); its labels are shifted by one
-(<code class="docutils literal notranslate"><span class="pre">LNormal_1</span></code> holds LNormalInf)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>A disc of radius 0.5 with an exactly cut alpha field (<code class="docutils literal notranslate"><span class="pre">cutCellIso</span></code>), 10 random centres
+per mesh. The normal error is <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">−</span> <span class="pre">n</span> <span class="pre">·</span> <span class="pre">n_exact</span></code> per cell, the centre error the
+distance of the plane centre from the exact circle; L∞ is the maximum over cells and
+samples, L1 the mean.</p>
 </section>
-<section id="metrics">
-<h3>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">¶</a></h3>
-<p>TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">reconstructionError</span></code>, over the interface cells and the 10 samples.</p>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 22.0%" />
-<col style="width: 38.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Metric</p></th>
-<th class="head"><p>Meaning</p></th>
-<th class="head"><p>Formula</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LNormalInf</span></code>, <code class="docutils literal notranslate"><span class="pre">LNormal1</span></code></p></td>
-<td><p>error of the interface normal</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">n</span> <span class="pre">·</span> <span class="pre">n_exact</span></code> per cell; ∞: max over cells and samples, 1: mean over samples
-of the mean over cells</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">LCentreInf</span></code>, <code class="docutils literal notranslate"><span class="pre">LCentre1</span></code></p></td>
-<td><p>error of the interface centre</p></td>
-<td><p>distance of the reconstructed centre from the exact circle, aggregated as above</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">k1</span></code></p></td>
-<td><p>time of one reconstruction [s]</p></td>
-<td><p>mean wall time incl. copy to host, after one untimed warm-up</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">wall_s</span></code></p></td>
-<td><p>solver wall time [s]</p></td>
-<td><p>excluding imports</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="run">
-<h3>Run<a class="headerlink" href="#run" title="Link to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/reconstruction/circle<span class="w"> </span>--smoke<span class="w">   </span><span class="c1"># n8, n16 Serial</span>
-pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/reconstruction/circle<span class="w">           </span><span class="c1"># the full sweep</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="changed-parameters">
-<h2>Changed parameters<a class="headerlink" href="#changed-parameters" title="Link to this heading">¶</a></h2>
+<section id="parameter-changes">
+<h2>Parameter changes<a class="headerlink" href="#parameter-changes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -421,13 +306,6 @@ pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w">
 </table>
 </div>
 <p><strong>24 cases</strong> (8 × 3 × 1); the smoke run (<code class="docutils literal notranslate"><span class="pre">--smoke</span></code>) has 2. The raw payloads are in <code class="docutils literal notranslate"><span class="pre">benchmarks/reconstruction/circle/benchmark.yaml</span></code>.</p>
-<p>The full sweep takes about 1 min with <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">4</span></code>.</p>
-<section id="larger-meshes">
-<h3>Larger meshes<a class="headerlink" href="#larger-meshes" title="Link to this heading">¶</a></h3>
-<p>Add <code class="docutils literal notranslate"><span class="pre">n2048:</span> <span class="pre">{block_mesh_dict_config:</span> <span class="pre">{blocks:</span> <span class="pre">[{cells:</span> <span class="pre">[2048,</span> <span class="pre">1,</span> <span class="pre">2048]}]}}</span></code> to
-<code class="docutils literal notranslate"><span class="pre">mesh</span></code>. The TwoPhaseFlow table ends at n1024, so n2048 enters only the
-plots. Case data grows with n² (the sweep to n1024 needs about 1.5 GB).</p>
-</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
@@ -523,20 +401,18 @@ plots. Case data grows with n² (the sweep to n1024 needs about 1.5 GB).</p>
 <p>Rows: the Serial executor. CPU and GPU are bitwise identical to it in these columns.</p>
 <p>All 24 cases and columns: <a class="reference download internal" download="" href="../_downloads/f1606ec44995cf592b347c3a2190241c/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, changes against the previous snapshot: <a class="reference download internal" download="" href="../_downloads/06567261f71dd2da298de7f3fe9caf1f/changes.json"><code class="xref download docutils literal notranslate"><span class="pre">changes.json</span></code></a>.</p>
 <ul class="simple">
-<li><p><strong>Centre converges at 2nd order</strong> (fitted 1.92 in centre L1, 1.68 in centre L∞), as
-numufoam’s gradAlpha.</p></li>
-<li><p><strong>Normal error is flat</strong>: L∞ stays at 8.4e-3 and L1 at 2.4e-3 from n64 on. That is the
-gradAlpha limit, in OpenFOAM as in NeoFOAM; plicRDF is not yet in NeoN.</p></li>
-<li><p><strong>Parity with TwoPhaseFlow</strong>: the normal norms and centre L∞ agree to 4e-8; centre L1
-differs by up to 4.2e-6 at n1024 because the <code class="docutils literal notranslate"><span class="pre">volTaylor</span></code> plane search stops within
-<code class="docutils literal notranslate"><span class="pre">isoFaceTol</span></code> = 1e-8 of the target volume.</p></li>
-<li><p><strong>Executors</strong>: Serial, CPU and GPU give identical norms; at n1024 the solver takes
-12 / 11 / 9.8 s.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">errors</span></code>: Serial, CPU, GPU and TwoPhaseFlow (dashed) lie on top of each other. The
+centre errors fall at second order (fitted slope over n8 to n1024: 1.92 in L1, 1.68
+in L∞). The normal errors stop falling at n32 and stay at about 8e-3 (L∞) and 2.4e-3
+(L1), as in TwoPhaseFlow: the accuracy of the gradAlpha normal.</p></li>
+<li><p>Against TwoPhaseFlow, the normal norms and centre L∞ differ by at most 4e-8
+(relative); centre L1 by up to 4.2e-6 at n1024, because the <code class="docutils literal notranslate"><span class="pre">volTaylor</span></code> plane
+search stops anywhere within <code class="docutils literal notranslate"><span class="pre">isoFaceTol</span></code> = 1e-8 of the target volume.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k1</span></code>: the time of one reconstruction; the GPU is slower than Serial up to n256 and
+faster from n512 on. <code class="docutils literal notranslate"><span class="pre">wall</span></code>: the solver wall time, 12 / 11 / 9.8 s (Serial / CPU /
+GPU) at n1024.</p></li>
 </ul>
-<section id="changes-since-the-previous-snapshot">
-<h3>Changes since the previous snapshot<a class="headerlink" href="#changes-since-the-previous-snapshot" title="Link to this heading">¶</a></h3>
 <p>Against the previous snapshot: 0 flagged (a metric off by more than a factor 2, a case missing or NaN), 0 new cases.</p>
-</section>
 </section>
 </section>
 
@@ -596,20 +472,10 @@ differs by up to 4.2e-6 at n1024 because the <code class="docutils literal notra
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">reconstruction/circle</a><ul>
-<li><a class="reference internal" href="#setup">Setup</a><ul>
-<li><a class="reference internal" href="#inputs">Inputs</a></li>
-<li><a class="reference internal" href="#metrics">Metrics</a></li>
-<li><a class="reference internal" href="#run">Run</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#changed-parameters">Changed parameters</a><ul>
-<li><a class="reference internal" href="#larger-meshes">Larger meshes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#results">Results</a><ul>
-<li><a class="reference internal" href="#changes-since-the-previous-snapshot">Changes since the previous snapshot</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#why-and-what-is-tested">Why and what is tested</a></li>
+<li><a class="reference internal" href="#case">Case</a></li>
+<li><a class="reference internal" href="#parameter-changes">Parameter changes</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
 </ul>
 </li>
 </ul>
