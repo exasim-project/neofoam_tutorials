@@ -168,6 +168,7 @@ KEY = {
 HEADERS = {
     "mesh": "Mesh",
     "method": "Method",
+    "time_step": "Time step",
     "CFL": "CFL",
     "LNormalInf": "normal L∞",
     "LNormal1": "normal L1",
