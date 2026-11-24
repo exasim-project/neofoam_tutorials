@@ -60,4 +60,19 @@ Results
 
 .. include:: /_generated/freeSurface/damBreak/key_results.rst
 
+- ``front_fixed``, ``front_adaptive``: NeoFOAM's front is in the same cell as
+  interFoam's (crosses) at every write time, on both meshes, both time steps and every
+  executor; the executors agree to round-off. It reaches Z = 1.89 at T = 1.40 (``x1``)
+  and 1.34 (``x2``) with the fixed step, 1.51 and 1.33 with the adaptive one, and stops
+  in the last bottom cell before the obstacle (Z = 1.96, 1.98).
+- Against Martin & Moyce the front runs ahead: it reaches Z = 1.44 at T = 0.89 … 0.93,
+  the experiment at 1.19; Z = 1.89 at T = 1.33 … 1.51, the experiment at 1.58 (a =
+  28 mm) and 1.63 (57 mm). Much of the lead is the experiment's time origin (each run's
+  T is shifted to 1.19 at Z = 1.44, as the release is not instantaneous). The mean speed
+  over Z = 1.44 … 1.89, ΔZ/ΔT, is 0.78 … 1.0 in the simulations (one cell is ΔZ =
+  0.087 on ``x1``) and 1.15 and 1.02 in the experiment.
+- ``deltaT``: the adaptive time steps are interFoam's, step for step (84 steps on
+  ``x1``, 142 on ``x2``), to the 8 digits the logs print.
+- The water volume changes by less than 1e-6 (MULES with ``cAlpha`` 1 and the open top).
+
 .. include:: /_generated/freeSurface/damBreak/changes.rst
