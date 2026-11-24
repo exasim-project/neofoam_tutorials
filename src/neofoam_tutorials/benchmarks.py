@@ -4,7 +4,7 @@ A benchmark is a case directory under ``cases/<name>`` (OpenFOAM format: blockMe
 ``0.orig``, setAlphaFieldDict, the MULES controls in fvSolution/fvSchemes, controlDict
 with end time, write interval and maxAlphaCo) plus what the metrics need to know
 about it: the initial shape, the prescribed velocity and the resolutions.
-``tests/test_benchmarks.py`` checks that the registry and the case files agree.
+``test/test_benchmarks.py`` checks that the registry and the case files agree.
 
 Adding a benchmark (sinWave, tiltedBox) is a case directory plus an entry in
 ``BENCHMARKS``.

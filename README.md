@@ -110,7 +110,7 @@ MULES is not bounded here: with the testsuite's `nAlphaCorr 2` the second correc
 upwind flux is built from the first corrector's alpha but applied to the old one, and
 alpha leaves [0, 1] by up to 6e-3 (deformationSphere); `nLimiterIter 10` or `50`
 change nothing, `nAlphaCorr 1` reduces it to ~1e-5. The library has to reproduce the
-reference's Ebound (tests/test_backend.py).
+reference's Ebound (test/test_neofoam_mules_parity.py).
 
 vortexShearedDisc's final field is ill-conditioned: scaling the initial alpha by
 (1 - 1e-14) changes the C++ reference's alpha at t = 8 by 6.4e-5 / 9.1e-10 / 4.3e-5 /
@@ -125,13 +125,13 @@ cases respond with 2e-13 / 5e-14 and the library matches them to 1e-13.
 (absolute, not normalised), Emass = |sum V alpha - initial mass|, Ebound =
 |max(-min alpha, max alpha - 1)|; alphaExact is the cut-cell volume fraction of the
 initial shape moved by U0 t when |U| is uniform. Against the C++ output of the same
-run (`tests/test_metrics.py`): Eshape to 1e-15 relative, Ebound bitwise, Emass to a
+run (`test/test_twophaseflow_metrics_parity.py`): Eshape to 1e-15 relative, Ebound bitwise, Emass to a
 few ulps of the total volume. The timing columns (tRec, Tadv) are not reproduced.
 
 ## Adding a benchmark
 
 A case directory under `cases/` plus a `Benchmark` entry in `benchmarks.py`;
-`tests/test_benchmarks.py` checks that the two agree.
+`test/test_benchmarks.py` checks that the two agree.
 
 ## Interface reconstruction (geometric VoF)
 
@@ -174,10 +174,10 @@ an octant of the sphere); no curvature. The triangle/tet meshes are the committe
 reference does not depend on a gmsh version. `normal()` points into the fluid
 (alpha = 1), and so does the cut face's area vector. isoAlpha's iso face is not planar
 on hexahedra, so its plane 0 cuts the cell's alpha only to ~1e-3 on curvature3D (to
-1e-8 everywhere else). `tests/test_reconstruction.py` checks the stored files, the
-Python cut cell against the initial alpha (1e-14), gradAlpha's gradient against a numpy
-least-squares fit over the stored stencil, and, marked `geometricvof`, that a rerun
-reproduces them bitwise.
+1e-8 everywhere else). `reference/test_reconstruction_reference.py` checks the stored
+files, gradAlpha's gradient against a numpy least-squares fit over the stored stencil,
+and, marked `geometricvof`, that a rerun reproduces them bitwise;
+`test/test_reconstruction.py` the Python cut cell against the initial alpha (1e-14).
 
 ## isoAdvection face fluxes (geometric VoF)
 
@@ -196,7 +196,7 @@ U at the points, dt, the interface and Un0), one row per `timeIntegratedFaceFlux
 (its arguments, result, point arrival times, branch, time-integrated area and its
 contributions), and the assembled fields (upwind dVf, dVf before and after
 `limitFluxes`, alphaPhi, alpha unbounded and bounded); keys and shapes are documented in
-`src/neofoam_tutorials/advection_flux.py`. `tests/test_advection_flux.py` checks
+`src/neofoam_tutorials/advection_flux.py`. `reference/test_advection_flux_reference.py` checks
 that the assembled fields follow from the rows and the inputs from the reconstruction
 reference, and, marked `geometricvof`, that a rerun reproduces them bitwise.
 
@@ -230,7 +230,7 @@ after 0, 1, 2 iterations and before clipping, the interface with x0, n0 and Un0 
 `interpolationCellPoint`; U and phi for the 2D cases) and the volumeFractionError
 (`metrics.py`) at the write times; keys and shapes are documented in
 `src/neofoam_tutorials/isoadvection.py` (`load_run(label, scheme, velocity)`).
-`tests/test_isoadvection.py` checks the files' consistency (time steps, iterations,
+`reference/test_isoadvection_reference.py` checks the files' consistency (time steps, iterations,
 mass up to the clipping, bounds, step 1 from its face fluxes, the errors), and, marked
 `geometricvof`, that a rerun reproduces them bitwise.
 
@@ -273,7 +273,7 @@ stores `volumeFractionError.dat`, `alpha_final.txt` and `run.json` in
 `reference/<case>/<resolution>/twoPhaseFlowIsoAdvection/<scheme>/` (`load_twophaseflow`).
 TwoPhaseFlow's own isoAdvection on v2506, with `Su = div(phi0) min(alpha, 1)`, agrees
 with the v2406 runs: Eshape to 2e-11 relative, final alpha to 3e-10
-(`tests/test_isoadvection.py`). Wall time (advectorVoF, serial) next to MULES:
+(`reference/test_isoadvection_reference.py`). Wall time (advectorVoF, serial) next to MULES:
 
 | case | MULES | isoAdvection gradAlpha | isoAdvection plicRDF |
 |---|---|---|---|
@@ -449,7 +449,7 @@ at 2.4e-3 from x32), as in the paper.
 `reference/twophaseflow.csv` is the TwoPhaseFlow (v2506) gradAlpha sweep x8 ... x1024
 (stored by the earlier live TwoPhaseFlow backend, fb6a24b), all `error.dat` columns but
 the timings. It agrees with numufoam to 1.9e-10 relative (LCentreInf at x1024;
-`tests/test_circle_reconstruction.py`); fitted order 1.92 in
+`benchmarks/reconstruction/circle/test_reference.py`); fitted order 1.92 in
 LCentre1 and 1.68 in LCentreInf (2.0 down to 1.2 between consecutive resolutions), the
 normal errors do not converge. The alpha samples are NeoFOAM's `setAlphaField` tool
 (`samples: 10`, time directories 1 ... 10, reconstructInterface's centres); they agree

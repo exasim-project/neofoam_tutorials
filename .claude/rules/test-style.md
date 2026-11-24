@@ -1,13 +1,18 @@
 ---
 paths:
-  - "tests/**/*.py"
+  - "test/**/*.py"
+  - "benchmarks/**/test_*.py"
+  - "reference/**/test_*.py"
+  - "conftest.py"
 ---
 
-# Test rules (`tests/`)
+# Test rules (`test/`, `benchmarks/`, `reference/`)
 
 ## Placement
 
-- Unit tests mirror `src/neofoam_tutorials/` 1:1: `metrics.py` → `tests/test_metrics.py`.
+- `test/` tests only the package and mirrors `src/neofoam_tutorials/` 1:1: `metrics.py` → `test/test_metrics.py`, `suite/checks.py` → `test/suite/test_checks.py`.
+- A benchmark's own tests (its `metrics.py`, its `benchmark.yaml` checks on the stored tables) live next to it: `benchmarks/<category>/<name>/test_*.py`.
+- Checks of the committed reference data (shapes, self-consistency, a rerun reproduces it) live in `reference/test_*_reference.py`.
 - Integration/e2e tests are named for the scenario (`test_neon_turbulence_parity.py`), never reusing a source-module name.
 - Prefer the lowest level that can prove the behavior — no solver run for a config check.
 - Tests are free functions, not classes.

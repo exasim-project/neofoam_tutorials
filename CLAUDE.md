@@ -8,6 +8,6 @@ the environment (`pixi install`), the tasks and the layout.
 Path-scoped rules, loaded when Claude works on matching files:
 
 - **[`.claude/rules/code-style.md`](.claude/rules/code-style.md)**: `src/`, `benchmarks/`, `doc/_scripts/`
-- **[`.claude/rules/test-style.md`](.claude/rules/test-style.md)**: `tests/`
+- **[`.claude/rules/test-style.md`](.claude/rules/test-style.md)**: `test/`, `benchmarks/**/test_*.py`, `reference/**/test_*.py`
 
 Never delete or weaken an existing test to get green — surface the conflict instead.
