@@ -30,16 +30,6 @@ def read_internal_field(path: Path, n_cells: int) -> Array:
     return values
 
 
-def read_function_object_dat(path: Path) -> Array:
-    """Rows of a function object's ``.dat`` file (``#`` lines are the header)."""
-    rows = [
-        [float(v) for v in line.split()]
-        for line in path.read_text().splitlines()
-        if line.strip() and not line.startswith("#")
-    ]
-    return np.array(rows, dtype=float)
-
-
 def _face_centres_and_areas(points: Array, faces: list[IntArray]) -> tuple[Array, Array]:
     centres = np.empty((len(faces), 3))
     areas = np.empty((len(faces), 3))

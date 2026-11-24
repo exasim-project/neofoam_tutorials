@@ -21,9 +21,7 @@ curvature and timing columns are not reproduced here.
 
 from __future__ import annotations
 
-import csv
 from dataclasses import dataclass, field
-from pathlib import Path
 
 import numpy as np
 
@@ -86,36 +84,3 @@ class ReconstructionError:
             "LCentreInf": self.centre_inf,
             "LCentre1": float(np.mean(self.centre_means)),
         }
-
-
-#: numufoam's ``getResults.py`` names ``error.dat``'s columns one position off (it counts
-#: from ``Time``): its ``LNormal_1`` is ``LNormalInf``, ``LNormal_Inf`` is ``LNormal1``, and
-#: so on; ``delta`` is ``length``.
-NUMUFOAM_COLUMNS = {
-    "LNormal_1": "LNormalInf",
-    "LNormal_Inf": "LNormal1",
-    "LCentre_1": "LCentreInf",
-    "LCentre_Inf": "LCentre1",
-    "delta": "length",
-    "nCells": "nCells",
-}
-
-
-def read_numufoam(path: Path) -> dict[tuple[str, int], dict[str, float]]:
-    """numufoam's ``error.csv``, ``(scheme, cells per side) -> {COLUMNS name: value}``."""
-    with path.open(newline="") as file:
-        return {
-            (row["Model"], int(row["Res"])): {
-                name: float(row[label]) for label, name in NUMUFOAM_COLUMNS.items()
-            }
-            for row in csv.DictReader(file)
-        }
-
-
-def observed_order(spacing: Array, error: Array) -> Array:
-    """``ln(E_i / E_i+1) / ln(h_i / h_i+1)`` between consecutive resolutions (arXiv eq. 26)."""
-    spacing = np.asarray(spacing, dtype=float)
-    error = np.asarray(error, dtype=float)
-    return np.asarray(
-        np.log(error[:-1] / error[1:]) / np.log(spacing[:-1] / spacing[1:]), dtype=float
-    )

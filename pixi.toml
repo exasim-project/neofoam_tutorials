@@ -6,11 +6,6 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [activation.env]
-# The external reference: TwoPhaseFlow's advectorVoF (MULESScheme) and its
-# volumeFractionError function object, built for OpenFOAM-v2506 under
-# ~/OpenFOAM/<user>-v2506 (TwoPhaseFlow_latest). OpenFOAM-v2406 has no
-# TwoPhaseFlow build, so the C++ reference runs on v2506.
-TWOPHASEFLOW_BASHRC = "$HOME/OpenFOAM/OpenFOAM-v2506/etc/bashrc"
 # NeoFOAM (and its pybFoam) is built against OpenFOAM-v2406; the benchmark workflows
 # run under it (scripts/benchmark.sh). NEOFOAM_SRC is the checkout `pixi run install-neofoam` builds.
 NEOFOAM_BASHRC = "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
@@ -58,7 +53,6 @@ default = ["dev", "neofoam", "docs"]
 
 [tasks]
 install = 'pip install -e . --no-build-isolation --no-deps'
-# The tests marked openfoam run TwoPhaseFlow's advectorVoF and skip without it.
 test = { cmd = "pytest -v", depends-on = ["install"] }
 # Exports a benchmark's NeoFOAM sweep (benchmark.yaml) to results/ and runs it with one
 # snakemake command (printed): pixi run benchmark FOLDER [--smoke] [--method NAME] [-c N]
@@ -66,23 +60,9 @@ benchmark = { cmd = "bash scripts/benchmark.sh", depends-on = ["install"] }
 # Builds and installs NeoFOAM (C++ core, Kokkos OpenMP+CUDA, Ginkgo, pybFoam on v2406)
 # from $NEOFOAM_SRC (or the given checkout) into this environment; 4 jobs, under build.lock.
 install-neofoam = "bash scripts/install_neofoam.sh"
-# Re-runs the C++ MULES reference of every benchmark and rewrites reference/<case>/.
-update-reference = { cmd = "python -m neofoam_tutorials.reference", depends-on = ["install"] }
-# Re-runs the OpenFOAM-v2406 reconstruction reference (reference/reconstructionReference)
-# of every curvature case and rewrites reference/curvature*/.
-update-reconstruction-reference = { cmd = "python -m neofoam_tutorials.reconstruction", depends-on = ["install"] }
-# Re-runs the OpenFOAM-v2406 isoAdvection face-flux reference (reference/advectionFluxReference)
-# of every curvature case and rewrites reference/curvature*/advection/.
-update-advection-flux-reference = { cmd = "python -m neofoam_tutorials.advection_flux", depends-on = ["install"] }
-# Re-runs the OpenFOAM-v2406 multi-step isoAdvection reference (reference/isoAdvectionReference)
-# and rewrites reference/<case>/isoAdvection/ (curvature2D and the TwoPhaseFlow benchmarks).
-update-isoadvection-reference = { cmd = "python -m neofoam_tutorials.isoadvection", depends-on = ["install"] }
-# Re-runs TwoPhaseFlow's advectorVoF with its isoAdvection on the benchmarks (v2506, benchmark
-# context next to MULES) and rewrites reference/<case>/<resolution>/twoPhaseFlowIsoAdvection/.
-update-twophaseflow-isoadvection-reference = { cmd = "python -m neofoam_tutorials.isoadvection --twophaseflow", depends-on = ["install"] }
 # The documentation: copies the benchmark outputs of results/ into doc/_generated/ (the
 # committed snapshot), then builds doc/_build/html with warnings as errors.
 docs = "python doc/_scripts/sync_results.py && sphinx-build -W -b html doc doc/_build/html"
-lint = "ruff check src test benchmarks reference conftest.py && ruff format --check src test benchmarks reference conftest.py"
-format = "ruff format src test benchmarks reference conftest.py && ruff check --fix src test benchmarks reference conftest.py"
+lint = "ruff check src test benchmarks && ruff format --check src test benchmarks"
+format = "ruff format src test benchmarks && ruff check --fix src test benchmarks"
 type-check = "mypy"

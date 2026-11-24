@@ -12,13 +12,10 @@ Adding a benchmark (sinWave, tiltedBox) is a case directory plus an entry in
 
 from __future__ import annotations
 
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from foamlib import FoamFile
-
-from .shapes import Cylinder, Shape, Sphere
+from .shapes import Cylinder, Shape
 
 CASES = Path(__file__).resolve().parents[2] / "cases"
 
@@ -67,19 +64,6 @@ class Benchmark:
     def case_dir(self) -> Path:
         return CASES / self.name
 
-    @property
-    def write_times(self) -> list[float]:
-        n = round(self.end_time / self.write_interval)
-        return [i * self.write_interval for i in range(n + 1)]
-
-    def copy_case(self, dest: Path, resolution: str | None = None) -> Path:
-        """Copy the case to ``dest`` with the blockMeshDict entries of ``resolution``."""
-        shutil.copytree(self.case_dir, dest)
-        block_mesh_dict = FoamFile(dest / "system" / "blockMeshDict")
-        for key, value in self.resolutions[resolution or self.default_resolution].items():
-            block_mesh_dict[key] = value
-        return dest
-
 
 DISC_UNI_FLOW = Benchmark(
     name="discUniFlow",
@@ -94,49 +78,4 @@ DISC_UNI_FLOW = Benchmark(
     default_resolution="100x60",
 )
 
-VORTEX_SHEARED_DISC = Benchmark(
-    name="vortexShearedDisc",
-    # test-vortexShearedDisc: a disc of radius 0.15 at (0.5, 0.75) in the unit square
-    # (x-z), stretched by the single vortex psi = sin^2(pi x) sin^2(pi z)/pi; phi is the
-    # stream function's point-value line integral (generateUVortex2D), divergence-free to
-    # round-off. The flow reverses at t = 4 and the disc is back at t = 8.
-    shape=Cylinder(origin=(0.5, 0.0, 0.75), radius=0.15, direction=(0.0, 1.0, 0.0)),
-    velocity=GeneratedVelocity("generateUVortex2D", period=16.0),
-    end_time=8.0,
-    write_interval=4.0,
-    # the testsuite runs 32 ... 512 cells per side
-    resolutions={f"{n}x{n}": {"nx": n, "nz": n} for n in (32, 64, 128, 256)},
-    default_resolution="128x128",
-)
-
-DEFORMATION_SPHERE = Benchmark(
-    name="deformationSphere",
-    # test-deformationSphere: a sphere of radius 0.15 at (0.5, 0.75, 0.25) in a
-    # 1 x 1 x 2 box, the single vortex in x-y plus w = (1 - 2r)^2 along z
-    # (generateUDeform: face-centre velocity, then CorrectPhi), reversed at t = 1.5.
-    shape=Sphere(origin=(0.5, 0.75, 0.25), radius=0.15),
-    velocity=GeneratedVelocity("generateUDeform", spiralling_flow=3.0),
-    end_time=3.0,
-    write_interval=1.5,
-    # the testsuite runs res x res x 2 res, res = 32, 64, 128; 64 would store 12 MB of alpha
-    resolutions={"32x32x64": {"nx": 32, "ny": 32, "nz": 64}},
-    default_resolution="32x32x64",
-)
-
-LEVEQUE = Benchmark(
-    name="Leveque",
-    # test-Leveque: LeVeque's 3D deformation of a sphere of radius 0.15 at
-    # (0.35, 0.35, 0.35) in the unit cube (generateU: face-centre velocity, then
-    # CorrectPhi), reversed at t = 1.5.
-    shape=Sphere(origin=(0.35, 0.35, 0.35), radius=0.15),
-    velocity=GeneratedVelocity("generateU", spiralling_flow=3.0),
-    end_time=3.0,
-    write_interval=1.5,
-    # the testsuite runs res^3, res = 32, 64, 128; 64 would store 6 MB of alpha
-    resolutions={"32x32x32": {"nx": 32, "ny": 32, "nz": 32}},
-    default_resolution="32x32x32",
-)
-
-BENCHMARKS: dict[str, Benchmark] = {
-    b.name: b for b in (DISC_UNI_FLOW, VORTEX_SHEARED_DISC, DEFORMATION_SPHERE, LEVEQUE)
-}
+BENCHMARKS: dict[str, Benchmark] = {b.name: b for b in (DISC_UNI_FLOW,)}
