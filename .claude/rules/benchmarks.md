@@ -5,30 +5,33 @@ paths:
 
 # Benchmark rules
 
-## Folder
+A benchmark is a reproducible NeoFOAM run that anyone can repeat from pixi and that
+shows the current state of the verification.
 
-- One benchmark = `benchmarks/<category>/<name>/` with `benchmark.yaml`, `case/`,
-  `plots.py`, `reference/` (CSV only), optional `metrics.py` and its `test_metrics.py`.
-- Repeat a published benchmark (TwoPhaseFlow, numufoam, literature): same geometry,
-  parameters and error definitions; cite the source and commit/table at the top of
-  `benchmark.yaml`.
-- Reference numbers of other codes or papers are committed CSVs in `reference/`, never
-  regenerated here; the CSV's source goes in its header comment or `benchmark.yaml`.
+## Reproducible from pixi
+
+- `pixi run benchmark benchmarks/<category>/<name>` runs it end to end, and `--smoke`
+  runs a small subset of it; no manual steps, no machine-specific paths.
+- Everything the run needs is in the benchmark folder (`benchmark.yaml`, `case/`) or the
+  pixi environment.
+- Reference data from other codes or papers is committed in `reference/` (CSV) with
+  its source noted; it is shown next to the results, not used to pass or fail them.
+
+## Outputs come from the solver
+
+- The solver writes the outputs during the run through NeoFOAM's postprocessing
+  (`case/system/postProcess.yaml`).
+- When postprocessing cannot compute something yet, prefer adding a reusable member
+  (NeoFOAM, or this package's `postprocess/`) over a script for one benchmark.
+
+## Gathering and plots use the standard patterns
+
+- Collecting results uses the suite's `collect` spec in `benchmark.yaml`; plots use the
+  helpers in `suite/plots.py` (or NeoFOAM's), so benchmarks look and work alike.
+- A pattern that more than one benchmark needs belongs in the suite, not copied between
+  benchmarks.
 
 ## benchmark.yaml
 
-- Header comment: physics, case, what is swept, where each reference comes from.
-- `dimensions` in NeoFOAM's `params.yaml` shape; always an executor dimension
-  (Serial/CPU/GPU) and a `smoke` subset that runs in under a minute.
-- No pass/fail checks: results are shown, and the change flag against the docs snapshot
-  is the only automatic judgement.
-
-## Metrics and plots
-
-- Prefer in-situ postProcess tables; `metrics.py` only for what they cannot compute.
-- Timing columns end in `_s` (the change flag skips them).
-- `plots.py` uses `suite/plots.py` helpers; no hard-coded paths.
-
-## Done
-
-`pixi run benchmark <folder> --smoke` runs, and the docs page exists (see the docs rule).
+- Start with a short comment: what is simulated, what is swept, and where any reference
+  data comes from.
