@@ -223,7 +223,10 @@ dimension columns (``mesh``, ``executor``, ``method``, ...):
 - **missing**: a case of the snapshot that the run does not have.
 
 A case only in the run (a new mesh or ``--method``) is listed as **new**, not flagged.
-Every numeric column is compared, timings included, and there is no per-column setting.
+Every numeric column is compared but the timings (TwoPhaseFlow's ``tRec``, ``Tadv``,
+``k1``, ``k2`` and any column ending in ``_s``, e.g. ``wall_s``), and a pair of values
+both below 1e-10 in magnitude (round-off) is not compared; there is no per-column
+setting.
 
 Add a benchmark
 ---------------

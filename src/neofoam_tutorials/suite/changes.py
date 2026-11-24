@@ -3,8 +3,10 @@
 The benchmarks showcase NeoFOAM's results; they do not judge them. :func:`compare` only
 flags what moved a lot since the snapshot in ``doc/_generated/<category>/<name>/``: a
 metric that changed by more than a factor :data:`FACTOR`, and a case that went missing
-or whose metric became NaN. A case that is new in the run is reported, not flagged. The
-workflow writes the result to ``changes.json`` and never fails on it.
+or whose metric became NaN. A case that is new in the run is reported, not flagged.
+Timings (:func:`is_timing`) are not compared, nor round-off: a value pair both below
+:data:`FLOOR` in magnitude. The workflow writes the result to ``changes.json`` and never
+fails on it.
 
 Example::
 
@@ -22,8 +24,13 @@ import pandas as pd
 
 #: a metric is flagged if new / old leaves [1 / FACTOR, FACTOR]
 FACTOR = 2.0
+#: a value pair both below this in magnitude is round-off, not compared
+FLOOR = 1e-10
 #: the kinds of change that are flagged; ``new`` (a case only in the run) is not
 FLAGGED = ("ratio", "nan", "missing")
+#: TwoPhaseFlow's timing columns: volumeFractionError's CPU times per step (``tRec``,
+#: ``Tadv``) and reconstructionError's per sample (``k1``; ``k2`` is its unused slot)
+TIMINGS = ("tRec", "Tadv", "k1", "k2")
 
 Change = dict[str, Any]
 
@@ -36,12 +43,17 @@ def _change(case: str, column: str, kind: str, old: Any = None, new: Any = None)
     return {"case": case, "column": column, "kind": kind, "old": _value(old), "new": _value(new)}
 
 
+def is_timing(column: str) -> bool:
+    """A wall or CPU time: a name in :data:`TIMINGS` or ending in ``_s`` (seconds)."""
+    return column in TIMINGS or column.endswith("_s")
+
+
 def _metric_change(case: str, column: str, old: float, new: float) -> Change | None:
     if math.isnan(old):
         return None
     if math.isnan(new):
         return _change(case, column, "nan", old, new)
-    if old == new:
+    if old == new or (abs(old) < FLOOR and abs(new) < FLOOR):
         return None
     ratio = new / old if old != 0 else math.inf
     if 1 / FACTOR <= ratio <= FACTOR:
@@ -52,12 +64,13 @@ def _metric_change(case: str, column: str, old: float, new: float) -> Change | N
 def compare(new: pd.DataFrame, old: pd.DataFrame, keys: Sequence[str]) -> list[Change]:
     """The drastic changes of ``new`` against ``old``, their rows matched on ``keys``.
 
-    Every numeric column of ``old`` but the keys is a metric (a column missing in ``new``
-    counts as NaN). One entry ``{case, column, kind, old, new}`` per finding, ``kind``
-    ``ratio``, ``nan``, ``missing`` (``old``'s case is not in ``new``) or ``new`` (the
-    case is only in ``new``); ``column`` is empty for a whole case.
+    Every numeric column of ``old`` but the keys and the timings is a metric (a column
+    missing in ``new`` counts as NaN). One entry ``{case, column, kind, old, new}`` per
+    finding, ``kind`` ``ratio``, ``nan``, ``missing`` (``old``'s case is not in ``new``) or
+    ``new`` (the case is only in ``new``); ``column`` is empty for a whole case.
     """
-    metrics = [c for c in old.select_dtypes("number").columns if c not in keys]
+    numeric = old.select_dtypes("number").columns
+    metrics = [c for c in numeric if c not in keys and not is_timing(c)]
     old = old.rename(columns={c: f"{c}_old" for c in old.columns if c not in keys})
     new = new.rename(columns={c: f"{c}_new" for c in new.columns if c not in keys})
     pairs = old.merge(new, on=list(keys), how="outer", indicator=True)

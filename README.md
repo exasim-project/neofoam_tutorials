@@ -129,8 +129,9 @@ the field's executor.
 
 The change flag (`suite/changes.py`, the workflow's `compare`): `results.csv` against the
 documentation's snapshot `doc/_generated/<category>/<name>/results.csv`, rows matched by
-the dimension columns. A numeric column is flagged when new/old leaves [0.5, 2] (a sign
-change too) or turns NaN, a case when it is missing in the run; a case only in the run
+the dimension columns. A numeric column (not a timing: `tRec`, `Tadv`, `k1`, `k2`, `*_s`)
+is flagged when new/old leaves [0.5, 2] (a sign change too; not when both are below 1e-10
+in magnitude) or turns NaN, a case when it is missing in the run; a case only in the run
 is listed as new. `changes.json`, the report and the docs show the findings; the
 workflow never fails on them.
 
