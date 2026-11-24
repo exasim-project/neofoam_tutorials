@@ -27,8 +27,7 @@ dimensions:
     CPU: {executor: CPU}
     GPU: {executor: GPU}
   advection_scheme_config:
-    # isoAdvector (geometric VoF) follows once NeoFOAM's VoF stack has it:
-    # isoAdvector: {advectionScheme: isoAdvector}
+    isoAdvector: {advectionScheme: isoAdvector}
     MULES: {advectionScheme: MULES}
 # --method NAME replaces this dimension's variants by {NAME: {entry: NAME}}
 method: {dimension: advection_scheme_config, entry: advectionScheme}
