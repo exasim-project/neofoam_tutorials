@@ -8,21 +8,21 @@
      - p error max
      - p error mean
    * - n16
-     - 0.6965
-     - 2.997
-     - 0.02011
-     - 0.001262
+     - 0.7298
+     - 1.089
+     - 0.02046
+     - 0.001066
    * - n32
-     - 0.7499
-     - 2.686
-     - 0.009415
-     - 0.000411
+     - 0.6341
+     - 0.873
+     - 0.009866
+     - 0.0002976
    * - n64
-     - 0.7848
-     - 2.003
-     - 0.004615
-     - 0.0001793
+     - 0.5411
+     - 0.7006
+     - 0.004854
+     - 9.531e-05
 
-Rows: the Serial executor. CPU and GPU agree with it to 4e-12 (relative, in these columns; round-off values below 1e-10 left out).
+Rows: the Serial executor. CPU and GPU agree with it to 1e-11 (relative, in these columns; round-off values below 1e-10 left out).
 
 All 9 cases and columns: :download:`results.csv </_generated/acceleration/tiltedBox/results.csv>`, changes against the previous snapshot: :download:`changes.json </_generated/acceleration/tiltedBox/changes.json>`.

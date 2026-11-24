@@ -19,13 +19,13 @@
      - 35.04
      - 0.1466
      - 0.2622
-     - 0.003746
+     - 0.003745
    * - n80
      - 31.64
      - 35.01
      - 0.09614
      - 0.4242
-     - 0.00606
+     - 0.006061
 
 Rows: the Serial executor. CPU and GPU agree with it to 1e-10 (relative, in these columns; round-off values below 1e-10 left out).
 

@@ -1,3 +1,256 @@
 {
-  "changes": []
+  "changes": [
+    {
+      "case": "n16_CPU",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.996827762749039,
+      "new": 1.064135716449903
+    },
+    {
+      "case": "n16_CPU",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.2611189730903426,
+      "new": 0.1188459096168988
+    },
+    {
+      "case": "n16_CPU",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.261118263974737,
+      "new": 0.1188455868694241
+    },
+    {
+      "case": "n16_CPU",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.996827762749039,
+      "new": 1.0893686282281123
+    },
+    {
+      "case": "n32_CPU",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.686140571739508,
+      "new": 0.8730088214238557
+    },
+    {
+      "case": "n32_CPU",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.148306207719183,
+      "new": 0.0530626784813995
+    },
+    {
+      "case": "n32_CPU",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.1483058049669623,
+      "new": 0.0530625343801381
+    },
+    {
+      "case": "n32_CPU",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.686140571739508,
+      "new": 0.8730088214238557
+    },
+    {
+      "case": "n64_CPU",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.0006715953859358,
+      "new": 0.7005733436695076
+    },
+    {
+      "case": "n64_CPU",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.0719631850256191,
+      "new": 0.0221907552096481
+    },
+    {
+      "case": "n64_CPU",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.0719629895965936,
+      "new": 0.0221906949466447
+    },
+    {
+      "case": "n64_CPU",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.003414759414441,
+      "new": 0.7005733436695076
+    },
+    {
+      "case": "n16_GPU",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.996827762749032,
+      "new": 1.0641357164498984
+    },
+    {
+      "case": "n16_GPU",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.2611189730903422,
+      "new": 0.1188459096168989
+    },
+    {
+      "case": "n16_GPU",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.2611182639747368,
+      "new": 0.1188455868694242
+    },
+    {
+      "case": "n16_GPU",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.996827762749032,
+      "new": 1.0893686282281094
+    },
+    {
+      "case": "n32_GPU",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.6861405717395117,
+      "new": 0.8730088214238539
+    },
+    {
+      "case": "n32_GPU",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.1483062077191829,
+      "new": 0.0530626784813998
+    },
+    {
+      "case": "n32_GPU",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.1483058049669623,
+      "new": 0.0530625343801385
+    },
+    {
+      "case": "n32_GPU",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.6861405717395117,
+      "new": 0.8730088214238539
+    },
+    {
+      "case": "n64_GPU",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.0006715953859384,
+      "new": 0.7005733436694978
+    },
+    {
+      "case": "n64_GPU",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.0719631850256197,
+      "new": 0.0221907552096481
+    },
+    {
+      "case": "n64_GPU",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.0719629895965944,
+      "new": 0.0221906949466447
+    },
+    {
+      "case": "n64_GPU",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.003414759414459,
+      "new": 0.7005733436694978
+    },
+    {
+      "case": "n16_Serial",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.9968277627490414,
+      "new": 1.064135716449903
+    },
+    {
+      "case": "n16_Serial",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.2611189730903426,
+      "new": 0.1188459096168986
+    },
+    {
+      "case": "n16_Serial",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.261118263974737,
+      "new": 0.1188455868694239
+    },
+    {
+      "case": "n16_Serial",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.9968277627490414,
+      "new": 1.0893686282281143
+    },
+    {
+      "case": "n32_Serial",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.686140571739513,
+      "new": 0.8730088214238498
+    },
+    {
+      "case": "n32_Serial",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.1483062077191828,
+      "new": 0.0530626784813996
+    },
+    {
+      "case": "n32_Serial",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.1483058049669621,
+      "new": 0.0530625343801383
+    },
+    {
+      "case": "n32_Serial",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.686140571739513,
+      "new": 0.8730088214238498
+    },
+    {
+      "case": "n64_Serial",
+      "column": "maxU",
+      "kind": "ratio",
+      "old": 2.0006715953859446,
+      "new": 0.7005733436694962
+    },
+    {
+      "case": "n64_Serial",
+      "column": "magU_integral",
+      "kind": "ratio",
+      "old": 0.0719631850256192,
+      "new": 0.0221907552096483
+    },
+    {
+      "case": "n64_Serial",
+      "column": "meanU",
+      "kind": "ratio",
+      "old": 0.0719629895965937,
+      "new": 0.0221906949466449
+    },
+    {
+      "case": "n64_Serial",
+      "column": "maxU_max",
+      "kind": "ratio",
+      "old": 2.0034147594144582,
+      "new": 0.7005733436694962
+    }
+  ]
 }
