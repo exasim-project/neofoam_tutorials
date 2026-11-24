@@ -1,0 +1,49 @@
+# Builds doc/ from the committed result snapshot (doc/_generated/) and publishes it to
+# GitHub Pages. No NeoFOAM or OpenFOAM is needed: the pages only render that snapshot.
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # pandas<3: pandas 3 parses the result CSVs differently and changes the tables.
+      - run: pip install sphinx furo sphinxcontrib-mermaid numpy "pandas<3" pillow pyyaml
+      - run: sphinx-build -W -b html doc doc/_build/html
+        env:
+          PYTHONPATH: src
+      - name: Check that the build left the committed snapshot unchanged
+        run: git diff --exit-code -- doc/_generated
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc/_build/html
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
