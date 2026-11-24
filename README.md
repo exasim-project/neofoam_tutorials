@@ -20,6 +20,7 @@ changes drastically from the published snapshot.
 | [advection/discUniFlowTestsuite](https://exasim-project.com/neofoam_tutorials/multiphase/disc_uni_flow_testsuite.html) | the same disc against TwoPhaseFlow's `advectorVoF` |
 | [surfaceTension/staticDrop](https://exasim-project.com/neofoam_tutorials/multiphase/static_drop.html) | parasitic currents of a static drop |
 | [acceleration/tiltedBox](https://exasim-project.com/neofoam_tutorials/multiphase/tilted_box.html) | hydrostatic balance in a tilted box |
+| [freeSurface/damBreak](https://exasim-project.com/neofoam_tutorials/multiphase/dam_break.html) | collapsing water column, against Martin & Moyce and interFoam |
 | [singlePhase/cavity](https://exasim-project.com/neofoam_tutorials/single_phase/cavity.html) | laminar lid-driven cavity, against Ghia et al. and icoFoam |
 | [singlePhase/pitzDaily](https://exasim-project.com/neofoam_tutorials/single_phase/pitz_daily.html) | turbulent backward-facing step, against simpleFoam |
 

@@ -23,7 +23,7 @@ incompressibleVoFNeoNSweep = "neofoam_tutorials.solvers.vof_neon:incompressibleV
 incompressibleFluidNeoNSweep = "neofoam_tutorials.solvers.fluid_neon:incompressibleFluidNeoNSweep"
 
 # NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool and the postProcess
-# sources and nodes (shapeError, startField, hydrostaticError, change).
+# sources and nodes (shapeError, startField, phaseExtent, hydrostaticError, change).
 [project.entry-points."neofoam.plugins"]
 setAlphaPlane = "neofoam_tutorials.tools.set_alpha_plane"
 verificationPostProcess = "neofoam_tutorials.postprocess"

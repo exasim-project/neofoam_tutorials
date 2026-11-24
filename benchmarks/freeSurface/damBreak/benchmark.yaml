@@ -1,0 +1,59 @@
+# Dam break (a collapsing water column, gravity alone): NeoFOAM's damBreak tests
+# (test/solver/incompressibleVoFNeoN: test_damBreak_comparison, sigma 0, fixed deltaT 1e-3;
+# test_damBreak_adaptive_time_step, maxCo = maxAlphaCo = 1), the OpenFOAM tutorial with the
+# column a = 0.1461 wide and 2a high (Martin & Moyce's n^2 = 2), to t = 0.2. Swept over
+# resolution x time step x executor. The surge front against
+# - reference/martin_moyce.csv: Martin & Moyce (1952), Phil. Trans. R. Soc. A 244,
+#   312-324, Table 2 (rectangular section, n^2 = 2): Z = z/a at T = n t sqrt(g/a), the mean
+#   of the a = 1 1/8 in. (T_a28mm) and a = 2 1/4 in. (T_a57mm) runs, each run's T shifted
+#   to 1.19 at Z = 1.44; valid until the front reaches the obstacle at x = 0.292 (Z = 2.0);
+# - reference/interfoam_front.csv (the front at the write times, the postProcess.yaml
+#   definition) and interfoam_time_steps.csv (the adaptive deltaT per step): native
+#   interFoam of OpenFOAM-v2406 on this case/ per mesh and time step (blockMesh, setFields
+#   with the tutorial's setFieldsDict box, interFoam).
+# NeoFOAM's incompressibleVoFNeoN (solvers/vof_neon.py: without the sweep's --no-preprocess)
+solver: incompressibleVoFNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # the tutorial's five blocks (x1: 2268 cells) and each refined twice (x2: 9072 cells),
+  # both well under 1 GB; x4 (36288 cells) is cells x 4 in every block
+  mesh:
+    x1:
+      block_mesh_dict_config:
+        blocks: [{cells: [23, 8, 1]}, {cells: [19, 8, 1]}, {cells: [23, 42, 1]},
+                 {cells: [4, 42, 1]}, {cells: [19, 42, 1]}]
+    x2:
+      block_mesh_dict_config:
+        blocks: [{cells: [46, 16, 1]}, {cells: [38, 16, 1]}, {cells: [46, 84, 1]},
+                 {cells: [8, 84, 1]}, {cells: [38, 84, 1]}]
+  control_dict_config:
+    fixed: {adjustTimeStep: false}
+    adaptive: {adjustTimeStep: true}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [x1]
+  control_dict_config: [adaptive]
+  neo_n_control_config: [Serial]
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (the end time; T_Z189 once reached) of the case's
+# postProcess tables (case/system/postProcess.yaml: the front every step, the water at
+# the field write times) merged on the time, with metrics.py's derived columns;
+# histories.csv: every row
+collect:
+  tables:
+    - postProcessing/front.csv
+    - postProcessing/water.csv
+  derive: metrics.py
+  history: true
+  columns:
+    mesh: mesh
+    control_dict_config: time_step
+    neo_n_control_config: executor
+# the columns of report.md's results table
+report: [steps, T_Z189, Z, water_change]
