@@ -247,45 +247,13 @@
 <h1>Single phase<a class="headerlink" href="#single-phase" title="Link to this heading">¶</a></h1>
 <p>These benchmarks verify NeoFOAM’s single-phase incompressible solver
 <code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoN</span></code> on NeoN: a laminar transient case run to the steady state
-(PISO) and a turbulent steady case (SIMPLE, k-ε). Each page describes the setup, the
-metrics, the current results and the checks.</p>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 14.0%" />
-<col style="width: 14.0%" />
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 12.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Benchmark</p></th>
-<th class="head"><p>Physics</p></th>
-<th class="head"><p>What NeoFOAM shows</p></th>
-<th class="head"><p>Status / limit</p></th>
-<th class="head"><p>Serial / CPU / GPU</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="cavity.html"><span class="doc">singlePhase/cavity</span></a></p></td>
-<td><p>Laminar lid-driven cavity, Re = 100, PISO to the steady state</p></td>
-<td><p>Centreline velocities within 1.4e-2 of Ghia et al. (1982) on n20 and 2e-3 to
-9e-3 on n40, n80; the same errors as OpenFOAM’s <code class="docutils literal notranslate"><span class="pre">icoFoam</span></code> (1.5 % apart on n80).</p></td>
-<td><p>The error against Ghia stops falling beyond n40, for icoFoam too: the limit of
-the reference.</p></td>
-<td><p>agree to 6e-8</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pitz_daily.html"><span class="doc">singlePhase/pitzDaily</span></a></p></td>
-<td><p>Turbulent backward-facing step, k-ε, SIMPLE (OpenFOAM’s pitzDaily)</p></td>
-<td><p>Reattachment length x_r / h = 7.025 against <code class="docutils literal notranslate"><span class="pre">simpleFoam</span></code>’s 7.021 on the same
-mesh; profiles within 3e-4 of U_inlet; the measured ≈ 7.0 within 0.5 %.</p></td>
-<td><p>No <code class="docutils literal notranslate"><span class="pre">residualControl</span></code> in NeoN: 1500 iterations are always run (converged after
-about 850).</p></td>
-<td><p>agree to 7e-4</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+(PISO) and a turbulent steady case (SIMPLE, k-ε). Each page says what is tested
+and why, describes the case and the parameter changes, and shows and explains the
+results.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="cavity.html"><span class="doc">singlePhase/cavity</span></a>: laminar lid-driven cavity at Re = 100, PISO to the steady state.</p></li>
+<li><p><a class="reference internal" href="pitz_daily.html"><span class="doc">singlePhase/pitzDaily</span></a>: turbulent backward-facing step, k-ε, SIMPLE (OpenFOAM’s pitzDaily).</p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cavity.html">singlePhase/cavity</a></li>

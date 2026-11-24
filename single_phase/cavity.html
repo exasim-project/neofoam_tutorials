@@ -245,11 +245,16 @@
         <article role="main" id="furo-main-content">
           <section id="singlephase-cavity">
 <h1>singlePhase/cavity<a class="headerlink" href="#singlephase-cavity" title="Link to this heading">¶</a></h1>
-<p>The lid-driven cavity at Re = 100, run to the steady state with NeoFOAM’s
-<code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoN</span></code> (PISO), and its centreline velocities compared with the
-benchmark solution of Ghia, Ghia &amp; Shin (1982).</p>
-<section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<section id="why-and-what-is-tested">
+<h2>Why and what is tested<a class="headerlink" href="#why-and-what-is-tested" title="Link to this heading">¶</a></h2>
+<p>The lid-driven cavity is the basic check of an incompressible solver: a laminar, steady
+recirculating flow with a classic benchmark solution. It tests NeoFOAM’s
+<code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoN</span></code> (PISO) on NeoN against the centreline velocities of Ghia,
+Ghia &amp; Shin (1982) at Re = 100, and against OpenFOAM-v2406’s <code class="docutils literal notranslate"><span class="pre">icoFoam</span></code> on the same
+case and meshes.</p>
+</section>
+<section id="case">
+<h2>Case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id1">
 <img alt="Sketch: the unit square, the lid moving to the right at 1 m/s, no-slip walls, the two centrelines dashed" src="../_images/cavity.png" />
 <figcaption>
@@ -257,169 +262,12 @@ benchmark solution of Ghia, Ghia &amp; Shin (1982).</p>
 centrelines are where the velocity is compared with Ghia et al.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Quantity</p></th>
-<th class="head"><p>Value</p></th>
-<th class="head"><p>Where set</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Domain</p></td>
-<td><p>unit square, L = 1 m</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/blockMeshDict</span></code> (<code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">1</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p>Lid velocity</p></td>
-<td><p>U = (1, 0, 0) m/s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">0/U</span></code> <code class="docutils literal notranslate"><span class="pre">movingWall</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Other walls</p></td>
-<td><p>no slip; p zeroGradient, reference cell 0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">0/U</span></code>, <code class="docutils literal notranslate"><span class="pre">0/p</span></code>, <code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Viscosity ν</p></td>
-<td><p>0.01 m²/s, so Re = U L / ν = 100</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Flow model</p></td>
-<td><p>laminar</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/turbulenceProperties</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Pressure–velocity</p></td>
-<td><p>PISO, momentum predictor, 2 correctors</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code> <code class="docutils literal notranslate"><span class="pre">PISO</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Schemes</p></td>
-<td><p>Euler, Gauss linear (second order in space)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSchemes</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Linear solvers</p></td>
-<td><p>CG (p), BiCGStab (U), Jacobi, tolerance 1e-8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Time step, end time</p></td>
-<td><p>adaptive, <code class="docutils literal notranslate"><span class="pre">maxCo</span></code> 0.5; 20 s (steady state)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The case is OpenFOAM’s icoFoam <code class="docutils literal notranslate"><span class="pre">cavity</span></code> on the unit square (OpenFOAM’s tutorial uses a
-0.1 m square, i.e. Re = 10), as NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">neoIcoFoam/cavity</span></code> tutorial. <code class="docutils literal notranslate"><span class="pre">orthogonal</span></code>
-corrections are written <code class="docutils literal notranslate"><span class="pre">uncorrected</span></code> for NeoN, which is the same on this mesh. The
-solver runs through <code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoNSweep</span></code>, a wrapper that only drops the
-sweep’s <code class="docutils literal notranslate"><span class="pre">--no-preprocess</span></code> option, which <code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoN</span></code> rejects.</p>
-<section id="inputs">
-<h3>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 40.0%" />
-<col style="width: 60.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>File (<code class="docutils literal notranslate"><span class="pre">benchmarks/singlePhase/cavity/</span></code>)</p></th>
-<th class="head"><p>Content</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">case/</span></code></p></td>
-<td><p>base case (mesh, lid, ν, PISO, schemes)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">case/system/postProcess.yaml</span></code></p></td>
-<td><p>the in-situ tables at every written time (every 2 s): <code class="docutils literal notranslate"><span class="pre">u_vertical</span></code> and
-<code class="docutils literal notranslate"><span class="pre">v_horizontal</span></code> (<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">|</span> <span class="pre">rows</span></code>: U of the cells next to the centrelines),
-<code class="docutils literal notranslate"><span class="pre">maxU</span></code> (<code class="docutils literal notranslate"><span class="pre">mag</span> <span class="pre">|</span> <span class="pre">max</span></code>), <code class="docutils literal notranslate"><span class="pre">dU</span></code> (this repository’s <code class="docutils literal notranslate"><span class="pre">change</span></code> node, <code class="docutils literal notranslate"><span class="pre">max</span></code>)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metrics.py</span></code></p></td>
-<td><p>the centreline errors from the <code class="docutils literal notranslate"><span class="pre">rows</span></code> tables and the run’s cost from
-<code class="docutils literal notranslate"><span class="pre">log.solver</span></code>; the final profiles for the plot</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference/ghia1982.csv</span></code></p></td>
-<td><p>Ghia, Ghia &amp; Shin (1982), J. Comput. Phys. 48, 387–411, Table I (u on the
-vertical centreline) and Table II (v on the horizontal centreline), Re = 100</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference/icofoam.csv</span></code></p></td>
-<td><p>OpenFOAM-v2406 <code class="docutils literal notranslate"><span class="pre">icoFoam</span></code> on the same case and meshes (fixed dt 0.001), evaluated
-by the same <code class="docutils literal notranslate"><span class="pre">metrics.py</span></code> (the tables written from its fields)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">openfoam_reference.py</span></code></p></td>
-<td><p>reruns icoFoam and rewrites <code class="docutils literal notranslate"><span class="pre">reference/icofoam.csv</span></code> (below)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The icoFoam reference is rebuilt with (<code class="docutils literal notranslate"><span class="pre">$OPENFOAM_BASHRC</span></code>, default
-<code class="docutils literal notranslate"><span class="pre">~/OpenFOAM/OpenFOAM-v2406/etc/bashrc</span></code>, is sourced for the runs; about 5 min):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>benchmarks/singlePhase/cavity/openfoam_reference.py<span class="w"> </span>runs/cavity
-</pre></div>
-</div>
+<p>ν = 0.01 m²/s (Re = 100), Gauss linear, adaptive time step (<code class="docutils literal notranslate"><span class="pre">maxCo</span></code> 0.5) to t = 20 s,
+the steady state. The errors are the RMS (L2) and maximum (L∞) of u − u_Ghia and
+v − v_Ghia at Ghia’s 15 interior points on each centreline.</p>
 </section>
-<section id="metrics">
-<h3>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 22.0%" />
-<col style="width: 38.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Metric</p></th>
-<th class="head"><p>Meaning</p></th>
-<th class="head"><p>Formula</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">u_L2</span></code>, <code class="docutils literal notranslate"><span class="pre">u_Linf</span></code></p></td>
-<td><p>error of u on the vertical centreline x = 0.5 [m/s]</p></td>
-<td><p>RMS and max of <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">−</span> <span class="pre">u_Ghia</span></code> at Ghia’s 15 interior points</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">v_L2</span></code>, <code class="docutils literal notranslate"><span class="pre">v_Linf</span></code></p></td>
-<td><p>error of v on the horizontal centreline y = 0.5 [m/s]</p></td>
-<td><p>RMS and max of <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">−</span> <span class="pre">v_Ghia</span></code> at Ghia’s 15 interior points</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dU</span></code></p></td>
-<td><p>distance to the steady state [m/s]</p></td>
-<td><p>max over cells of <code class="docutils literal notranslate"><span class="pre">|U(20)</span> <span class="pre">−</span> <span class="pre">U(18)|</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maxU</span></code></p></td>
-<td><p>largest velocity in the cells [m/s]</p></td>
-<td><p>max over cells of |U|</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">h</span></code></p></td>
-<td><p>cell size [m]</p></td>
-<td><p>1 / cells per side</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">steps</span></code>, <code class="docutils literal notranslate"><span class="pre">wall_s</span></code>, <code class="docutils literal notranslate"><span class="pre">time_per_step_s</span></code></p></td>
-<td><p>cost of the run</p></td>
-<td><p>time steps, wall time (<code class="docutils literal notranslate"><span class="pre">ClockTime</span></code>, whole seconds), wall time / steps</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The centreline values are interpolated linearly between the two cell columns (rows)
-next to the line, then linearly along it through the cell centres and the wall values.
-NeoN has no line sampling, so the cells next to the lines come from a <code class="docutils literal notranslate"><span class="pre">box</span></code> of
-half-width 0.03 about each line (it holds the two neighbours up to n = 160) and the
-<code class="docutils literal notranslate"><span class="pre">rows</span></code> node, which writes them every 2 s; the profile is the same as from all cells.</p>
-</section>
-<section id="run">
-<h3>Run<a class="headerlink" href="#run" title="Link to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/singlePhase/cavity<span class="w"> </span>--smoke
-pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/singlePhase/cavity
-</pre></div>
-</div>
-</section>
-</section>
-<section id="changed-parameters">
-<h2>Changed parameters<a class="headerlink" href="#changed-parameters" title="Link to this heading">¶</a></h2>
+<section id="parameter-changes">
+<h2>Parameter changes<a class="headerlink" href="#parameter-changes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -450,14 +298,6 @@ pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w">
 </table>
 </div>
 <p><strong>9 cases</strong> (3 × 3); the smoke run (<code class="docutils literal notranslate"><span class="pre">--smoke</span></code>) has 1. The raw payloads are in <code class="docutils literal notranslate"><span class="pre">benchmarks/singlePhase/cavity/benchmark.yaml</span></code>.</p>
-<p>The full sweep takes about 7 min with <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">1</span></code> (n80: 3 min Serial, 2.5 min CPU, 1.7 min
-GPU).</p>
-<section id="larger-meshes">
-<h3>Larger meshes<a class="headerlink" href="#larger-meshes" title="Link to this heading">¶</a></h3>
-<p>Add <code class="docutils literal notranslate"><span class="pre">n160:</span> <span class="pre">{block_mesh_dict_config:</span> <span class="pre">{blocks:</span> <span class="pre">[{cells:</span> <span class="pre">[160,</span> <span class="pre">160,</span> <span class="pre">1]}]}}</span></code> to <code class="docutils literal notranslate"><span class="pre">mesh</span></code>.
-Expect the error against Ghia to level off: Ghia’s own solution (129 × 129, second
-order) is no more accurate than that.</p>
-</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
@@ -530,71 +370,20 @@ order) is no more accurate than that.</p>
 </table>
 </div>
 <p>Rows: the Serial executor. CPU and GPU agree with it to 1e-05 (relative, in these columns; round-off values below 1e-10 left out).</p>
-<p>All 9 cases and columns: <a class="reference download internal" download="" href="../_downloads/1527fbb62671e0775e1694293645a202/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, per-group checks: <a class="reference download internal" download="" href="../_downloads/31aa5d59f5cf2cecfda8389cf958d511/checks.json"><code class="xref download docutils literal notranslate"><span class="pre">checks.json</span></code></a>.</p>
+<p>All 9 cases and columns: <a class="reference download internal" download="" href="../_downloads/1527fbb62671e0775e1694293645a202/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, changes against the previous snapshot: <a class="reference download internal" download="" href="../_downloads/3e2d0486cab6bbe64f5c51e8d8156273/changes.json"><code class="xref download docutils literal notranslate"><span class="pre">changes.json</span></code></a>.</p>
 <ul class="simple">
-<li><p><strong>Matches Ghia on every mesh</strong>: the centreline errors are at most 1.4e-2 (n20) and
-2e-3 to 9e-3 on n40 and n80, against velocities of order 1.</p></li>
-<li><p><strong>NeoN is OpenFOAM</strong>: icoFoam on the same case gives the same errors (1.5 % apart on
-n80; up to 19 % on n20 and n40, where the two solvers’ time steps differ and the PISO
-steady state depends weakly on it).</p></li>
-<li><p><strong>The error against Ghia stops falling at n40</strong>: u converges at order 2.9 from n20 to
-n40, then rises at n80, and v levels off at 4.5e-3 — for icoFoam too, so this is the
-limit of the comparison (Ghia’s own 129 × 129 solution), not of NeoN.</p></li>
-<li><p><strong>Executors</strong>: CPU and GPU agree with Serial to 6e-8. On these small meshes the GPU is
-slower than Serial up to n40 and 1.7× faster on n80; CPU (4 threads) at most 1.25×.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">profiles</span></code>: the centreline velocities lie on Ghia’s points; n20 is visibly off only
+near the extrema of v.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">error_vs_n</span></code>: the errors are at most 1.4e-2 on n20 and 1.0e-3 to 9.1e-3 on n40 and
+n80, for velocities of order 1. u converges at order 2.9 from n20 to n40 and rises
+again on n80; v levels off at 4.5e-3 to 4.9e-3 (L2). icoFoam (dashed) does the same:
+it is 1.5 % apart on n80 and up to 19 % on n20 and n40, where the time steps differ
+(icoFoam: fixed 0.001 s). Beyond n40 the comparison is limited by Ghia’s own 129 × 129
+solution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_per_step</span></code>, <code class="docutils literal notranslate"><span class="pre">wall_time</span></code>: the GPU is slower than Serial up to n40 and 1.8×
+faster on n80; the CPU executor is 1.26× faster on n80.</p></li>
 </ul>
-<section id="checks">
-<h3>Checks<a class="headerlink" href="#checks" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 24.0%" />
-<col style="width: 16.0%" />
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Check</p></th>
-<th class="head"><p>Groups</p></th>
-<th class="head"><p>Detail (first such group)</p></th>
-<th class="head"><p>Why</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>reference icofoam.csv u_L2, u_Linf, v_L2, v_Linf</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: max rel diff 1.9e-01 (v_Linf n20_CPU), rtol 0.2, 3 cases</p></td>
-<td><p>NeoN reproduces OpenFOAM icoFoam’s errors (the coarse meshes differ by the time step, which the PISO steady state depends on weakly).</p></td>
-</tr>
-<tr class="row-odd"><td><p>order u_L2</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 2.90 (&gt;= 1.5)</p></td>
-<td><p>Second order from n20 to n40; at n80 the error reaches Ghia’s own, also for icoFoam.</p></td>
-</tr>
-<tr class="row-even"><td><p>maximum u_Linf</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 1.352e-02 (n20_CPU), maximum 0.05</p></td>
-<td><p>Regression bound on the coarsest mesh’s error.</p></td>
-</tr>
-<tr class="row-odd"><td><p>maximum v_Linf</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 1.046e-02 (n20_CPU), maximum 0.05</p></td>
-<td><p>Regression bound on the coarsest mesh’s error.</p></td>
-</tr>
-<tr class="row-even"><td><p>maximum dU</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 1.153e-05 (n40_CPU), maximum 5e-05</p></td>
-<td><p>The run reached the steady state.</p></td>
-</tr>
-<tr class="row-odd"><td><p>agreement executor</p></td>
-<td><p><strong>PASS</strong> 2/2</p></td>
-<td><p>CPU vs Serial: max rel diff 5.5e-08 (u_L2 n40_CPU), rtol 0.0001, 3 cases</p></td>
-<td><p>CPU and GPU reproduce Serial (iterative solves to 1e-8).</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
+<p>Against the previous snapshot: 0 flagged (a metric off by more than a factor 2, a case missing or NaN), 0 new cases.</p>
 </section>
 </section>
 
@@ -654,20 +443,10 @@ slower than Serial up to n40 and 1.7× faster on n80; CPU (4 threads) at most 1.
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">singlePhase/cavity</a><ul>
-<li><a class="reference internal" href="#setup">Setup</a><ul>
-<li><a class="reference internal" href="#inputs">Inputs</a></li>
-<li><a class="reference internal" href="#metrics">Metrics</a></li>
-<li><a class="reference internal" href="#run">Run</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#changed-parameters">Changed parameters</a><ul>
-<li><a class="reference internal" href="#larger-meshes">Larger meshes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#results">Results</a><ul>
-<li><a class="reference internal" href="#checks">Checks</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#why-and-what-is-tested">Why and what is tested</a></li>
+<li><a class="reference internal" href="#case">Case</a></li>
+<li><a class="reference internal" href="#parameter-changes">Parameter changes</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
 </ul>
 </li>
 </ul>

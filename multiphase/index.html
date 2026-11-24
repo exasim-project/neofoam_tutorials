@@ -247,77 +247,15 @@
 <h1>Multiphase<a class="headerlink" href="#multiphase" title="Link to this heading">¶</a></h1>
 <p>These benchmarks cover the building blocks of a geometric VoF solver: interface
 reconstruction, interface advection, surface tension, and gravity across the interface.
-Each page describes the setup, the metrics, the current results and the checks.</p>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 14.0%" />
-<col style="width: 14.0%" />
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 12.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Benchmark</p></th>
-<th class="head"><p>Physics</p></th>
-<th class="head"><p>What NeoFOAM shows</p></th>
-<th class="head"><p>Status / limit</p></th>
-<th class="head"><p>Serial / CPU / GPU</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="circle.html"><span class="doc">reconstruction/circle</span></a></p></td>
-<td><p>Interface reconstruction (PLIC, gradAlpha) of a circle on hex meshes</p></td>
-<td><p>Agrees with TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">reconstructInterface</span></code> to 4e-8 relative in the
-normal errors. The interface centre converges at second order (fitted 1.98 in
-<code class="docutils literal notranslate"><span class="pre">LCentre1</span></code>).</p></td>
-<td><p>The gradAlpha normal does not converge; OpenFOAM’s gradAlpha behaves the same.
-From n32 on, <code class="docutils literal notranslate"><span class="pre">LCentre1</span></code> differs from TwoPhaseFlow by up to 4.2e-6, so the
-full sweep’s <code class="docutils literal notranslate"><span class="pre">reference</span></code> check (rtol 1e-6) fails. The cause is the volTaylor
-plane-search tolerance.</p></td>
-<td><p>bitwise equal</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="disc_uni_flow.html"><span class="doc">advection/discUniFlow</span></a></p></td>
-<td><p>Advection of a disc in uniform flow (paper setup, numufoam reference)</p></td>
-<td><p>Mass is conserved to round-off (Emass ≤ 3e-17) and alpha stays bounded at
-CFL 0.1, for both isoAdvector and MULES. MULES’s E1 is within 16 % of
-numufoam’s at n10 and n20.</p></td>
-<td><p>isoAdvector with gradAlpha does not converge on this sharp disc (E1 6.9e-3,
-7.4e-3, 8.5e-3 on n10 to n40); OpenFOAM’s gradAlpha behaves the same. plicRDF
-and isoAlpha, which converge at second order, are not in NeoN yet. NeoN’s MULES
-(Gauss linear normal) stalls.</p></td>
-<td><p>swept; not compared</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="disc_uni_flow_testsuite.html"><span class="doc">advection/discUniFlowTestsuite</span></a></p></td>
-<td><p>Advection of a disc for t = 4 (TwoPhaseFlow testsuite)</p></td>
-<td><p>Reproduces TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">advectorVoF</span></code>: MULES to 1.7e-14 and isoAdvector
-(gradAlpha) to 4.7e-9 relative in E1.</p></td>
-<td><p>The testsuite’s E1 limit of 0.0122 is set by plicRDF. gradAlpha (0.0225) and
-MULES (0.0304) do not reach it, and it is not checked.</p></td>
-<td><p>every executor passes the reference</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="static_drop.html"><span class="doc">surfaceTension/staticDrop</span></a></p></td>
-<td><p>Surface tension: parasitic currents of a static drop (CSF)</p></td>
-<td><p>At n40 it reproduces interFoam: Laplace jump 29.90 Pa against 29.9009, max
-|U| to 1.5 %.</p></td>
-<td><p>The jump misses σ/R by 18 / 14.7 / 9.6 % at R/dx = 5 / 10 / 20, because
-gradAlpha curvature converges slowly. The spurious currents grow with
-resolution (0.15 to 0.42 m/s).</p></td>
-<td><p>agree to 1e-10</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="tilted_box.html"><span class="doc">acceleration/tiltedBox</span></a></p></td>
-<td><p>Hydrostatic balance in a tilted box (gravity, no surface tension)</p></td>
-<td><p>The pressure error falls with resolution (largest 2.0e-2, 9.4e-3, 4.6e-3 of the
-hydrostatic range). max|U| at t = 0.01 is within 26 % of TwoPhaseFlow.</p></td>
-<td><p>The spurious current grows in time, to 2.0–3.0 m/s at t = 0.1. The setup is
-not identical to TwoPhaseFlow’s (gradAlpha instead of plicRDF, open top).</p></td>
-<td><p>agree to 5e-15</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The figures come from the results snapshot on each page or, where the snapshot is a
-smoke run, from the full sweeps described there.</p>
+Each page says what is tested and why, describes the case and the parameter changes,
+and shows and explains the results.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="circle.html"><span class="doc">reconstruction/circle</span></a>: interface reconstruction (PLIC, gradAlpha) of a circle on hex meshes.</p></li>
+<li><p><a class="reference internal" href="disc_uni_flow.html"><span class="doc">advection/discUniFlow</span></a>: advection of a disc in uniform flow, against numufoam.</p></li>
+<li><p><a class="reference internal" href="disc_uni_flow_testsuite.html"><span class="doc">advection/discUniFlowTestsuite</span></a>: advection of a disc for t = 4, against TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">advectorVoF</span></code>.</p></li>
+<li><p><a class="reference internal" href="static_drop.html"><span class="doc">surfaceTension/staticDrop</span></a>: surface tension: parasitic currents of a static drop (CSF).</p></li>
+<li><p><a class="reference internal" href="tilted_box.html"><span class="doc">acceleration/tiltedBox</span></a>: hydrostatic balance in a tilted box (gravity, no surface tension).</p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="circle.html">reconstruction/circle</a></li>

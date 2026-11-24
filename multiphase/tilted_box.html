@@ -245,12 +245,17 @@
         <article role="main" id="furo-main-content">
           <section id="acceleration-tiltedbox">
 <h1>acceleration/tiltedBox<a class="headerlink" href="#acceleration-tiltedbox" title="Link to this heading">¶</a></h1>
-<p>Hydrostatic balance in a tilted box: the spurious currents of the gravity force across
-the interface, in NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">incompressibleVoFNeoN</span></code>. The case is TwoPhaseFlow’s
+<section id="why-and-what-is-tested">
+<h2>Why and what is tested<a class="headerlink" href="#why-and-what-is-tested" title="Link to this heading">¶</a></h2>
+<p>Gravity acting across a density ratio of 1000 must give a hydrostatic pressure, not a
+flow. In a box tilted against the mesh, the interface cuts the cells obliquely, so any
+imbalance of the gravity force in NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">incompressibleVoFNeoN</span></code> shows up as a
+spurious current and a pressure error. The case is TwoPhaseFlow’s
 <code class="docutils literal notranslate"><span class="pre">run/benchmark/acceleration/tiltedBox</span></code> (numufoam’s <code class="docutils literal notranslate"><span class="pre">acceleration/tiltedBox</span></code> with
-ρ = 1000/1).</p>
-<section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+ρ = 1000/1); TwoPhaseFlow’s stored max|U| at t = 0.01 is the reference.</p>
+</section>
+<section id="case">
+<h2>Case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id1">
 <img alt="Sketch: the unit box tilted by 30 degrees, water below the horizontal plane z = 0.1345, gravity downwards" src="../_images/tiltedBox.png" />
 <figcaption>
@@ -258,147 +263,13 @@ the interface, in NeoFOAM’s <code class="docutils literal notranslate"><span c
 interface z = 0.1345, slip walls and an open top, on the coarsest grid (n = 16).</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Quantity</p></th>
-<th class="head"><p>Value</p></th>
-<th class="head"><p>Where set</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Domain</p></td>
-<td><p>unit box tilted by 30° about y</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/blockMeshDict</span></code> (rotated <code class="docutils literal notranslate"><span class="pre">vertices</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p>Interface</p></td>
-<td><p>plane z = 0.1345, water below</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/setAlphaFieldDict</span></code> (<code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">plane</span></code>)</p></td>
-</tr>
-<tr class="row-even"><td><p>Gravity g</p></td>
-<td><p>(0, 0, −9.81) m/s²</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/g</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Surface tension σ</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Water ρ, ν</p></td>
-<td><p>1000 kg/m³, 1e-6 m²/s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Air ρ, ν</p></td>
-<td><p>1 kg/m³, 1.48e-5 m²/s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Alpha advection</p></td>
-<td><p>isoAdvector, gradAlpha</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Pressure–velocity</p></td>
-<td><p>no momentum predictor, 6 correctors</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code> <code class="docutils literal notranslate"><span class="pre">PIMPLE</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Time step, end time</p></td>
-<td><p>adaptive, <code class="docutils literal notranslate"><span class="pre">maxCo</span></code> 0.2; 0.1 s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Samples</p></td>
-<td><p>every 0.005 s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">controlDict</span></code> <code class="docutils literal notranslate"><span class="pre">writeInterval</span></code>; <code class="docutils literal notranslate"><span class="pre">postProcess.yaml</span></code> (<code class="docutils literal notranslate"><span class="pre">stepper</span></code>)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The fluids should stay at rest. NeoFOAM has no <code class="docutils literal notranslate"><span class="pre">transformPoints</span></code>, so the mesh is
-rotated in <code class="docutils literal notranslate"><span class="pre">blockMeshDict</span></code>, and the plane comes from this repository’s
-<code class="docutils literal notranslate"><span class="pre">setAlphaPlane</span></code> tool. Unlike TwoPhaseFlow: gradAlpha instead of plicRDF, and an open
-top (<code class="docutils literal notranslate"><span class="pre">p_rgh</span></code> fixedValue 0) instead of a closed box with a pressure reference.</p>
-<section id="inputs">
-<h3>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 40.0%" />
-<col style="width: 60.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>File (<code class="docutils literal notranslate"><span class="pre">benchmarks/acceleration/tiltedBox/</span></code>)</p></th>
-<th class="head"><p>Content</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">case/</span></code></p></td>
-<td><p>base case (rotated mesh, plane, g, phases, schemes)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">case/system/postProcess.yaml</span></code></p></td>
-<td><p>the in-situ tables: <code class="docutils literal notranslate"><span class="pre">maxU</span></code>, <code class="docutils literal notranslate"><span class="pre">magU_integral</span></code>, <code class="docutils literal notranslate"><span class="pre">p_err_max</span></code>,
-<code class="docutils literal notranslate"><span class="pre">p_err_integral</span></code>, <code class="docutils literal notranslate"><span class="pre">volume</span></code>, at every written time</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metrics.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">derive</span></code>: the means, <code class="docutils literal notranslate"><span class="pre">maxU_max</span></code> and <code class="docutils literal notranslate"><span class="pre">maxU_10ms</span></code> from the tables</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference/twophaseflow.csv</span></code></p></td>
-<td><p>TwoPhaseFlow’s max|U| at t = 0.01 (n32, n64, n128)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>g = 9.81 m/s², no surface tension, isoAdvector with gradAlpha, adaptive time step
+(<code class="docutils literal notranslate"><span class="pre">maxCo</span></code> 0.2) to t = 0.1 s. Unlike TwoPhaseFlow the reconstruction is gradAlpha
+instead of plicRDF and the top is open instead of closed. The pressure error is
+|p − p_hydrostatic| over the hydrostatic range in the box.</p>
 </section>
-<section id="metrics">
-<h3>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 22.0%" />
-<col style="width: 38.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Metric</p></th>
-<th class="head"><p>Meaning</p></th>
-<th class="head"><p>Formula</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maxU</span></code>, <code class="docutils literal notranslate"><span class="pre">meanU</span></code></p></td>
-<td><p>spurious current [m/s]</p></td>
-<td><p>max and volume-weighted mean of cell |U| (<code class="docutils literal notranslate"><span class="pre">mag</span> <span class="pre">|</span> <span class="pre">max</span></code>; <code class="docutils literal notranslate"><span class="pre">mag</span> <span class="pre">|</span> <span class="pre">volIntegrate</span></code>
-over <code class="docutils literal notranslate"><span class="pre">area</span> <span class="pre">|</span> <span class="pre">sum</span></code>: the rotated cells differ in volume by 1e-6)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maxU_max</span></code></p></td>
-<td><p>largest spurious current over time</p></td>
-<td><p>max over written times of <code class="docutils literal notranslate"><span class="pre">maxU</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maxU_10ms</span></code></p></td>
-<td><p>TwoPhaseFlow’s measure</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">maxU</span></code> at t = 0.01</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">p_err_max</span></code>, <code class="docutils literal notranslate"><span class="pre">p_err_mean</span></code></p></td>
-<td><p>hydrostatic pressure error</p></td>
-<td><p>max and volume-weighted mean of <code class="docutils literal notranslate"><span class="pre">|p</span> <span class="pre">−</span> <span class="pre">p_hydrostatic|</span></code> / hydrostatic range in the
-box (this repository’s <code class="docutils literal notranslate"><span class="pre">hydrostaticError</span></code> node, then <code class="docutils literal notranslate"><span class="pre">max</span></code>; <code class="docutils literal notranslate"><span class="pre">volIntegrate</span></code>
-over <code class="docutils literal notranslate"><span class="pre">area</span> <span class="pre">|</span> <span class="pre">sum</span></code>)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="run">
-<h3>Run<a class="headerlink" href="#run" title="Link to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/acceleration/tiltedBox<span class="w"> </span>--smoke
-pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/acceleration/tiltedBox
-</pre></div>
-</div>
-</section>
-</section>
-<section id="changed-parameters">
-<h2>Changed parameters<a class="headerlink" href="#changed-parameters" title="Link to this heading">¶</a></h2>
+<section id="parameter-changes">
+<h2>Parameter changes<a class="headerlink" href="#parameter-changes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -429,13 +300,6 @@ pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w">
 </table>
 </div>
 <p><strong>9 cases</strong> (3 × 3); the smoke run (<code class="docutils literal notranslate"><span class="pre">--smoke</span></code>) has 1. The raw payloads are in <code class="docutils literal notranslate"><span class="pre">benchmarks/acceleration/tiltedBox/benchmark.yaml</span></code>.</p>
-<p>The full sweep takes about 40 s.</p>
-<section id="larger-meshes">
-<h3>Larger meshes<a class="headerlink" href="#larger-meshes" title="Link to this heading">¶</a></h3>
-<p>Add <code class="docutils literal notranslate"><span class="pre">n128:</span> <span class="pre">{block_mesh_dict_config:</span> <span class="pre">{blocks:</span> <span class="pre">[{cells:</span> <span class="pre">[128,</span> <span class="pre">1,</span> <span class="pre">128]}]}}</span></code>; the
-TwoPhaseFlow table already holds n128. Another tilt angle is a mesh variant with other
-<code class="docutils literal notranslate"><span class="pre">vertices</span></code>.</p>
-</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
@@ -490,63 +354,17 @@ TwoPhaseFlow table already holds n128. Another tilt angle is a mesh variant with
 </table>
 </div>
 <p>Rows: the Serial executor. CPU and GPU agree with it to 4e-12 (relative, in these columns; round-off values below 1e-10 left out).</p>
-<p>All 9 cases and columns: <a class="reference download internal" download="" href="../_downloads/32a2473f159200bd2c0f4eca9cc7f71e/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, per-group checks: <a class="reference download internal" download="" href="../_downloads/d0e38c259cc4dbc882fcd806d7b0836a/checks.json"><code class="xref download docutils literal notranslate"><span class="pre">checks.json</span></code></a>.</p>
+<p>All 9 cases and columns: <a class="reference download internal" download="" href="../_downloads/32a2473f159200bd2c0f4eca9cc7f71e/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, changes against the previous snapshot: <a class="reference download internal" download="" href="../_downloads/18e176095439f94b5fad8bacd7b3575a/changes.json"><code class="xref download docutils literal notranslate"><span class="pre">changes.json</span></code></a>.</p>
 <ul class="simple">
-<li><p><strong>Pressure converges</strong>: the largest error falls 2.0e-2, 9.4e-3, 4.6e-3 and the mean
-1.3e-3, 4.1e-4, 1.8e-4 of the hydrostatic range (n16, n32, n64).</p></li>
-<li><p><strong>Spurious current</strong>: 0.70, 0.75, 0.78 m/s at t = 0.01, 26 % (n32) and 20 % (n64)
-below TwoPhaseFlow — only the magnitude is comparable, the setups differ.</p></li>
-<li><p><strong>It grows in time</strong>, to 3.0, 2.7, 2.0 m/s at t = 0.1; a balanced-force
-reconstruction (plicRDF) is not yet in NeoN.</p></li>
-<li><p><strong>Executors</strong>: CPU and GPU agree with Serial to 5e-15.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p_err_mean</span></code>: the mean pressure error stays nearly constant in time and falls with
+resolution, 1.3e-3, 4.1e-4, 1.8e-4 (n16, n32, n64); the largest error falls 2.0e-2,
+9.4e-3, 4.6e-3.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maxU</span></code>: the spurious current at t = 0.01 is 0.70, 0.75, 0.78 m/s, 26 % (n32) and
+20 % (n64) below TwoPhaseFlow’s (crosses); only the magnitude compares, as the
+setups differ. It keeps growing in time, to 3.0, 2.7, 2.0 m/s at t = 0.1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">meanU</span></code>: the mean current also grows in time and is smaller on finer meshes.</p></li>
 </ul>
-<section id="checks">
-<h3>Checks<a class="headerlink" href="#checks" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 24.0%" />
-<col style="width: 16.0%" />
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Check</p></th>
-<th class="head"><p>Groups</p></th>
-<th class="head"><p>Detail (first such group)</p></th>
-<th class="head"><p>Why</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>reference twophaseflow.csv maxU_10ms</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: max rel diff 2.6e-01 (maxU_10ms n32_CPU), rtol 0.3, 2 cases</p></td>
-<td><p>Magnitude only: the setup differs from TwoPhaseFlow’s (gradAlpha, open top).</p></td>
-</tr>
-<tr class="row-odd"><td><p>maximum maxU_max</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 2.997e+00 (n16_CPU), maximum 3.5</p></td>
-<td><p>Regression bound on the spurious current.</p></td>
-</tr>
-<tr class="row-even"><td><p>maximum p_err_max</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 2.011e-02 (n16_CPU), maximum 0.025</p></td>
-<td><p>Regression bound on the hydrostatic pressure error.</p></td>
-</tr>
-<tr class="row-odd"><td><p>maximum p_err_mean</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 1.262e-03 (n16_CPU), maximum 0.0015</p></td>
-<td><p>Regression bound on the hydrostatic pressure error.</p></td>
-</tr>
-<tr class="row-even"><td><p>agreement executor</p></td>
-<td><p><strong>PASS</strong> 2/2</p></td>
-<td><p>CPU vs Serial: max rel diff 4.5e-12 (p_err_mean n64_CPU), rtol 1e-08, 3 cases</p></td>
-<td><p>CPU and GPU reproduce Serial.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
+<p>Against the previous snapshot: 0 flagged (a metric off by more than a factor 2, a case missing or NaN), 0 new cases.</p>
 </section>
 </section>
 
@@ -598,20 +416,10 @@ reconstruction (plicRDF) is not yet in NeoN.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">acceleration/tiltedBox</a><ul>
-<li><a class="reference internal" href="#setup">Setup</a><ul>
-<li><a class="reference internal" href="#inputs">Inputs</a></li>
-<li><a class="reference internal" href="#metrics">Metrics</a></li>
-<li><a class="reference internal" href="#run">Run</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#changed-parameters">Changed parameters</a><ul>
-<li><a class="reference internal" href="#larger-meshes">Larger meshes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#results">Results</a><ul>
-<li><a class="reference internal" href="#checks">Checks</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#why-and-what-is-tested">Why and what is tested</a></li>
+<li><a class="reference internal" href="#case">Case</a></li>
+<li><a class="reference internal" href="#parameter-changes">Parameter changes</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
 </ul>
 </li>
 </ul>

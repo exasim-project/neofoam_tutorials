@@ -245,153 +245,31 @@
         <article role="main" id="furo-main-content">
           <section id="advection-discuniflow">
 <h1>advection/discUniFlow<a class="headerlink" href="#advection-discuniflow" title="Link to this heading">¶</a></h1>
-<p>A disc translated in a uniform flow: the paper’s advection test (Scheufler &amp; Roenby,
-arXiv 1801.05382, sec. 4.2.1, as in numufoam). NeoN’s isoAdvector (<code class="docutils literal notranslate"><span class="pre">gradAlpha</span></code>
-reconstruction) and NeoN’s MULES are compared with numufoam’s stored errors over
-resolution and Courant number.</p>
-<section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<section id="why-and-what-is-tested">
+<h2>Why and what is tested<a class="headerlink" href="#why-and-what-is-tested" title="Link to this heading">¶</a></h2>
+<p>Advection must move a sharp interface without smearing it, losing mass or leaving
+[0, 1]. Here a disc is translated by a uniform velocity, so the exact solution is the
+same disc moved by U t, and the shape error over resolution and Courant number measures
+NeoN’s isoAdvector (<code class="docutils literal notranslate"><span class="pre">gradAlpha</span></code> reconstruction) and NeoN’s MULES. This is the paper’s
+advection test (Scheufler &amp; Roenby, arXiv 1801.05382, sec. 4.2.1); numufoam’s stored
+errors for MULES, isoAlpha and plicRDF are the reference.</p>
+</section>
+<section id="case">
+<h2>Case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id1">
-<img alt="Sketch: a disc of radius 0.2 moving from (0.25, 0.25) to (0.75, 0.75) in the unit square" src="../_images/discUniFlow.png" />
+<img alt="alpha and alpha - alpha_exact at t = 0 and t = 0.5, NeoFOAM isoAdvector gradAlpha, n40" src="../_images/isoAdvector_n40_neofoam.png" />
 <figcaption>
-<p><span class="caption-text">The unit square (x-z, one cell in y) on the coarsest grid (n = 10). The disc starts
-at (0.25, 0.25) and ends at (0.75, 0.75) after U t.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+<p><span class="caption-text">NeoFOAM, isoAdvector with gradAlpha, n40, maxAlphaCo 0.1: alpha (left) and
+alpha − alpha_exact (right) at the start and at t = 0.5.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Quantity</p></th>
-<th class="head"><p>Value</p></th>
-<th class="head"><p>Where set</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Domain</p></td>
-<td><p>1 × 1 (x-z), 1 cell in y</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/blockMeshDict</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Disc radius R, start</p></td>
-<td><p>0.2, (0.25, 0.25)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/setAlphaFieldDict</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Velocity U</p></td>
-<td><p>(1, 1), uniform, fixed</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">0/U</span></code> <code class="docutils literal notranslate"><span class="pre">internalField</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>End time</p></td>
-<td><p>0.5 (end position (0.75, 0.75))</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code> <code class="docutils literal notranslate"><span class="pre">endTime</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Time step</p></td>
-<td><p>fixed, from <code class="docutils literal notranslate"><span class="pre">maxAlphaCo</span></code> (<code class="docutils literal notranslate"><span class="pre">maxCo</span></code> off)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Method</p></td>
-<td><p>isoAdvector (gradAlpha, <code class="docutils literal notranslate"><span class="pre">volTaylor</span></code>) or MULES</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code> <code class="docutils literal notranslate"><span class="pre">advectionScheme</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>MULES gradient</p></td>
-<td><p>Gauss linear</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSchemes</span></code> <code class="docutils literal notranslate"><span class="pre">gradSchemes</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Solver</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">advectorVoF</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code> <code class="docutils literal notranslate"><span class="pre">solver</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Only alpha is transported; the velocity stays fixed. The errors are measured once,
-at t = 0.5, against the exactly cut disc at its end position.</p>
-<section id="inputs">
-<h3>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 40.0%" />
-<col style="width: 60.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>File (<code class="docutils literal notranslate"><span class="pre">benchmarks/advection/discUniFlow/</span></code>)</p></th>
-<th class="head"><p>Content</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">case/</span></code></p></td>
-<td><p>base case (mesh, disc, U, controls incl. the <code class="docutils literal notranslate"><span class="pre">volumeFractionError</span></code> function)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">case/system/postProcess.yaml</span></code></p></td>
-<td><p>the in-situ tables at the function’s write times (every 0.1): <code class="docutils literal notranslate"><span class="pre">Eshape</span></code>,
-<code class="docutils literal notranslate"><span class="pre">mass</span></code>, <code class="docutils literal notranslate"><span class="pre">mass0</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_min</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_max</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metrics.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">derive</span></code>: <code class="docutils literal notranslate"><span class="pre">Emass</span></code> and <code class="docutils literal notranslate"><span class="pre">Ebound</span></code> from the tables</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference/numufoam.csv</span></code></p></td>
-<td><p>numufoam’s <code class="docutils literal notranslate"><span class="pre">error.csv</span></code>: isoAlpha, plicRDF, MULES at CFL 0.05 to 0.5, n10 to
-n320</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>A disc of radius 0.2 starts at (0.25, 0.25) in the unit square (x-z, one cell in y)
+and moves with the fixed velocity U = (1, 1) to (0.75, 0.75) at t = 0.5; only alpha is
+transported, with a fixed time step set by <code class="docutils literal notranslate"><span class="pre">maxAlphaCo</span></code>. E1 is
+<code class="docutils literal notranslate"><span class="pre">Σ</span> <span class="pre">V</span> <span class="pre">|alpha</span> <span class="pre">−</span> <span class="pre">alpha_exact|</span></code> at t = 0.5.</p>
 </section>
-<section id="metrics">
-<h3>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">¶</a></h3>
-<p>TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">volumeFractionError</span></code> at t = 0.5, from NeoFOAM <code class="docutils literal notranslate"><span class="pre">postProcess</span></code> tables.
-The solver’s <code class="docutils literal notranslate"><span class="pre">volumeFractionError.dat</span></code> (the same errors, to round-off) supplies the
-timing and mesh columns.</p>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 22.0%" />
-<col style="width: 38.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Metric</p></th>
-<th class="head"><p>Meaning</p></th>
-<th class="head"><p>Formula</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Eshape</span></code> (E1)</p></td>
-<td><p>shape error (absolute)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Σ</span> <span class="pre">V</span> <span class="pre">|alpha</span> <span class="pre">−</span> <span class="pre">alpha_exact|</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_exact</span></code>: the initial disc moved by U t
-(this repository’s <code class="docutils literal notranslate"><span class="pre">shapeError</span></code> source, NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">cutCellIso</span></code>; <code class="docutils literal notranslate"><span class="pre">volIntegrate</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Emass</span></code></p></td>
-<td><p>mass error</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">|Σ</span> <span class="pre">V</span> <span class="pre">alpha</span> <span class="pre">−</span> <span class="pre">initial</span> <span class="pre">mass|</span></code> (<code class="docutils literal notranslate"><span class="pre">alpha1</span> <span class="pre">|</span> <span class="pre">volIntegrate</span></code>; the start time’s
-<code class="docutils literal notranslate"><span class="pre">alpha.water</span></code>: this repository’s <code class="docutils literal notranslate"><span class="pre">startField</span></code> source)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Ebound</span></code></p></td>
-<td><p>boundedness error</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">max(−min</span> <span class="pre">alpha,</span> <span class="pre">max</span> <span class="pre">alpha</span> <span class="pre">−</span> <span class="pre">1)</span></code> (<code class="docutils literal notranslate"><span class="pre">alpha1</span> <span class="pre">|</span> <span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Tadv</span></code>, <code class="docutils literal notranslate"><span class="pre">wall_s</span></code>, <code class="docutils literal notranslate"><span class="pre">steps</span></code></p></td>
-<td><p>timings, step count</p></td>
-<td><p>wall time per advection, solver wall time, number of steps</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="run">
-<h3>Run<a class="headerlink" href="#run" title="Link to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/advection/discUniFlow<span class="w"> </span>--smoke
-pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/advection/discUniFlow<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="changed-parameters">
-<h2>Changed parameters<a class="headerlink" href="#changed-parameters" title="Link to this heading">¶</a></h2>
+<section id="parameter-changes">
+<h2>Parameter changes<a class="headerlink" href="#parameter-changes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -432,14 +310,6 @@ pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w">
 </table>
 </div>
 <p><strong>36 cases</strong> (3 × 2 × 3 × 2); the smoke run (<code class="docutils literal notranslate"><span class="pre">--smoke</span></code>) has 2. The raw payloads are in <code class="docutils literal notranslate"><span class="pre">benchmarks/advection/discUniFlow/benchmark.yaml</span></code>.</p>
-<p>About 1.5 min with <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">1</span></code>. numufoam’s CFLs 0.05 and 0.2 are commented-out variants
-too.</p>
-<section id="larger-meshes">
-<h3>Larger meshes<a class="headerlink" href="#larger-meshes" title="Link to this heading">¶</a></h3>
-<p>Uncomment <code class="docutils literal notranslate"><span class="pre">n80</span></code>, <code class="docutils literal notranslate"><span class="pre">n160</span></code>, <code class="docutils literal notranslate"><span class="pre">n320</span></code> in <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code> and, optionally, the
-commented <code class="docutils literal notranslate"><span class="pre">order</span></code> check on n40 to n320. n320 needs about 20 MB per case and 1–4 min
-on <code class="docutils literal notranslate"><span class="pre">Serial</span></code> per CFL; the <code class="docutils literal notranslate"><span class="pre">reference</span></code> check then fails for MULES (see Checks).</p>
-</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
@@ -587,72 +457,29 @@ on <code class="docutils literal notranslate"><span class="pre">Serial</span></c
 </table>
 </div>
 <p>Rows: the Serial executor. CPU and GPU agree with it to 8e-14 (relative, in these columns; round-off values below 1e-10 left out).</p>
-<p>All 36 cases and columns: <a class="reference download internal" download="" href="../_downloads/71e7afddca1a9f4761a1cfea4087fd14/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, per-group checks: <a class="reference download internal" download="" href="../_downloads/ef041f239277ca2c584867af5dba146f/checks.json"><code class="xref download docutils literal notranslate"><span class="pre">checks.json</span></code></a>.</p>
+<p>All 36 cases and columns: <a class="reference download internal" download="" href="../_downloads/71e7afddca1a9f4761a1cfea4087fd14/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, changes against the previous snapshot: <a class="reference download internal" download="" href="../_downloads/8771bdc51d9e15ec7e20a47c669a08de/changes.json"><code class="xref download docutils literal notranslate"><span class="pre">changes.json</span></code></a>.</p>
 <ul class="simple">
-<li><p><strong>Mass and bounds</strong>: mass is conserved to round-off for both methods. isoAdvector
-stays in [0, 1]; MULES does only at CFL 0.1 (bound error 1.5e-2 at CFL 0.5).</p></li>
-<li><p><strong>MULES vs numufoam</strong>: E1 is 0.84–0.92 × numufoam’s at n10 and n20 (CFL 0.1) and
-1.67 × at n40; NeoN uses a Gauss linear interface normal, numufoam
-<code class="docutils literal notranslate"><span class="pre">pointCellsLeastSquares</span></code>.</p></li>
-<li><p><strong>isoAdvector with gradAlpha does not converge</strong> on this sharp disc: E1 = 6.9e-3,
-7.4e-3, 8.4e-3 on n10 to n40 at CFL 0.1. OpenFOAM’s gradAlpha behaves the same
-(see <a class="reference internal" href="disc_uni_flow_testsuite.html"><span class="doc">advection/discUniFlowTestsuite</span></a> for exact parity); plicRDF and isoAlpha are not
-yet in NeoN.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E1_vs_n</span></code>: numufoam’s isoAlpha and plicRDF (dashed) fall by a factor of about 10
+from n10 to n40. NeoN’s isoAdvector with gradAlpha does not: at CFL 0.1 its E1 is
+6.9e-3, 7.4e-3, 8.4e-3 on n10, n20, n40. NeoN’s MULES at CFL 0.1 is 0.84 and 0.92 ×
+numufoam’s MULES on n10 and n20 and 1.67 × on n40; the two differ in the interface
+normal’s gradient (NeoN: Gauss linear, numufoam: <code class="docutils literal notranslate"><span class="pre">pointCellsLeastSquares</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E1_vs_CFL</span></code>: MULES’s E1 grows with the Courant number, as numufoam’s does.</p></li>
+<li><p>Mass is conserved to round-off (mass error ≤ 1.4e-16) by both methods. isoAdvector
+stays in [0, 1]; MULES does at CFL 0.1 and leaves it by up to 1.5e-2 at CFL 0.5.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_per_step</span></code>: the advection and the solver wall time per step.</p></li>
 </ul>
-<p>The alpha fields at t = 0.5 on n40 show the difference:</p>
+<p>The case figure shows where the isoAdvector error sits: at t = 0.5 alpha − alpha_exact
+reaches ±0.5 in cells along the whole interface. OpenFOAM-v2506’s isoAdvector with
+plicRDF, which NeoN does not have yet, on the same case:</p>
 <figure class="align-default" id="id5">
-<img alt="alpha and alpha - alpha_exact at t = 0 and t = 0.5, NeoFOAM isoAdvector gradAlpha, n40" src="../_images/isoAdvector_n40_neofoam.png" />
-<figcaption>
-<p><span class="caption-text">NeoFOAM, isoAdvector with gradAlpha, n40, maxAlphaCo 0.1: E1 = 8.4e-3. The error
-(right) reaches ±0.5 in cells along the whole interface.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<figure class="align-default" id="id6">
 <img alt="alpha and alpha - alpha_exact at t = 0 and t = 0.5, OpenFOAM isoAdvector plicRDF, n40" src="../_images/plicRDF_n40_openfoam.png" />
 <figcaption>
-<p><span class="caption-text">OpenFOAM-v2506, isoAdvector with plicRDF, same case: E1 = 7.7e-4, with errors below
-±0.06. This is the reconstruction NeoN still needs.</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
+<p><span class="caption-text">OpenFOAM-v2506, isoAdvector with plicRDF, n40, maxAlphaCo 0.1: E1 = 7.7e-4, with
+errors below ±0.06.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<section id="checks">
-<h3>Checks<a class="headerlink" href="#checks" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 24.0%" />
-<col style="width: 16.0%" />
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Check</p></th>
-<th class="head"><p>Groups</p></th>
-<th class="head"><p>Detail (first such group)</p></th>
-<th class="head"><p>Why</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>reference numufoam.csv Eshape, celltoCellDist, Ncells</p></td>
-<td><p><strong>PASS</strong> 6/12 (6 skip)</p></td>
-<td><p>MULES CFL01 CPU: max rel diff 6.7e-01 (Eshape MULES_CFL01_n40_CPU), rtol 1, 3 cases</p></td>
-<td><p>MULES within a factor 2 of numufoam’s E1; isoAdvector has no numufoam counterpart (gradAlpha), so its groups skip.</p></td>
-</tr>
-<tr class="row-odd"><td><p>maximum Emass</p></td>
-<td><p><strong>PASS</strong> 12/12</p></td>
-<td><p>MULES CFL01 CPU: 8.327e-17 (MULES_CFL01_n40_CPU), maximum 1e-12</p></td>
-<td><p>Mass is conserved to round-off.</p></td>
-</tr>
-<tr class="row-even"><td><p>maximum Ebound</p></td>
-<td><p><strong>PASS</strong> 9/9</p></td>
-<td><p>isoAdvector CFL01 CPU: 6.661e-16 (isoAdvector_CFL01_n20_CPU), maximum 1e-08</p></td>
-<td><p>Alpha stays in [0, 1]; MULES is checked only at CFL 0.1.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>No <code class="docutils literal notranslate"><span class="pre">order</span></code> check is enabled: neither method converges on n10 to n40. On n320, MULES
-reaches 3.5 × numufoam’s E1 and fails the <code class="docutils literal notranslate"><span class="pre">reference</span></code> band.</p>
-</section>
+<p>Against the previous snapshot: 0 flagged (a metric off by more than a factor 2, a case missing or NaN), 0 new cases.</p>
 </section>
 </section>
 
@@ -712,20 +539,10 @@ reaches 3.5 × numufoam’s E1 and fails the <code class="docutils literal notra
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">advection/discUniFlow</a><ul>
-<li><a class="reference internal" href="#setup">Setup</a><ul>
-<li><a class="reference internal" href="#inputs">Inputs</a></li>
-<li><a class="reference internal" href="#metrics">Metrics</a></li>
-<li><a class="reference internal" href="#run">Run</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#changed-parameters">Changed parameters</a><ul>
-<li><a class="reference internal" href="#larger-meshes">Larger meshes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#results">Results</a><ul>
-<li><a class="reference internal" href="#checks">Checks</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#why-and-what-is-tested">Why and what is tested</a></li>
+<li><a class="reference internal" href="#case">Case</a></li>
+<li><a class="reference internal" href="#parameter-changes">Parameter changes</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
 </ul>
 </li>
 </ul>

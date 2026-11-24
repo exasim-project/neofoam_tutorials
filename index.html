@@ -245,10 +245,12 @@
         <article role="main" id="furo-main-content">
           <section id="neofoam-verification">
 <h1>NeoFOAM verification<a class="headerlink" href="#neofoam-verification" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">neofoam_tutorials</span></code> is the verification suite for NeoFOAM’s single-phase
-incompressible solver and its two-phase volume-of-fluid (VoF) methods. Each benchmark is
-a base case, a parameter sweep and declarative checks against stored references from
-OpenFOAM, TwoPhaseFlow, numufoam or the literature.
+<p><code class="docutils literal notranslate"><span class="pre">neofoam_tutorials</span></code> showcases the verification state of NeoFOAM’s single-phase
+incompressible solver and its two-phase volume-of-fluid (VoF) methods on TwoPhaseFlow’s
+and other published benchmarks. Each benchmark is a base case and a parameter sweep;
+its results are shown next to stored reference data from OpenFOAM, TwoPhaseFlow,
+numufoam or the literature. The suite does not judge the results: it only flags a
+result that changed drastically since the previous snapshot.
 The suite runs each benchmark as a NeoFOAM sweep with Snakemake, on NeoN’s <code class="docutils literal notranslate"><span class="pre">Serial</span></code>,
 <code class="docutils literal notranslate"><span class="pre">CPU</span></code> and <code class="docutils literal notranslate"><span class="pre">GPU</span></code> executors. These pages show the results: what NeoFOAM reproduces,
 and where it does not yet match the methods it is compared against.</p>
@@ -262,7 +264,7 @@ and where it does not yet match the methods it is compared against.</p>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#how-a-benchmark-works">How a benchmark works</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#add-a-benchmark">Add a benchmark</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#test-a-new-method">Test a new method</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#change-sweeps-and-thresholds">Change sweeps and thresholds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#change-sweeps">Change sweeps</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#refresh-the-results-in-this-documentation">Refresh the results in this documentation</a></li>
 </ul>
 </li>

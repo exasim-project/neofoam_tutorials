@@ -293,12 +293,13 @@ Options:</p>
 <p>Inside the pixi environment, with OpenFOAM-v2406 sourced, this command alone
 reproduces the run. Snakemake reruns only what changed. It does not track the solver’s
 source code, so after changing a method, add <code class="docutils literal notranslate"><span class="pre">--forcerun</span> <span class="pre">solve</span></code>. The command targets
-<code class="docutils literal notranslate"><span class="pre">report.md</span></code>: once the cases are removed, a changed <code class="docutils literal notranslate"><span class="pre">plots.py</span></code>, check or reference
-table reruns <code class="docutils literal notranslate"><span class="pre">verify</span></code>, <code class="docutils literal notranslate"><span class="pre">plots</span></code> and <code class="docutils literal notranslate"><span class="pre">report</span></code> only (<code class="docutils literal notranslate"><span class="pre">--forcerun</span> <span class="pre">plots</span></code> redraws the
-plots), as they read the collected tables, never the case folders. Snakemake’s default
+<code class="docutils literal notranslate"><span class="pre">report.md</span></code>: once the cases are removed, a changed <code class="docutils literal notranslate"><span class="pre">plots.py</span></code>, reference table or
+snapshot reruns <code class="docutils literal notranslate"><span class="pre">compare</span></code>, <code class="docutils literal notranslate"><span class="pre">plots</span></code> and <code class="docutils literal notranslate"><span class="pre">report</span></code> only (<code class="docutils literal notranslate"><span class="pre">--forcerun</span> <span class="pre">plots</span></code> redraws
+the plots), as they read the collected tables, never the case folders. Snakemake’s default
 target <code class="docutils literal notranslate"><span class="pre">all</span></code> also wants every case and would rerun the solvers.</p>
-<p>The command exits non-zero if a workflow failed. A failed <strong>check</strong> does not fail the
-workflow; it is recorded in <code class="docutils literal notranslate"><span class="pre">checks.json</span></code> and in the report.</p>
+<p>The command exits non-zero if a workflow failed. The results are not judged: a
+<strong>drastic change</strong> against the documentation’s snapshot is flagged in <code class="docutils literal notranslate"><span class="pre">changes.json</span></code>
+and in the report, and never fails the workflow (see <a class="reference internal" href="#changes-against-the-snapshot">Changes against the snapshot</a>).</p>
 </section>
 <section id="outputs">
 <h2>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">¶</a></h2>
@@ -328,15 +329,15 @@ series the plots draw), with the case’s variant columns</p></td>
 <td><p>with <code class="docutils literal notranslate"><span class="pre">collect:</span> <span class="pre">{profiles:</span> <span class="pre">[...]}</span></code>: the cases’ profile tables (cavity, pitzDaily),
 with the case’s variant columns</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">checks.json</span></code></p></td>
-<td><p>every check’s result per group of cases (<code class="docutils literal notranslate"><span class="pre">pass</span></code>, <code class="docutils literal notranslate"><span class="pre">fail</span></code>, <code class="docutils literal notranslate"><span class="pre">skip</span></code>) with a
-detail line</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">changes.json</span></code></p></td>
+<td><p>the drastic changes of <code class="docutils literal notranslate"><span class="pre">results.csv</span></code> against the documentation’s snapshot
+(below): flagged metrics and cases, and the new cases</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plots/</span></code></p></td>
 <td><p>the benchmark’s plots, PNG and PDF</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">report.md</span></code></p></td>
-<td><p>plots, results table and checks on one page</p></td>
+<td><p>plots, results table and changes on one page</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Snakefile</span></code>, <code class="docutils literal notranslate"><span class="pre">sweep.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">params.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">configs/</span></code></p></td>
 <td><p>the exported sweep, kept so the run can be repeated</p></td>
@@ -358,7 +359,7 @@ detail line</p></td>
 preprocess tools (<code class="docutils literal notranslate"><span class="pre">blockMesh</span></code>, <code class="docutils literal notranslate"><span class="pre">setAlphaField</span></code>, …) and
 <code class="docutils literal notranslate"><span class="pre">system/postProcess.yaml</span></code> the in-situ tables the solver writes (below).</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">reference/</span></code></dt><dd><p>Stored tables (CSV), read by the checks and the plots.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">reference/</span></code></dt><dd><p>Stored tables (CSV) of other codes and the literature, drawn by the plots.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">plots.py</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">plot(results,</span> <span class="pre">references,</span> <span class="pre">out)</span></code>, using helpers from
 <code class="docutils literal notranslate"><span class="pre">neofoam_tutorials.suite.plots</span></code>.</p>
@@ -377,9 +378,9 @@ and/or <code class="docutils literal notranslate"><span class="pre">metrics(case
   SOLVE --&gt; METRICS[&quot;metrics&lt;br/&gt;(optional)&quot;]
   METRICS --&gt; COLLECT[&quot;collect&lt;br/&gt;results.csv&quot;]
   SOLVE --&gt; COLLECT
-  COLLECT --&gt; VERIFY[&quot;verify&lt;br/&gt;checks.json&quot;]
+  COLLECT --&gt; COMPARE[&quot;compare&lt;br/&gt;changes.json&quot;]
   COLLECT --&gt; PLOTS[&quot;plots&lt;br/&gt;plots/&quot;]
-  VERIFY --&gt; REPORT[&quot;report&lt;br/&gt;report.md&quot;]
+  COMPARE --&gt; REPORT[&quot;report&lt;br/&gt;report.md&quot;]
   PLOTS --&gt; REPORT
     </pre><p><code class="docutils literal notranslate"><span class="pre">setup</span></code> lays the case’s payloads over the base case, copies the mesh, and runs the
 case-level preprocess tools: NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">setAlphaField</span></code> (exact <code class="docutils literal notranslate"><span class="pre">cutCellIso</span></code> volume
@@ -393,9 +394,9 @@ are NeoFOAM solvers registered through the <code class="docutils literal notrans
 <li><p><code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoNSweep</span></code>: NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">incompressibleFluidNeoN</span></code> (single phase).</p></li>
 </ul>
 <p>They are built from NeoFOAM’s models only, and write tables with the same columns as
-the reference applications. Snakemake tracks <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">plots.py</span></code>,
-<code class="docutils literal notranslate"><span class="pre">metrics.py</span></code> and the reference tables, so changing a check reruns only <code class="docutils literal notranslate"><span class="pre">verify</span></code> and
-<code class="docutils literal notranslate"><span class="pre">report</span></code>.</p>
+the reference applications. Snakemake tracks <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>’s <code class="docutils literal notranslate"><span class="pre">collect</span></code> section, <code class="docutils literal notranslate"><span class="pre">plots.py</span></code>,
+<code class="docutils literal notranslate"><span class="pre">metrics.py</span></code>, the reference tables and the snapshot, so changing a plot reruns only
+<code class="docutils literal notranslate"><span class="pre">plots</span></code> and <code class="docutils literal notranslate"><span class="pre">report</span></code>.</p>
 <section id="in-situ-tables">
 <h3>In-situ tables<a class="headerlink" href="#in-situ-tables" title="Link to this heading">¶</a></h3>
 <p>The solvers run NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">postProcess</span></code> model: <code class="docutils literal notranslate"><span class="pre">case/system/postProcess.yaml</span></code>
@@ -448,33 +449,27 @@ merged table; <code class="docutils literal notranslate"><span class="pre">histo
 files concatenated into <code class="docutils literal notranslate"><span class="pre">profiles.csv</span></code>; <code class="docutils literal notranslate"><span class="pre">columns</span></code>: dimension → column name in
 <code class="docutils literal notranslate"><span class="pre">results.csv</span></code>, whose row per case is the last row of the merged table.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">checks</span></code></dt><dd><p>A list of checks (below).</p>
-</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">report</span></code></dt><dd><p>The columns of the report’s results table.</p>
 </dd>
 </dl>
 </section>
-<section id="checks">
-<h3>Checks<a class="headerlink" href="#checks" title="Link to this heading">¶</a></h3>
-<p>Checks run per group of cases. A group is one combination of every dimension except
-the mesh (for example <code class="docutils literal notranslate"><span class="pre">MULES</span> <span class="pre">CFL01</span> <span class="pre">Serial</span></code>), so a check sees all resolutions of a
-group.</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">reference,</span> <span class="pre">file,</span> <span class="pre">match,</span> <span class="pre">columns,</span> <span class="pre">rtol}</span></code></dt><dd><p>Compare <code class="docutils literal notranslate"><span class="pre">columns</span></code> with <code class="docutils literal notranslate"><span class="pre">reference/&lt;file&gt;</span></code>, rows matched on the <code class="docutils literal notranslate"><span class="pre">match</span></code> columns,
-to relative tolerance <code class="docutils literal notranslate"><span class="pre">rtol</span></code>. Empty stored values are not compared, and a group
-without stored rows is skipped.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">order,</span> <span class="pre">column,</span> <span class="pre">spacing,</span> <span class="pre">minimum}</span></code></dt><dd><p>The least-squares slope of <code class="docutils literal notranslate"><span class="pre">log(column)</span></code> over <code class="docutils literal notranslate"><span class="pre">log(1/spacing)</span></code> must be at least
-<code class="docutils literal notranslate"><span class="pre">minimum</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">maximum,</span> <span class="pre">column,</span> <span class="pre">maximum}</span></code></dt><dd><p>The group’s largest value must be at most <code class="docutils literal notranslate"><span class="pre">maximum</span></code>: a mass or bound error, or a
-spurious velocity.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">agreement,</span> <span class="pre">across,</span> <span class="pre">base,</span> <span class="pre">columns,</span> <span class="pre">rtol}</span></code></dt><dd><p>Each case must agree with the same case of the <code class="docutils literal notranslate"><span class="pre">base</span></code> variant of <code class="docutils literal notranslate"><span class="pre">across</span></code> to
-<code class="docutils literal notranslate"><span class="pre">rtol</span></code>, for example <code class="docutils literal notranslate"><span class="pre">CPU</span></code> and <code class="docutils literal notranslate"><span class="pre">GPU</span></code> against <code class="docutils literal notranslate"><span class="pre">Serial</span></code>.</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">where:</span> <span class="pre">{column:</span> <span class="pre">[values]}</span></code> limits any check to those rows.</p>
+<section id="changes-against-the-snapshot">
+<h3>Changes against the snapshot<a class="headerlink" href="#changes-against-the-snapshot" title="Link to this heading">¶</a></h3>
+<p>The suite shows NeoFOAM’s results; it does not hold them to a tolerance. <code class="docutils literal notranslate"><span class="pre">compare</span></code>
+(<code class="docutils literal notranslate"><span class="pre">neofoam_tutorials.suite.changes</span></code>) only flags what moved a lot since the snapshot in
+<code class="docutils literal notranslate"><span class="pre">doc/_generated/&lt;category&gt;/&lt;name&gt;/results.csv</span></code>, its rows matched to the run’s by the
+dimension columns (<code class="docutils literal notranslate"><span class="pre">mesh</span></code>, <code class="docutils literal notranslate"><span class="pre">executor</span></code>, <code class="docutils literal notranslate"><span class="pre">method</span></code>, …):</p>
+<ul class="simple">
+<li><p><strong>ratio</strong>: a numeric column whose run value is more than 2× or less than 0.5× the
+snapshot’s (a sign change too);</p></li>
+<li><p><strong>nan</strong>: a column that has a value in the snapshot and is NaN (or absent) in the run;</p></li>
+<li><p><strong>missing</strong>: a case of the snapshot that the run does not have.</p></li>
+</ul>
+<p>A case only in the run (a new mesh or <code class="docutils literal notranslate"><span class="pre">--method</span></code>) is listed as <strong>new</strong>, not flagged.
+Every numeric column is compared but the timings (TwoPhaseFlow’s <code class="docutils literal notranslate"><span class="pre">tRec</span></code>, <code class="docutils literal notranslate"><span class="pre">Tadv</span></code>,
+<code class="docutils literal notranslate"><span class="pre">k1</span></code>, <code class="docutils literal notranslate"><span class="pre">k2</span></code> and any column ending in <code class="docutils literal notranslate"><span class="pre">_s</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">wall_s</span></code>), and a pair of values
+both below 1e-10 in magnitude (round-off) is not compared; there is no per-column
+setting.</p>
 </section>
 </section>
 <section id="add-a-benchmark">
@@ -507,17 +502,15 @@ like <code class="docutils literal notranslate"><span class="pre">setAlphaPlane<
 </pre></div>
 </div>
 <p>This runs the cases <code class="docutils literal notranslate"><span class="pre">n8_Serial_myScheme</span></code> and <code class="docutils literal notranslate"><span class="pre">n16_Serial_myScheme</span></code> and reports
-their errors and checks. A <code class="docutils literal notranslate"><span class="pre">reference</span></code> check skips groups that have no stored rows.
+their errors; against the snapshot they are new cases, listed but not flagged.
 To keep the method in the default sweep, add it as a variant of the method dimension
 in <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>.</p>
 </section>
-<section id="change-sweeps-and-thresholds">
-<h2>Change sweeps and thresholds<a class="headerlink" href="#change-sweeps-and-thresholds" title="Link to this heading">¶</a></h2>
-<p>Edit <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>. To add a resolution, add a variant to <code class="docutils literal notranslate"><span class="pre">mesh</span></code> (each
-benchmark page lists its larger meshes). To tighten or relax a check, change its
-<code class="docutils literal notranslate"><span class="pre">rtol</span></code>, <code class="docutils literal notranslate"><span class="pre">minimum</span></code> or <code class="docutils literal notranslate"><span class="pre">maximum</span></code>; record the measured value and the reason in a
-comment next to it, as the existing checks do. Then rerun the printed Snakemake
-command: only the affected steps run again.</p>
+<section id="change-sweeps">
+<h2>Change sweeps<a class="headerlink" href="#change-sweeps" title="Link to this heading">¶</a></h2>
+<p>Edit <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>. To add a resolution, add a variant to <code class="docutils literal notranslate"><span class="pre">mesh</span></code> (most
+<code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code> files note their larger meshes in a comment). Then rerun the printed Snakemake command: only
+the affected steps run again.</p>
 </section>
 <section id="refresh-the-results-in-this-documentation">
 <span id="refresh-the-results"></span><h2>Refresh the results in this documentation<a class="headerlink" href="#refresh-the-results-in-this-documentation" title="Link to this heading">¶</a></h2>
@@ -528,13 +521,14 @@ pixi<span class="w"> </span>run<span class="w"> </span>docs<span class="w">     
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">docs</span></code> runs <code class="docutils literal notranslate"><span class="pre">doc/_scripts/sync_results.py</span></code>. The script copies
-<code class="docutils literal notranslate"><span class="pre">results.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">checks.json</span></code> and the shrunk <code class="docutils literal notranslate"><span class="pre">plots/*.png</span></code> of every benchmark
+<code class="docutils literal notranslate"><span class="pre">results.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">changes.json</span></code> and the shrunk <code class="docutils literal notranslate"><span class="pre">plots/*.png</span></code> of every benchmark
 that has a run in <code class="docutils literal notranslate"><span class="pre">results/</span></code>, renders the tables, and builds the HTML with
 <code class="docutils literal notranslate"><span class="pre">sphinx-build</span> <span class="pre">-W</span></code> into <code class="docutils literal notranslate"><span class="pre">doc/_build/html</span></code>. Commit <code class="docutils literal notranslate"><span class="pre">doc/_generated/</span></code> to keep the
 new snapshot. A page notes when its snapshot holds only part of the full sweep.</p>
-<p>The readable tables of each page (changed parameters, key results, check verdicts) are
-rendered from <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">results.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">checks.json</span></code> at build time by
-<code class="docutils literal notranslate"><span class="pre">doc/_scripts/page_tables.py</span></code>. The setup sketches in <code class="docutils literal notranslate"><span class="pre">doc/_static/setup/</span></code> are drawn
+<p>The readable tables of each page (changed parameters, key results, changes since the
+previous snapshot) are rendered from <code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">results.csv</span></code> and
+<code class="docutils literal notranslate"><span class="pre">changes.json</span></code> at build time by <code class="docutils literal notranslate"><span class="pre">doc/_scripts/page_tables.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">doc/_scripts/sync_results.py</span></code>. The setup sketches in <code class="docutils literal notranslate"><span class="pre">doc/_static/setup/</span></code> are drawn
 from the case files; after changing a case, redraw and commit them:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>doc/_scripts/setup_sketches.py<span class="w">                  </span><span class="c1"># all</span>
 pixi<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>doc/_scripts/setup_sketches.py<span class="w"> </span>reconstruction/circle
@@ -606,12 +600,12 @@ pixi<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </
 <li><a class="reference internal" href="#how-a-benchmark-works">How a benchmark works</a><ul>
 <li><a class="reference internal" href="#in-situ-tables">In-situ tables</a></li>
 <li><a class="reference internal" href="#benchmark-yaml-keys"><code class="docutils literal notranslate"><span class="pre">benchmark.yaml</span></code> keys</a></li>
-<li><a class="reference internal" href="#checks">Checks</a></li>
+<li><a class="reference internal" href="#changes-against-the-snapshot">Changes against the snapshot</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#add-a-benchmark">Add a benchmark</a></li>
 <li><a class="reference internal" href="#test-a-new-method">Test a new method</a></li>
-<li><a class="reference internal" href="#change-sweeps-and-thresholds">Change sweeps and thresholds</a></li>
+<li><a class="reference internal" href="#change-sweeps">Change sweeps</a></li>
 <li><a class="reference internal" href="#refresh-the-results-in-this-documentation">Refresh the results in this documentation</a></li>
 </ul>
 </li>

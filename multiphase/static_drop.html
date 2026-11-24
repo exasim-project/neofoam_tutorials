@@ -245,12 +245,16 @@
         <article role="main" id="furo-main-content">
           <section id="surfacetension-staticdrop">
 <h1>surfaceTension/staticDrop<a class="headerlink" href="#surfacetension-staticdrop" title="Link to this heading">¶</a></h1>
-<p>A static drop: the parasitic currents of the Brackbill continuum surface force (CSF)
-with gradAlpha curvature, in NeoFOAM’s full two-phase solver <code class="docutils literal notranslate"><span class="pre">incompressibleVoFNeoN</span></code>.
-The case is NeoFOAM’s <code class="docutils literal notranslate"><span class="pre">test/solver/incompressibleVoFNeoN/cases/stationaryDroplet</span></code>;
-native interFoam on the same case is the reference.</p>
-<section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<section id="why-and-what-is-tested">
+<h2>Why and what is tested<a class="headerlink" href="#why-and-what-is-tested" title="Link to this heading">¶</a></h2>
+<p>Surface tension must balance the pressure jump across a curved interface without
+driving a flow. A drop at rest tests exactly that in NeoFOAM’s full two-phase solver
+<code class="docutils literal notranslate"><span class="pre">incompressibleVoFNeoN</span></code> (Brackbill CSF with gradAlpha curvature): every velocity is a
+spurious current, and the pressure jump should equal σ/R. The case is NeoFOAM’s
+<code class="docutils literal notranslate"><span class="pre">stationaryDroplet</span></code> test case; native interFoam on the same case is the reference.</p>
+</section>
+<section id="case">
+<h2>Case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
 <figure class="align-default" id="id1">
 <img alt="Sketch: a 2 mm water drop in the centre of an 8 mm box, walls on three sides, open top" src="../_images/staticDrop.png" />
 <figcaption>
@@ -258,155 +262,12 @@ native interFoam on the same case is the reference.</p>
 no-slip walls and an open top, on the coarsest grid (n = 20).</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Quantity</p></th>
-<th class="head"><p>Value</p></th>
-<th class="head"><p>Where set</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Domain</p></td>
-<td><p>8 × 8 mm (x-y), 1 cell in z</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/blockMeshDict</span></code> (<code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">0.001</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p>Drop radius R, centre</p></td>
-<td><p>2 mm, (4, 4) mm</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/setAlphaFieldDict</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Surface tension σ</p></td>
-<td><p>0.07 N/m</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code> <code class="docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Water ρ, ν</p></td>
-<td><p>1000 kg/m³, 1e-6 m²/s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Air ρ, ν</p></td>
-<td><p>1 kg/m³, 1.48e-5 m²/s</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/transportProperties</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Gravity g</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">constant/g</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Alpha advection</p></td>
-<td><p>MULES (<code class="docutils literal notranslate"><span class="pre">MULESCorr</span> <span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">nAlphaCorr</span> <span class="pre">2</span></code>)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/fvSolution</span></code> (solver default scheme)</p></td>
-</tr>
-<tr class="row-odd"><td><p>Surface force</p></td>
-<td><p>CSF, gradAlpha curvature</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">incompressibleVoFNeoN</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>Time step, end time</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">deltaT</span></code> 2e-5 s fixed, 4e-3 s (200 steps)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>Samples</p></td>
-<td><p>every 10th step</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">controlDict</span></code> <code class="docutils literal notranslate"><span class="pre">writeInterval</span></code>; <code class="docutils literal notranslate"><span class="pre">postProcess.yaml</span></code> (<code class="docutils literal notranslate"><span class="pre">stepper</span></code>)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The drop should stay at rest, so every velocity is a spurious current, and the
-pressure jump should equal σ/R = 35 Pa. The solver evaluates the metrics in-run as
-NeoFOAM <code class="docutils literal notranslate"><span class="pre">postProcess</span></code> tables at the field write times; <code class="docutils literal notranslate"><span class="pre">metrics.py</span></code> derives the
-rest when they are collected.</p>
-<section id="inputs">
-<h3>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 40.0%" />
-<col style="width: 60.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>File (<code class="docutils literal notranslate"><span class="pre">benchmarks/surfaceTension/staticDrop/</span></code>)</p></th>
-<th class="head"><p>Content</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">case/</span></code></p></td>
-<td><p>base case (mesh, drop, phases, σ, schemes)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">case/system/postProcess.yaml</span></code></p></td>
-<td><p>the in-situ tables: <code class="docutils literal notranslate"><span class="pre">maxU</span></code>, <code class="docutils literal notranslate"><span class="pre">magU_integral</span></code>, <code class="docutils literal notranslate"><span class="pre">volume</span></code>, <code class="docutils literal notranslate"><span class="pre">p_inside</span></code>,
-<code class="docutils literal notranslate"><span class="pre">p_outside</span></code>, <code class="docutils literal notranslate"><span class="pre">water</span></code>, at every written time</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metrics.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">derive</span></code>: the derived metrics below, from the tables</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference/interfoam.csv</span></code></p></td>
-<td><p>interFoam’s jump and max|U| at n40, its jump deficit at n80</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>Water in air, σ = 0.07 N/m, no gravity, MULES, 200 fixed steps of 2e-5 s to
+t = 4e-3 s. Δp is the mean pressure inside r &lt; R/2 minus the mean outside r &gt; 3R/2;
+σ/R uses R from the water volume.</p>
 </section>
-<section id="metrics">
-<h3>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 22.0%" />
-<col style="width: 38.0%" />
-<col style="width: 40.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Metric</p></th>
-<th class="head"><p>Meaning</p></th>
-<th class="head"><p>Formula</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maxU</span></code>, <code class="docutils literal notranslate"><span class="pre">meanU</span></code></p></td>
-<td><p>spurious current [m/s]</p></td>
-<td><p>max and volume-weighted mean of cell |U| (<code class="docutils literal notranslate"><span class="pre">mag</span> <span class="pre">|</span> <span class="pre">max</span></code>; <code class="docutils literal notranslate"><span class="pre">mag</span> <span class="pre">|</span> <span class="pre">volIntegrate</span></code>
-over <code class="docutils literal notranslate"><span class="pre">area</span> <span class="pre">|</span> <span class="pre">sum</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maxU_max</span></code></p></td>
-<td><p>largest spurious current over time</p></td>
-<td><p>max over written times of <code class="docutils literal notranslate"><span class="pre">maxU</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Ca</span></code>, <code class="docutils literal notranslate"><span class="pre">Ca_max</span></code></p></td>
-<td><p>capillary number</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">mu_water</span> <span class="pre">|U|max</span> <span class="pre">/</span> <span class="pre">σ</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dp</span></code></p></td>
-<td><p>Laplace pressure jump [Pa]</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">mean</span> <span class="pre">p_rgh(r</span> <span class="pre">&lt;</span> <span class="pre">R/2)</span> <span class="pre">−</span> <span class="pre">mean</span> <span class="pre">p_rgh(r</span> <span class="pre">&gt;</span> <span class="pre">3R/2)</span></code> (<code class="docutils literal notranslate"><span class="pre">sphere</span></code> and <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">sphere</span></code> of
-radius R/2, 3R/2 about the axis on the mid-plane, <code class="docutils literal notranslate"><span class="pre">mean</span></code>; R = 2 mm selects the
-same cells as R of the water volume)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sigma_R</span></code></p></td>
-<td><p>exact jump [Pa]</p></td>
-<td><p>σ/R, with R from the water volume (<code class="docutils literal notranslate"><span class="pre">alpha1</span> <span class="pre">|</span> <span class="pre">volIntegrate</span></code>)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dp_err</span></code></p></td>
-<td><p>relative jump error</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">|dp</span> <span class="pre">/</span> <span class="pre">sigma_R</span> <span class="pre">−</span> <span class="pre">1|</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="run">
-<h3>Run<a class="headerlink" href="#run" title="Link to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/surfaceTension/staticDrop<span class="w"> </span>--smoke
-pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w"> </span>benchmarks/surfaceTension/staticDrop<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="changed-parameters">
-<h2>Changed parameters<a class="headerlink" href="#changed-parameters" title="Link to this heading">¶</a></h2>
+<section id="parameter-changes">
+<h2>Parameter changes<a class="headerlink" href="#parameter-changes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -437,15 +298,6 @@ pixi<span class="w"> </span>run<span class="w"> </span>benchmark<span class="w">
 </table>
 </div>
 <p><strong>9 cases</strong> (3 × 3); the smoke run (<code class="docutils literal notranslate"><span class="pre">--smoke</span></code>) has 1. The raw payloads are in <code class="docutils literal notranslate"><span class="pre">benchmarks/surfaceTension/staticDrop/benchmark.yaml</span></code>.</p>
-<p>The full sweep takes about 1 min with <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">1</span></code>.</p>
-<section id="larger-meshes">
-<h3>Larger meshes<a class="headerlink" href="#larger-meshes" title="Link to this heading">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">deltaT</span></code> 2e-5 is 0.57 of the capillary limit <code class="docutils literal notranslate"><span class="pre">sqrt(rho_avg</span> <span class="pre">dx³</span> <span class="pre">/</span> <span class="pre">(2π</span> <span class="pre">σ))</span></code> at n80,
-so a finer mesh needs a smaller time step too: add
-<code class="docutils literal notranslate"><span class="pre">n160:</span> <span class="pre">{block_mesh_dict_config:</span> <span class="pre">{blocks:</span> <span class="pre">[{cells:</span> <span class="pre">[160,</span> <span class="pre">160,</span> <span class="pre">1]}]}}</span></code> and a dimension
-<code class="docutils literal notranslate"><span class="pre">control_dict_config:</span> <span class="pre">{dt2e-5:</span> <span class="pre">{deltaT:</span> <span class="pre">2.0e-5},</span> <span class="pre">dt5e-6:</span> <span class="pre">{deltaT:</span> <span class="pre">5.0e-6}}</span></code>. A new
-dimension adds its own check groups; narrow them with <code class="docutils literal notranslate"><span class="pre">where</span></code>.</p>
-</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
@@ -504,70 +356,16 @@ dimension adds its own check groups; narrow them with <code class="docutils lite
 </table>
 </div>
 <p>Rows: the Serial executor. CPU and GPU agree with it to 1e-10 (relative, in these columns; round-off values below 1e-10 left out).</p>
-<p>All 9 cases and columns: <a class="reference download internal" download="" href="../_downloads/adea300d235e34f715fdfd54fb1cffd6/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, per-group checks: <a class="reference download internal" download="" href="../_downloads/261f5da7baeac193c600cca57e0bbecb/checks.json"><code class="xref download docutils literal notranslate"><span class="pre">checks.json</span></code></a>.</p>
+<p>All 9 cases and columns: <a class="reference download internal" download="" href="../_downloads/adea300d235e34f715fdfd54fb1cffd6/results.csv"><code class="xref download docutils literal notranslate"><span class="pre">results.csv</span></code></a>, changes against the previous snapshot: <a class="reference download internal" download="" href="../_downloads/a6d71117ab9fde1974d4da779fcb4edd/changes.json"><code class="xref download docutils literal notranslate"><span class="pre">changes.json</span></code></a>.</p>
 <ul class="simple">
-<li><p><strong>interFoam parity at n40</strong>: Δp = 29.90 Pa against interFoam’s 29.9009, max|U| at
-the end time 0.199 m/s.</p></li>
-<li><p><strong>Curvature converges slowly</strong>: Δp misses σ/R by 18 %, 14.7 % and 9.6 % at R/dx = 5,
-10 and 20 (gradAlpha curvature; interFoam has the same deficit).</p></li>
-<li><p><strong>Spurious current grows with resolution</strong> at fixed <code class="docutils literal notranslate"><span class="pre">deltaT</span></code>: max|U| over time
-0.15, 0.26, 0.42 m/s (Ca up to 6.1e-3), a known CSF property.</p></li>
-<li><p><strong>Executors</strong>: CPU and GPU agree with Serial to 1e-10.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pressure_jump</span></code>: Δp = 28.84, 29.90, 31.64 Pa against σ/R ≈ 35 Pa, short by 18.0,
+14.7 and 9.6 % at R/dx = 5, 10, 20: the gradAlpha curvature converges slowly.
+interFoam gives 29.90 Pa at n40 and the same 9.6 % at n80.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maxU</span></code>, <code class="docutils literal notranslate"><span class="pre">meanU</span></code>: the spurious current over time. Its maximum over time grows with
+resolution at the fixed time step, 0.15, 0.26, 0.42 m/s (Ca up to 6.1e-3). At the end
+time on n40 max|U| = 0.199 m/s, interFoam’s is 0.1993 m/s.</p></li>
 </ul>
-<section id="checks">
-<h3>Checks<a class="headerlink" href="#checks" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-given docutils container">
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 24.0%" />
-<col style="width: 16.0%" />
-<col style="width: 30.0%" />
-<col style="width: 30.0%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Check</p></th>
-<th class="head"><p>Groups</p></th>
-<th class="head"><p>Detail (first such group)</p></th>
-<th class="head"><p>Why</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>reference interfoam.csv dp</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: max rel diff 5.8e-06 (dp n40_CPU), rtol 0.0001, 2 cases</p></td>
-<td><p>The Laplace jump matches interFoam at n40.</p></td>
-</tr>
-<tr class="row-odd"><td><p>reference interfoam.csv maxU</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: max rel diff 1.5e-03 (maxU n40_CPU), rtol 0.015, 2 cases</p></td>
-<td><p>The spurious current matches interFoam.</p></td>
-</tr>
-<tr class="row-even"><td><p>reference interfoam.csv dp_err</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: max rel diff 2.5e-03 (dp_err n40_CPU), rtol 0.01, 2 cases</p></td>
-<td><p>The CSF deficit of the jump matches interFoam.</p></td>
-</tr>
-<tr class="row-odd"><td><p>maximum dp_err</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 1.798e-01 (n20_CPU), maximum 0.2</p></td>
-<td><p>The jump is within 20 % of σ/R.</p></td>
-</tr>
-<tr class="row-even"><td><p>maximum maxU_max</p></td>
-<td><p><strong>PASS</strong> 3/3</p></td>
-<td><p>CPU: 4.242e-01 (n80_CPU), maximum 0.5</p></td>
-<td><p>Regression bound on the spurious current.</p></td>
-</tr>
-<tr class="row-odd"><td><p>agreement executor</p></td>
-<td><p><strong>PASS</strong> 2/2</p></td>
-<td><p>CPU vs Serial: max rel diff 1.1e-10 (maxU n40_CPU), rtol 1e-08, 3 cases</p></td>
-<td><p>CPU and GPU reproduce Serial.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>A smoke run (n20 only) skips the <code class="docutils literal notranslate"><span class="pre">reference</span></code> checks: interFoam is stored for n40 and
-n80.</p>
-</section>
+<p>Against the previous snapshot: 0 flagged (a metric off by more than a factor 2, a case missing or NaN), 0 new cases.</p>
 </section>
 </section>
 
@@ -627,20 +425,10 @@ n80.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">surfaceTension/staticDrop</a><ul>
-<li><a class="reference internal" href="#setup">Setup</a><ul>
-<li><a class="reference internal" href="#inputs">Inputs</a></li>
-<li><a class="reference internal" href="#metrics">Metrics</a></li>
-<li><a class="reference internal" href="#run">Run</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#changed-parameters">Changed parameters</a><ul>
-<li><a class="reference internal" href="#larger-meshes">Larger meshes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#results">Results</a><ul>
-<li><a class="reference internal" href="#checks">Checks</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#why-and-what-is-tested">Why and what is tested</a></li>
+<li><a class="reference internal" href="#case">Case</a></li>
+<li><a class="reference internal" href="#parameter-changes">Parameter changes</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
 </ul>
 </li>
 </ul>
