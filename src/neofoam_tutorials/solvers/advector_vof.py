@@ -106,6 +106,17 @@ for _config in (
 # (the contribution is registered by create_init, which imports the NeoN models).
 advectorVoFTimeStep = Model("advectorVoFTimeStep").labeled("Fixed time step (alpha Courant)")
 advectorVoFTimeStep.config(ControlDictConfig)
+#: setDeltaT.H's guard against a zero Courant number
+SMALL = 1e-15
+
+
+def _courant_limit(alpha1: Any, phi: Any, deltaT: float, cfg: ControlDictConfig) -> float:
+    """setDeltaT.H's undamped target step from the flow and interface Courant numbers."""
+    from neofoam import neofoam_bindings as nfb
+
+    co_num, alpha_co_num = (float(c) for c in nfb.courant_numbers(alpha1, phi, float(deltaT)))
+    factor = min(cfg.maxCo / (co_num + SMALL), cfg.maxAlphaCo / (alpha_co_num + SMALL))
+    return float(factor * float(deltaT))
 
 
 def _runtime_steps(argv: list[str]) -> list[InitStep]:
@@ -143,9 +154,8 @@ def create_init() -> StagedInitRunner:
     from neofoam.solver.incompressibleVoFNeoN.models.field_writer import (
         neon_vof_writer_backend_steps,
     )
-    from neofoam.solver.incompressibleVoFNeoN.models.time_step import courant_limit
 
-    advectorVoFTimeStep.contributes(initialTimeStepConstraint)(courant_limit)
+    advectorVoFTimeStep.contributes(initialTimeStepConstraint)(_courant_limit)
 
     spec_builder = StagedInitSpec.build("advectorVoF")
     case = Path(".")
