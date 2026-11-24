@@ -1,0 +1,202 @@
+{
+  "checks": [
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CFL01 CPU",
+      "status": "pass",
+      "detail": "max rel diff 6.7e-01 (Eshape MULES_CFL01_n40_CPU), rtol 1, 3 cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CFL01 GPU",
+      "status": "pass",
+      "detail": "max rel diff 6.7e-01 (Eshape MULES_CFL01_n40_GPU), rtol 1, 3 cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CFL01 Serial",
+      "status": "pass",
+      "detail": "max rel diff 6.7e-01 (Eshape MULES_CFL01_n40_Serial), rtol 1, 3 cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CFL05 CPU",
+      "status": "pass",
+      "detail": "max rel diff 5.9e-02 (Eshape MULES_CFL05_n40_CPU), rtol 1, 3 cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CFL05 GPU",
+      "status": "pass",
+      "detail": "max rel diff 5.9e-02 (Eshape MULES_CFL05_n40_GPU), rtol 1, 3 cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "MULES CFL05 Serial",
+      "status": "pass",
+      "detail": "max rel diff 5.9e-02 (Eshape MULES_CFL05_n40_Serial), rtol 1, 3 cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CFL01 CPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CFL01 GPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CFL01 Serial",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CFL05 CPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CFL05 GPU",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "reference numufoam.csv Eshape,celltoCellDist,Ncells",
+      "group": "isoAdvector CFL05 Serial",
+      "status": "skip",
+      "detail": "no stored row for these cases"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES CFL01 CPU",
+      "status": "pass",
+      "detail": "8.327e-17 (MULES_CFL01_n40_CPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES CFL01 GPU",
+      "status": "pass",
+      "detail": "8.327e-17 (MULES_CFL01_n40_GPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES CFL01 Serial",
+      "status": "pass",
+      "detail": "8.327e-17 (MULES_CFL01_n40_Serial), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES CFL05 CPU",
+      "status": "pass",
+      "detail": "5.551e-17 (MULES_CFL05_n20_CPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES CFL05 GPU",
+      "status": "pass",
+      "detail": "5.551e-17 (MULES_CFL05_n20_GPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "MULES CFL05 Serial",
+      "status": "pass",
+      "detail": "5.551e-17 (MULES_CFL05_n20_Serial), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CFL01 CPU",
+      "status": "pass",
+      "detail": "1.388e-16 (isoAdvector_CFL01_n40_CPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CFL01 GPU",
+      "status": "pass",
+      "detail": "6.939e-17 (isoAdvector_CFL01_n20_GPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CFL01 Serial",
+      "status": "pass",
+      "detail": "1.388e-16 (isoAdvector_CFL01_n40_Serial), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CFL05 CPU",
+      "status": "pass",
+      "detail": "5.551e-17 (isoAdvector_CFL05_n40_CPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CFL05 GPU",
+      "status": "pass",
+      "detail": "1.388e-17 (isoAdvector_CFL05_n10_GPU), maximum 1e-12"
+    },
+    {
+      "check": "maximum Emass",
+      "group": "isoAdvector CFL05 Serial",
+      "status": "pass",
+      "detail": "5.551e-17 (isoAdvector_CFL05_n40_Serial), maximum 1e-12"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CFL01 CPU",
+      "status": "pass",
+      "detail": "6.661e-16 (isoAdvector_CFL01_n20_CPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CFL01 GPU",
+      "status": "pass",
+      "detail": "6.661e-16 (isoAdvector_CFL01_n20_GPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CFL01 Serial",
+      "status": "pass",
+      "detail": "6.661e-16 (isoAdvector_CFL01_n20_Serial), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CFL05 CPU",
+      "status": "pass",
+      "detail": "1.637e-15 (isoAdvector_CFL05_n40_CPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CFL05 GPU",
+      "status": "pass",
+      "detail": "1.637e-15 (isoAdvector_CFL05_n40_GPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "isoAdvector CFL05 Serial",
+      "status": "pass",
+      "detail": "1.637e-15 (isoAdvector_CFL05_n40_Serial), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "MULES CFL01 CPU",
+      "status": "pass",
+      "detail": "1.791e-18 (MULES_CFL01_n40_CPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "MULES CFL01 GPU",
+      "status": "pass",
+      "detail": "1.284e-18 (MULES_CFL01_n40_GPU), maximum 1e-08"
+    },
+    {
+      "check": "maximum Ebound",
+      "group": "MULES CFL01 Serial",
+      "status": "pass",
+      "detail": "1.791e-18 (MULES_CFL01_n40_Serial), maximum 1e-08"
+    }
+  ]
+}

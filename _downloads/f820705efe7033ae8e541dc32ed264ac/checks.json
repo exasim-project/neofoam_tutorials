@@ -1,0 +1,124 @@
+{
+  "checks": [
+    {
+      "check": "reference openfoam.csv x_r_h,Umin_xh1,Umin_xh3,Umin_xh5",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "max rel diff 8.8e-04 (Umin_xh5 tutorial_CPU), rtol 0.05, 2 cases"
+    },
+    {
+      "check": "reference openfoam.csv x_r_h,Umin_xh1,Umin_xh3,Umin_xh5",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "max rel diff 1.8e-03 (Umin_xh5 tutorial_GPU), rtol 0.05, 2 cases"
+    },
+    {
+      "check": "reference openfoam.csv x_r_h,Umin_xh1,Umin_xh3,Umin_xh5",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "max rel diff 1.6e-03 (Umin_xh5 tutorial_Serial), rtol 0.05, 2 cases"
+    },
+    {
+      "check": "reference openfoam.csv iterations",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "max rel diff 2.0e-02 (iterations coarse_CPU), rtol 0.5, 2 cases"
+    },
+    {
+      "check": "reference openfoam.csv iterations",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "max rel diff 3.2e-02 (iterations tutorial_GPU), rtol 0.5, 2 cases"
+    },
+    {
+      "check": "reference openfoam.csv iterations",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "max rel diff 2.5e-02 (iterations tutorial_Serial), rtol 0.5, 2 cases"
+    },
+    {
+      "check": "maximum profile_err",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "2.293e-04 (tutorial_CPU), maximum 0.01"
+    },
+    {
+      "check": "maximum profile_err",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "2.749e-04 (tutorial_GPU), maximum 0.01"
+    },
+    {
+      "check": "maximum profile_err",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "2.727e-04 (tutorial_Serial), maximum 0.01"
+    },
+    {
+      "check": "maximum p_res",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "5.817e-04 (tutorial_CPU), maximum 0.01"
+    },
+    {
+      "check": "maximum p_res",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "4.279e-04 (coarse_GPU), maximum 0.01"
+    },
+    {
+      "check": "maximum p_res",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "4.712e-04 (tutorial_Serial), maximum 0.01"
+    },
+    {
+      "check": "maximum Ux_res",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "6.054e-06 (coarse_CPU), maximum 0.001"
+    },
+    {
+      "check": "maximum Ux_res",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "5.798e-06 (coarse_GPU), maximum 0.001"
+    },
+    {
+      "check": "maximum Ux_res",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "6.085e-06 (coarse_Serial), maximum 0.001"
+    },
+    {
+      "check": "reference pitz_daily_1983.csv x_r_h",
+      "group": "CPU",
+      "status": "pass",
+      "detail": "max rel diff 4.8e-03 (x_r_h coarse_CPU), rtol 0.2, 2 cases"
+    },
+    {
+      "check": "reference pitz_daily_1983.csv x_r_h",
+      "group": "GPU",
+      "status": "pass",
+      "detail": "max rel diff 4.8e-03 (x_r_h coarse_GPU), rtol 0.2, 2 cases"
+    },
+    {
+      "check": "reference pitz_daily_1983.csv x_r_h",
+      "group": "Serial",
+      "status": "pass",
+      "detail": "max rel diff 4.7e-03 (x_r_h coarse_Serial), rtol 0.2, 2 cases"
+    },
+    {
+      "check": "agreement executor",
+      "group": "CPU vs Serial",
+      "status": "pass",
+      "detail": "max rel diff 6.9e-04 (Umin_xh5 tutorial_CPU), rtol 0.001, 2 cases"
+    },
+    {
+      "check": "agreement executor",
+      "group": "GPU vs Serial",
+      "status": "pass",
+      "detail": "max rel diff 3.4e-04 (Umin_xh5 coarse_GPU), rtol 0.001, 2 cases"
+    }
+  ]
+}
