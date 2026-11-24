@@ -1,4 +1,5 @@
-"""The maximum, agreement and reference checks on small tables."""
+"""The maximum, agreement and reference checks on small tables and on discUniFlow's stored
+numufoam table."""
 
 from __future__ import annotations
 
@@ -7,6 +8,16 @@ from pathlib import Path
 import pandas as pd
 
 from neofoam_tutorials.suite.checks import evaluate
+
+PAPER = Path(__file__).resolve().parents[2] / "benchmarks" / "advection" / "discUniFlow"
+
+
+def _as_results(stored: pd.DataFrame) -> pd.DataFrame:
+    """A stored table as the Serial rows of a ``results.csv``."""
+    return stored.assign(
+        case=[f"{m}_{c}" for m, c in zip(stored["method"], stored.get("CFL", stored["mesh"]))],
+        executor="Serial",
+    )
 
 
 def _executor_results(scale: dict[str, float]) -> pd.DataFrame:
@@ -28,6 +39,17 @@ def test_maximum_bounds_each_executors_largest_value() -> None:
 
     assert [(c["group"], c["status"]) for c in checks] == [("GPU", "fail"), ("Serial", "pass")]
     assert "n40_GPU" in checks[0]["detail"]
+
+
+def test_maximum_check_fails_above_its_bound() -> None:
+    stored = pd.read_csv(PAPER / "reference" / "numufoam.csv")
+    mules = _as_results(stored[(stored["method"] == "MULES") & (stored["CFL"] == "CFL05")])
+    check = {"type": "maximum", "column": "Ebound", "maximum": 1e-8}
+
+    (result,) = evaluate([check], mules, PAPER / "reference", ["CFL", "executor", "method"])
+
+    assert result["status"] == "fail"
+    assert result["detail"].startswith("1.161e-01")
 
 
 def test_agreement_compares_each_executor_with_the_base_on_the_same_mesh() -> None:

@@ -1,4 +1,4 @@
-"""The circle reconstruction benchmark's published reference tables.
+"""The circle benchmark's published reference tables.
 
 numufoam's ``error.csv`` (``reference/numufoam_error.csv``) is the published run of the
 case; ``reference/twophaseflow.csv`` is TwoPhaseFlow's reconstructInterface (v2506) run
@@ -15,8 +15,7 @@ import pytest
 
 from neofoam_tutorials.reconstruction_error import observed_order, read_numufoam
 
-ROOT = Path(__file__).resolve().parents[1]
-BENCHMARK = ROOT / "benchmarks" / "reconstruction" / "circle"
+BENCHMARK = Path(__file__).resolve().parent
 NUMUFOAM = read_numufoam(BENCHMARK / "reference" / "numufoam_error.csv")
 NORMS = ("LNormalInf", "LNormal1", "LCentreInf", "LCentre1")
 
