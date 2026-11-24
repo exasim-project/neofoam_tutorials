@@ -4,7 +4,7 @@ advection/discUniFlowTestsuite
 TwoPhaseFlow's testsuite variant of the disc in uniform flow
 (``testsuite/advection/test-discUniFlow``): a long run (t = 4, 1200 steps) on one mesh,
 compared with stored runs of TwoPhaseFlow's ``advectorVoF`` with the same schemes. This
-is the parity test: NeoFOAM has to reproduce the C++ reference.
+is the parity case: it shows how closely NeoFOAM reproduces the C++ reference.
 
 Setup
 -----
