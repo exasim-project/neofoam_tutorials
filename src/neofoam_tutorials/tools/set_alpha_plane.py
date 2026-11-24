@@ -3,8 +3,8 @@
 NeoFOAM's ``setAlphaField`` tool knows the ``sphere`` and ``cylinder`` functions only.
 This tool reads the same ``system/setAlphaFieldDict`` with OpenFOAM's plane entries and
 sets the field to the ``cutCellIso`` volume fraction of the plane function
-``normal . (p - origin)`` (positive on the side the normal points to), with NeoFOAM's
-cut (:func:`neofoam.preprocess.cut_cell_iso.volume_fraction`, exact for a plane)::
+``normal . (p - origin)`` (positive on the side the normal points to), with this
+package's cut (:func:`neofoam_tutorials.cut_cell.exact_alpha`, exact for a plane)::
 
     field   alpha.water;
     type    plane;
@@ -56,14 +56,16 @@ def set_alpha_plane(mesh: Any, config: SetAlphaPlaneDictConfig) -> None:
     """Write the start time's field (run from the case, the field must exist there)."""
     import numpy as np
     import pybFoam as pyf
-    from neofoam.preprocess.cut_cell_iso import PolyMeshTopology, volume_fraction
 
-    topology = PolyMeshTopology.read(Path("."))
+    from ..cut_cell import exact_alpha
+    from ..foam import PolyMesh
+
+    poly_mesh = PolyMesh.read(Path("."))
     normal = np.asarray(config.normal, dtype=float)
     normal /= np.linalg.norm(normal)
-    f = (topology.points - np.asarray(config.origin, dtype=float)) @ normal
+    f = (poly_mesh.points - np.asarray(config.origin, dtype=float)) @ normal
     field = pyf.volScalarField.read_field(mesh, config.field, False)
-    np.asarray(field.internalField())[:] = volume_fraction(topology, f, np.asarray(mesh.V()))
+    np.asarray(field.internalField())[:] = exact_alpha(poly_mesh, f)
     field.correctBoundaryConditions()
     pyf.write(field)
 

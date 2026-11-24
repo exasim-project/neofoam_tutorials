@@ -9,7 +9,7 @@ version = "0.1.0"
 # NeoFOAM (and its pybFoam) is built against OpenFOAM-v2406; the benchmark workflows
 # run under it (scripts/benchmark.sh). NEOFOAM_SRC is the checkout `pixi run install-neofoam` builds.
 NEOFOAM_BASHRC = "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
-NEOFOAM_SRC = "$HOME/libsAndApps/NeoFOAM/.claude/worktrees/workflow-benchmarks"
+NEOFOAM_SRC = "$HOME/libsAndApps/NeoFOAM/.claude/vof-bench"
 
 [dependencies]
 python = "3.12.*"

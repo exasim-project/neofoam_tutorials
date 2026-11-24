@@ -136,9 +136,11 @@ A benchmark is a folder ``benchmarks/<category>/<name>/``:
      PLOTS --> REPORT
 
 ``setup`` lays the case's payloads over the base case, copies the mesh, and runs the
-case-level preprocess tools: NeoFOAM's ``setAlphaField`` (exact ``cutCellIso`` volume
-fractions of a cylinder or sphere) or this repository's ``setAlphaPlane``. The solvers
-are NeoFOAM solvers registered through the ``neofoam.solvers`` entry point in
+case-level preprocess tools: NeoFOAM's ``setFields`` and ``setAlphaField`` (exact
+``cutCellIso`` volume fractions of the level set of the case's
+``system/setAlphaField.py``) or this repository's ``setAlphaPlane``. The solvers are
+NeoFOAM solvers registered through the ``neofoam.solvers`` (their ``run``) and
+``neofoam.region_solvers`` (their spec, for the sweep) entry points in
 ``pyproject.toml``:
 
 - ``reconstructInterface``: TwoPhaseFlow's ``reconstructInterface``.
@@ -246,9 +248,10 @@ Add a benchmark
    ``report.md``.
 
 A new solver is a module that exports the solver spec and ``run(argv)``, registered
-under ``[project.entry-points."neofoam.solvers"]`` in ``pyproject.toml`` (then
-``pixi run install``). A new preprocess tool is registered under ``neofoam.plugins``,
-like ``setAlphaPlane``.
+under ``[project.entry-points."neofoam.solvers"]`` (``module:run``) and
+``[project.entry-points."neofoam.region_solvers"]`` (``module:spec``) in
+``pyproject.toml`` (then ``pixi run install``). A new preprocess tool is registered under
+``neofoam.plugins``, like ``setAlphaPlane``.
 
 Test a new method
 -----------------
