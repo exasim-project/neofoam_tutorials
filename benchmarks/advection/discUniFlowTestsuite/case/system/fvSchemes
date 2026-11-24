@@ -8,8 +8,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// The schemes NeoN's MULES implements, as the stored TwoPhaseFlow MULESScheme run's
-// (cases/discUniFlow). isoAdvector reads none of them.
+// The schemes NeoN's MULES implements, as the stored TwoPhaseFlow MULESScheme run's.
+// isoAdvector reads none of them.
 ddtSchemes
 {
     default         Euler;

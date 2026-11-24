@@ -19,7 +19,7 @@ paths:
 
 1. **Proves one named behavior** — `test_<subject>_<behavior>`; if the name needs "and", split it.
 2. **Reads as setup → act → assert** — the call to the thing under test is one visible line, not buried in a helper.
-3. **Inputs are explicit and on disk** — real case files under `cases/<name>/`, never file content as strings/f-string templates in the test. Vary content via the format's own reader/writer, not text patching.
+3. **Inputs are explicit and on disk** — real case files (a benchmark's `case/`), never file content as strings/f-string templates in the test. Vary content via the format's own reader/writer, not text patching.
 4. **Never mutates checked-in files** — `shutil.copytree` the case into `tmp_path`.
 5. **Builds objects the way production does** — select from the real case dict, don't hand-construct with fabricated arguments.
 6. **Expectations are pre-written data** — literals in the test/`parametrize` entry, or the case's `expected.yaml`; never computed by the code under test itself.

@@ -23,7 +23,6 @@ pixi run docs               # syncs results/ into doc/_generated/, builds the do
 | `src/neofoam_tutorials/suite/` | the benchmark suite: export to a NeoFOAM sweep, the Snakemake rules and workers, the change flag (`changes.py`), plots, report |
 | `src/neofoam_tutorials/solvers/`, `postprocess/`, `tools/` | the NeoFOAM solvers, postProcess members and preprocess tool the benchmarks run |
 | `src/neofoam_tutorials/metrics.py`, `cut_cell.py`, `reconstruction_error.py` | TwoPhaseFlow's `volumeFractionError` (Eshape, Emass, Ebound), `cutCellIso` and `reconstructionError` in numpy |
-| `src/neofoam_tutorials/benchmarks.py`, `cases/discUniFlow/` | the registry of the earlier MULES reference benchmark and its case; `test/test_benchmarks.py` checks that they agree |
 | `test/` | unit tests of `src/neofoam_tutorials/`, mirroring it |
 | `doc/` | the documentation, with the committed results snapshot `doc/_generated/` |
 

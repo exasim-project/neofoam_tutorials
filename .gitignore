@@ -9,9 +9,6 @@ __pycache__/
 .ruff_cache/
 .mypy_cache/
 
-# OpenFOAM runs (scratch copies of cases/)
-runs/
-
 # benchmark workflow runs (pixi run benchmark)
 results/
 
