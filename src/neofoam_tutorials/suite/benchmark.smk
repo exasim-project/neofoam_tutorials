@@ -1,5 +1,5 @@
 # The benchmark's rules after NeoFOAM's sweep, included by the Snakefile that
-# neofoam_verification.suite.benchmark.export writes: (metrics per case ->) collect ->
+# neofoam_tutorials.suite.benchmark.export writes: (metrics per case ->) collect ->
 # verify, plots -> report; on success the case and mesh data are removed.
 # Consumes the sweep's globals `cases` and BASE_CASE (the benchmark's case/ folder).
 # Only collect (and metrics) read the cases: verify, plots and report read collect's
@@ -11,7 +11,7 @@ from pathlib import Path
 import yaml
 
 BENCHMARK = str(Path(BASE_CASE).parent)
-BENCHMARK_WORKER = "python -m neofoam_verification.suite.workflow"
+BENCHMARK_WORKER = "python -m neofoam_tutorials.suite.workflow"
 REFERENCES = sorted(str(p) for p in Path(BENCHMARK, "reference").glob("*.csv"))
 SPEC = yaml.safe_load(Path(BENCHMARK, "benchmark.yaml").read_text())
 METRICS = SPEC.get("metrics")

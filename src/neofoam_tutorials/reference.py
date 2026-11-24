@@ -10,7 +10,7 @@ the testsuite's generator application, built with wmake) and advected with
 * ``alpha_final.txt``: cell alpha at the end time (17 significant digits),
 * ``run.json``: versions, time steps, wall time.
 
-``python -m neofoam_verification.reference`` regenerates them.
+``python -m neofoam_tutorials.reference`` regenerates them.
 """
 
 from __future__ import annotations

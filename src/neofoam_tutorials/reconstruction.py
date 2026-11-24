@@ -9,7 +9,7 @@ After TwoPhaseFlow's ``apps/benchmark/reconstructInterface`` on the
 benchmark can also use ``cutCellImpFunc``, which v2406 does not have), reconstructs
 the interface with each scheme of ``system/reconstructionReferenceDict`` and evaluates
 ``cutCellPLIC::calcSubCell`` and ``surfaceIteratorPLIC::vofCutCell`` in every cell
-with a non-zero interface normal. ``python -m neofoam_verification.reconstruction``
+with a non-zero interface normal. ``python -m neofoam_tutorials.reconstruction``
 regenerates ``reference/<case>/``.
 
 File format (``np.load``; n cells, m interface cells, P = 8 planes, K = 12 cuts):

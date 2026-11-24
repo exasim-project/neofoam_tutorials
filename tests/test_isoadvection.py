@@ -16,9 +16,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from neofoam_verification import isoadvection
-from neofoam_verification.cut_cell import exact_alpha
-from neofoam_verification.isoadvection import (
+from neofoam_tutorials import isoadvection
+from neofoam_tutorials.cut_cell import exact_alpha
+from neofoam_tutorials.isoadvection import (
     RUNS,
     SCHEMES,
     exact_shape,
@@ -31,9 +31,9 @@ from neofoam_verification.isoadvection import (
     velocities,
     write_times,
 )
-from neofoam_verification.metrics import bound_error, mass_error, shape_error
-from neofoam_verification.reconstruction import have_openfoam, load_mesh
-from neofoam_verification.reference import have_twophaseflow
+from neofoam_tutorials.metrics import bound_error, mass_error, shape_error
+from neofoam_tutorials.reconstruction import have_openfoam, load_mesh
+from neofoam_tutorials.reference import have_twophaseflow
 
 PARAMS = [(label, s, v) for label, case in RUNS.items() for s, v in run_keys(case)]
 IDS = [f"{label}-{run_key(s, v)}" for label, s, v in PARAMS]

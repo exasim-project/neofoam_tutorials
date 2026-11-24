@@ -1,6 +1,6 @@
 """Advection-flux reference: one isoAdvection step of OpenFOAM-v2406's geometricVoF.
 
-On the curvature cases of :mod:`neofoam_verification.reconstruction` (same mesh, same
+On the curvature cases of :mod:`neofoam_tutorials.reconstruction` (same mesh, same
 initial alpha), ``reference/advectionFluxReference`` (an OpenFOAM utility, built with
 wmake into ``$FOAM_USER_APPBIN``) runs ``isoAdvection::advect`` once for every velocity
 and Courant number of ``system/advectionFluxReferenceDict`` and every scheme, with
@@ -10,7 +10,7 @@ interIsoFoam) and ``alpha.<scheme>.unbounded`` (no bounding, no clipping), and r
 of ``cutFaceAdvect`` that records its intermediate values). The utility stops unless
 the trace equals the library's ``cutFaceAdvect`` on every face and the replayed face
 flux equals the library's unbounded ``dVf_`` on every face, both bitwise.
-``python -m neofoam_verification.advection_flux`` regenerates
+``python -m neofoam_tutorials.advection_flux`` regenerates
 ``reference/<case>/advection/``.
 
 Velocities: U = U(C) in the cells, U(Cf) on the boundary faces, phi = U(Cf) . Sf

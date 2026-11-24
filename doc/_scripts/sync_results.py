@@ -23,8 +23,8 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from neofoam_verification.suite.benchmark import load
-from neofoam_verification.suite.workflow import groups, mesh_column
+from neofoam_tutorials.suite.benchmark import load
+from neofoam_tutorials.suite.workflow import groups, mesh_column
 
 ROOT = Path(__file__).resolve().parents[2]
 BENCHMARKS = ROOT / "benchmarks"

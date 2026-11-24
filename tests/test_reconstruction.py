@@ -14,8 +14,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from neofoam_verification.cut_cell import exact_alpha
-from neofoam_verification.reconstruction import (
+from neofoam_tutorials.cut_cell import exact_alpha
+from neofoam_tutorials.reconstruction import (
     N_PLANES,
     N_SIGNED_DISTANCE,
     NAMES,

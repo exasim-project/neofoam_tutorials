@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from neofoam_verification.suite.workflow import read_post_process
+from neofoam_tutorials.suite.workflow import read_post_process
 
 GHIA = Path(__file__).with_name("reference") / "ghia1982.csv"
 CLOCK = re.compile(r"ClockTime = (\S+) s")

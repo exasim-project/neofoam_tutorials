@@ -1,7 +1,7 @@
 NeoFOAM verification
 ====================
 
-``neofoam_verification`` is the verification suite for NeoFOAM's single-phase
+``neofoam_tutorials`` is the verification suite for NeoFOAM's single-phase
 incompressible solver and its two-phase volume-of-fluid (VoF) methods. Each benchmark is
 a base case, a parameter sweep and declarative checks against stored references from
 OpenFOAM, TwoPhaseFlow, numufoam or the literature.

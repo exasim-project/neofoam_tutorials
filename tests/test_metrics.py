@@ -13,10 +13,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from neofoam_verification.benchmarks import BENCHMARKS
-from neofoam_verification.foam import PolyMesh, read_function_object_dat
-from neofoam_verification.metrics import mesh_measures
-from neofoam_verification.reference import DAT, evaluate
+from neofoam_tutorials.benchmarks import BENCHMARKS
+from neofoam_tutorials.foam import PolyMesh, read_function_object_dat
+from neofoam_tutorials.metrics import mesh_measures
+from neofoam_tutorials.reference import DAT, evaluate
 
 
 def test_python_metrics_match_cpp_volumeFractionError(twophaseflow_runs) -> None:  # type: ignore[no-untyped-def]
@@ -50,8 +50,8 @@ def test_python_mesh_measures_match_cpp(twophaseflow_runs) -> None:  # type: ign
 
 def test_initial_alpha_is_the_exact_volume_fraction(twophaseflow_runs) -> None:  # type: ignore[no-untyped-def]
     """setAlphaField (OpenFOAM) and the Python cut cell agree on the initial field."""
-    from neofoam_verification.foam import read_internal_field
-    from neofoam_verification.metrics import exact_alpha_at
+    from neofoam_tutorials.foam import read_internal_field
+    from neofoam_tutorials.metrics import exact_alpha_at
 
     for name, (result, case) in twophaseflow_runs.items():
         b = BENCHMARKS[name]

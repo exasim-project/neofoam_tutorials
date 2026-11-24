@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from neofoam_verification.suite.benchmark import dimensions, load, name
-from neofoam_verification.suite.checks import evaluate
-from neofoam_verification.suite.workflow import collect, metrics, read_table
+from neofoam_tutorials.suite.benchmark import dimensions, load, name
+from neofoam_tutorials.suite.checks import evaluate
+from neofoam_tutorials.suite.workflow import collect, metrics, read_table
 
 CIRCLE = Path(__file__).resolve().parents[1] / "benchmarks" / "reconstruction" / "circle"
 SPEC = load(CIRCLE)
@@ -94,7 +94,7 @@ def test_metrics_table_round_trips_and_prunes_the_inner_time_directories(
     (benchmark / "benchmark.yaml").write_text("metrics: {script: metrics.py, prune: true}\n")
     (benchmark / "metrics.py").write_text(
         "import pandas as pd\n"
-        "from neofoam_verification.suite.workflow import time_directories\n"
+        "from neofoam_tutorials.suite.workflow import time_directories\n"
         "def metrics(case):\n"
         "    times = [float(t.name) for t in time_directories(case)]\n"
         "    return pd.DataFrame({'Time': times, 'maxU': [2 * t for t in times]})\n"

@@ -1,8 +1,8 @@
 """The workers of ``benchmark.smk``, run in the benchmark's workflow directory::
 
-    python -m neofoam_verification.suite.workflow collect|verify|plots|report \\
+    python -m neofoam_tutorials.suite.workflow collect|verify|plots|report \\
         --benchmark FOLDER --out PATH
-    python -m neofoam_verification.suite.workflow metrics --benchmark FOLDER --out \\
+    python -m neofoam_tutorials.suite.workflow metrics --benchmark FOLDER --out \\
         cases/<case>/postProcessing/metrics.dat
 
 * ``metrics`` -- per solved case, when ``benchmark.yaml`` has ``metrics: {script, prune}``:
@@ -181,7 +181,7 @@ def plot(folder: Path, results: pd.DataFrame, out: Path) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(prog="python -m neofoam_verification.suite.workflow")
+    parser = argparse.ArgumentParser(prog="python -m neofoam_tutorials.suite.workflow")
     parser.add_argument("command", choices=COMMANDS)
     parser.add_argument("--benchmark", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)

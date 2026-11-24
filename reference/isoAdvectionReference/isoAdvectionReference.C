@@ -40,7 +40,7 @@ Description
     isoAdvectionReference/[<velocity>/]<scheme>/: steps.dat (one row per
     step), alpha/<step>.dat (alpha after the step, at step 1, every
     -alphaInterval steps and at the write times) and step1/ (the pieces of
-    the first step), converted to .npz by neofoam_verification.isoadvection,
+    the first step), converted to .npz by neofoam_tutorials.isoadvection,
     which documents the columns. Values on faces of empty patches are nan.
 
 \*---------------------------------------------------------------------------*/

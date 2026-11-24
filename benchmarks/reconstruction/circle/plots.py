@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from neofoam_verification.suite.plots import error_plot, save, timing_plot
+from neofoam_tutorials.suite.plots import error_plot, save, timing_plot
 
 NORMS = ("LNormalInf", "LNormal1", "LCentreInf", "LCentre1")
 

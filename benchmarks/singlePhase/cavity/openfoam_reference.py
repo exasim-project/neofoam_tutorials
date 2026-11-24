@@ -26,8 +26,8 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from neofoam_verification.foam import PolyMesh, read_internal_field
-from neofoam_verification.suite.workflow import time_directories
+from neofoam_tutorials.foam import PolyMesh, read_internal_field
+from neofoam_tutorials.suite.workflow import time_directories
 
 HERE = Path(__file__).resolve().parent
 BASHRC = os.environ.get("OPENFOAM_BASHRC", str(Path.home() / "OpenFOAM/OpenFOAM-v2406/etc/bashrc"))

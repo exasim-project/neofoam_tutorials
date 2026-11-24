@@ -10,7 +10,7 @@ phi0 and U0 by ``cos(2 pi (t + dt/2)/period)`` or ``cos(pi (t + dt/2)/spiralling
 before ``runTime++``). advectorVoF itself passes ``Su = div(phi0) min(alpha, 1)``,
 round-off for these solenoidal velocities, which is left out here. The utility checks
 its bookkeeping against the library bitwise (see its header).
-``python -m neofoam_verification.isoadvection`` regenerates the stored runs.
+``python -m neofoam_tutorials.isoadvection`` regenerates the stored runs.
 
 Runs (:data:`RUNS`): curvature2D (32 x 32 hex, alpha1 by ``cutCellIso``, the velocities
 of ``system/isoAdvectionReferenceDict``) and the TwoPhaseFlow benchmarks at their

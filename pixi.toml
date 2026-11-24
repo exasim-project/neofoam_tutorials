@@ -1,7 +1,7 @@
 [workspace]
 authors = ["Henning Scheufler <henning.scheufler@web.de>"]
 channels = ["conda-forge", "bioconda"]
-name = "neofoam_verification"
+name = "neofoam_tutorials"
 platforms = ["linux-64"]
 version = "0.1.0"
 
@@ -67,19 +67,19 @@ benchmark = { cmd = "bash scripts/benchmark.sh", depends-on = ["install"] }
 # from $NEOFOAM_SRC (or the given checkout) into this environment; 4 jobs, under build.lock.
 install-neofoam = "bash scripts/install_neofoam.sh"
 # Re-runs the C++ MULES reference of every benchmark and rewrites reference/<case>/.
-update-reference = { cmd = "python -m neofoam_verification.reference", depends-on = ["install"] }
+update-reference = { cmd = "python -m neofoam_tutorials.reference", depends-on = ["install"] }
 # Re-runs the OpenFOAM-v2406 reconstruction reference (reference/reconstructionReference)
 # of every curvature case and rewrites reference/curvature*/.
-update-reconstruction-reference = { cmd = "python -m neofoam_verification.reconstruction", depends-on = ["install"] }
+update-reconstruction-reference = { cmd = "python -m neofoam_tutorials.reconstruction", depends-on = ["install"] }
 # Re-runs the OpenFOAM-v2406 isoAdvection face-flux reference (reference/advectionFluxReference)
 # of every curvature case and rewrites reference/curvature*/advection/.
-update-advection-flux-reference = { cmd = "python -m neofoam_verification.advection_flux", depends-on = ["install"] }
+update-advection-flux-reference = { cmd = "python -m neofoam_tutorials.advection_flux", depends-on = ["install"] }
 # Re-runs the OpenFOAM-v2406 multi-step isoAdvection reference (reference/isoAdvectionReference)
 # and rewrites reference/<case>/isoAdvection/ (curvature2D and the TwoPhaseFlow benchmarks).
-update-isoadvection-reference = { cmd = "python -m neofoam_verification.isoadvection", depends-on = ["install"] }
+update-isoadvection-reference = { cmd = "python -m neofoam_tutorials.isoadvection", depends-on = ["install"] }
 # Re-runs TwoPhaseFlow's advectorVoF with its isoAdvection on the benchmarks (v2506, benchmark
 # context next to MULES) and rewrites reference/<case>/<resolution>/twoPhaseFlowIsoAdvection/.
-update-twophaseflow-isoadvection-reference = { cmd = "python -m neofoam_verification.isoadvection --twophaseflow", depends-on = ["install"] }
+update-twophaseflow-isoadvection-reference = { cmd = "python -m neofoam_tutorials.isoadvection --twophaseflow", depends-on = ["install"] }
 # The documentation: copies the benchmark outputs of results/ into doc/_generated/ (the
 # committed snapshot), then builds doc/_build/html with warnings as errors.
 docs = "python doc/_scripts/sync_results.py && sphinx-build -W -b html doc doc/_build/html"

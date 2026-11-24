@@ -112,7 +112,7 @@ A benchmark is a folder ``benchmarks/<category>/<name>/``:
    Stored tables (CSV), read by the checks and the plots.
 ``plots.py``
    ``plot(results, references, out)``, using helpers from
-   ``neofoam_verification.suite.plots``.
+   ``neofoam_tutorials.suite.plots``.
 ``metrics.py`` (optional)
    What the in-situ tables cannot do: ``derive(history, case) -> DataFrame``, columns
    derived from a case's tables when they are collected (a maximum over time, a ratio),
@@ -177,7 +177,7 @@ On the NeoN solvers only the ``internal`` source works, on the registry fields
 (``alpha1``, ``U``, ``p_rgh``, ``p``, ``rho``). This repository adds the sources
 ``shapeError`` (TwoPhaseFlow's Eshape integrand) and ``startField`` (a field at the start
 time) and the nodes ``hydrostaticError`` and ``change``, registered through the
-``neofoam.plugins`` entry point ``neofoam_verification.postprocess``.
+``neofoam.plugins`` entry point ``neofoam_tutorials.postprocess``.
 
 ``benchmark.yaml`` keys
 ~~~~~~~~~~~~~~~~~~~~~~~

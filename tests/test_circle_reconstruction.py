@@ -14,14 +14,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from neofoam_verification.foam_random import centres
-from neofoam_verification.reconstruction_error import (
+from neofoam_tutorials.foam_random import centres
+from neofoam_tutorials.reconstruction_error import (
     ReconstructionError,
     observed_order,
     read_numufoam,
     sample_errors,
 )
-from neofoam_verification.shapes import Cylinder
+from neofoam_tutorials.shapes import Cylinder
 
 ROOT = Path(__file__).resolve().parents[1]
 BENCHMARK = ROOT / "benchmarks" / "reconstruction" / "circle"

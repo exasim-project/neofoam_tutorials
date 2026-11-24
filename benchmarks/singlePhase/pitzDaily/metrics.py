@@ -39,8 +39,8 @@ import numpy as np
 import pandas as pd
 from foamlib import FoamFile
 
-from neofoam_verification.foam import PolyMesh, read_internal_field
-from neofoam_verification.suite.workflow import time_directories
+from neofoam_tutorials.foam import PolyMesh, read_internal_field
+from neofoam_tutorials.suite.workflow import time_directories
 
 STEP = 0.0254  # step height h [m]: the lower wall drops from y = 0 to -h at x = 0
 LENGTH = 0.206  # the straight channel downstream of the step, 0 < x < LENGTH

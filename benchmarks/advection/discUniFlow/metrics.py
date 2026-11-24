@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from neofoam_verification.metrics import table_errors
+from neofoam_tutorials.metrics import table_errors
 
 
 def derive(history: pd.DataFrame, case: Path) -> pd.DataFrame:

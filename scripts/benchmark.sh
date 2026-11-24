@@ -7,4 +7,4 @@ set +eu
 # shellcheck disable=SC1090
 source "$NEOFOAM_BASHRC" >/dev/null 2>&1
 set -eu
-exec python -m neofoam_verification.run "$@"
+exec python -m neofoam_tutorials.run "$@"

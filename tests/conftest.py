@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from neofoam_verification.backend import RunResult
-from neofoam_verification.benchmarks import BENCHMARKS
-from neofoam_verification.reference import have_twophaseflow, run_twophaseflow
+from neofoam_tutorials.backend import RunResult
+from neofoam_tutorials.benchmarks import BENCHMARKS
+from neofoam_tutorials.reference import have_twophaseflow, run_twophaseflow
 
 
 @pytest.fixture(scope="session")

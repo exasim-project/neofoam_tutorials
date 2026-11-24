@@ -29,7 +29,7 @@ from foamlib import FoamFile  # noqa: E402
 from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.patches import Arc, Circle, Polygon  # noqa: E402
 
-from neofoam_verification.foam_random import centres  # noqa: E402
+from neofoam_tutorials.foam_random import centres  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 BENCHMARKS = ROOT / "benchmarks"

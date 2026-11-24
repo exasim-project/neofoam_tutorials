@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from neofoam_verification.cut_cell import exact_alpha
-from neofoam_verification.foam import PolyMesh
+from neofoam_tutorials.cut_cell import exact_alpha
+from neofoam_tutorials.foam import PolyMesh
 
 # one hex cell, OpenFOAM point and face ordering (all faces boundary faces)
 POINTS = np.array(

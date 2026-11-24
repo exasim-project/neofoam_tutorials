@@ -1,4 +1,4 @@
-# neofoam_verification
+# neofoam_tutorials
 
 Verification of NeoFOAM's MULES VoF advection (OpenFOAM via pybFoam, and NeoN on
 Serial/CPU/GPU executors) against OpenFOAM, on TwoPhaseFlow's advection benchmarks.
@@ -21,7 +21,7 @@ pixi run install-neofoam [CHECKOUT]  # builds NeoFOAM (C++) into this env, below
 |---|---|
 | `cases/<name>/` | the benchmark case (OpenFOAM format): blockMeshDict, `0.orig`, setAlphaFieldDict, MULES controls, controlDict with the `volumeFractionError` function object; for a generated velocity also the testsuite's generator application (`generateU*/`, built with wmake into `$FOAM_USER_APPBIN`) |
 | `reference/<name>/<resolution>/` | the OpenFOAM MULES reference: `volumeFractionError.dat` (C++, verbatim), `alpha_final.txt`, `run.json` |
-| `src/neofoam_verification/benchmarks.py` | the registry: case dir, initial shape (cylinder, sphere), prescribed velocity (uniform, or generated with its `isoAdvector` time dependence), end time, write interval, resolutions |
+| `src/neofoam_tutorials/benchmarks.py` | the registry: case dir, initial shape (cylinder, sphere), prescribed velocity (uniform, or generated with its `isoAdvector` time dependence), end time, write interval, resolutions |
 | `foam.py` | foamlib readers, OpenFOAM's face/cell geometry in numpy |
 | `shapes.py`, `cut_cell.py` | implicit functions; TwoPhaseFlow's `cutCellIso` (exact volume fraction) |
 | `metrics.py` | TwoPhaseFlow's `volumeFractionError` (Eshape, Emass, Ebound) on arrays |
@@ -148,7 +148,7 @@ for `gradAlpha` also its least-squares gradient (the normal handed to `vofCutCel
 the `zoneDistribute` stencil per interface cell, whose labels past the cells are boundary
 faces. `reference/<case>/{mesh,isoAlpha,plicRDF,gradAlpha}.npz` and `run.json` hold it;
 the keys and
-shapes are documented in `src/neofoam_verification/reconstruction.py`.
+shapes are documented in `src/neofoam_tutorials/reconstruction.py`.
 
 | case | mesh | cells | scheme | interface cells | LNormalInf | LNormal1 | LCentreInf | LCentre1 |
 |---|---|---|---|---|---|---|---|---|
@@ -196,7 +196,7 @@ U at the points, dt, the interface and Un0), one row per `timeIntegratedFaceFlux
 (its arguments, result, point arrival times, branch, time-integrated area and its
 contributions), and the assembled fields (upwind dVf, dVf before and after
 `limitFluxes`, alphaPhi, alpha unbounded and bounded); keys and shapes are documented in
-`src/neofoam_verification/advection_flux.py`. `tests/test_advection_flux.py` checks
+`src/neofoam_tutorials/advection_flux.py`. `tests/test_advection_flux.py` checks
 that the assembled fields follow from the rows and the inputs from the reconstruction
 reference, and, marked `geometricvof`, that a rerun reproduces them bitwise.
 
@@ -229,7 +229,7 @@ after clipping), alpha after step 1, at the write times (and every
 after 0, 1, 2 iterations and before clipping, the interface with x0, n0 and Un0 from
 `interpolationCellPoint`; U and phi for the 2D cases) and the volumeFractionError
 (`metrics.py`) at the write times; keys and shapes are documented in
-`src/neofoam_verification/isoadvection.py` (`load_run(label, scheme, velocity)`).
+`src/neofoam_tutorials/isoadvection.py` (`load_run(label, scheme, velocity)`).
 `tests/test_isoadvection.py` checks the files' consistency (time steps, iterations,
 mass up to the clipping, bounds, step 1 from its face fluxes, the errors), and, marked
 `geometricvof`, that a rerun reproduces them bitwise.
@@ -265,7 +265,7 @@ so a port compares alpha with an absolute tolerance, not by its support.
 
 ### advectorVoF with isoAdvection (benchmark context)
 
-`python -m neofoam_verification.isoadvection --twophaseflow` runs the benchmarks with
+`python -m neofoam_tutorials.isoadvection --twophaseflow` runs the benchmarks with
 TwoPhaseFlow's advectorVoF as for MULES (`reference.run_twophaseflow`), with
 `advectionScheme isoAdvection` and the controls above (plus the testsuite's unused
 `nAlphaCorr 2`, `nAlphaSubCycles 1`, `cAlpha 1`, which advectorVoF requires), and
@@ -365,7 +365,7 @@ which steps `post_process` after `write_output` as incompressibleVoFNeoN) suppor
 `internal` source, on the registry fields (`alpha1`, `U`, `p_rgh`, `p`, `rho`). The
 benchmarks evaluate their tables at the field write times (`write_control_type: stepper`)
 or the function object's (`runTime`). This repository registers, through the
-`neofoam.plugins` entry point `neofoam_verification.postprocess` (`pyproject.toml`):
+`neofoam.plugins` entry point `neofoam_tutorials.postprocess` (`pyproject.toml`):
 
 | `type` | kind | what |
 |---|---|---|

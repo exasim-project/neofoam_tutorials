@@ -34,7 +34,7 @@ Description
        value on every face and the replayed dVf field equals 1.'s bitwise.
 
     Output (text tables, 17 significant digits) in advectionFluxReference/,
-    converted to .npz by neofoam_verification.advection_flux, which documents
+    converted to .npz by neofoam_tutorials.advection_flux, which documents
     the columns. Values on faces of empty patches are written as nan.
 
 \*---------------------------------------------------------------------------*/

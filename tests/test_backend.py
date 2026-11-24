@@ -27,9 +27,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from neofoam_verification.backend import run_case
-from neofoam_verification.benchmarks import BENCHMARKS, Benchmark
-from neofoam_verification.reference import evaluate, have_twophaseflow, load_reference, mesh_case
+from neofoam_tutorials.backend import run_case
+from neofoam_tutorials.benchmarks import BENCHMARKS, Benchmark
+from neofoam_tutorials.reference import evaluate, have_twophaseflow, load_reference, mesh_case
 
 ALPHA_ATOL = 1e-10  # final alpha vs the OpenFOAM MULES reference
 MASS_RTOL = 1e-12  # Emass / initial mass

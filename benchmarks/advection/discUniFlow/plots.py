@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from neofoam_verification.suite.plots import save
+from neofoam_tutorials.suite.plots import save
 
 MARKERS = {"Serial": "o", "CPU": "s", "GPU": "^"}
 COLOURS = {"isoAdvector": "C0", "MULES": "C1"}

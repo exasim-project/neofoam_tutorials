@@ -10,8 +10,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from neofoam_verification.suite.benchmark import load
-from neofoam_verification.suite.checks import evaluate
+from neofoam_tutorials.suite.benchmark import load
+from neofoam_tutorials.suite.checks import evaluate
 
 SINGLE_PHASE = Path(__file__).resolve().parents[1] / "benchmarks" / "singlePhase"
 CAVITY, PITZ_DAILY = SINGLE_PHASE / "cavity", SINGLE_PHASE / "pitzDaily"

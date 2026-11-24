@@ -9,7 +9,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Multi-step isoAdvection from the initial alpha1 (isoAdvectionReference, run by
-// neofoam_verification.isoadvection for its SCHEMES) for every velocity. The
+// neofoam_tutorials.isoadvection for its SCHEMES) for every velocity. The
 // time step follows advectorVoF (maxAlphaCo, no maxCo limit); the run ends at
 // endTime with alpha stored at every writeInterval.
 maxAlphaCo          0.5;

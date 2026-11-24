@@ -10,9 +10,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from neofoam_verification.benchmarks import BENCHMARKS
-from neofoam_verification.foam import read_function_object_dat
-from neofoam_verification.reference import DAT, load_reference
+from neofoam_tutorials.benchmarks import BENCHMARKS
+from neofoam_tutorials.foam import read_function_object_dat
+from neofoam_tutorials.reference import DAT, load_reference
 
 
 def test_rerun_reproduces_stored_reference(twophaseflow_runs) -> None:  # type: ignore[no-untyped-def]

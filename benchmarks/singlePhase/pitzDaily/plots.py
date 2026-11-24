@@ -14,7 +14,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from neofoam_verification.suite.plots import MARKERS, histories, history_plot, profiles, save
+from neofoam_tutorials.suite.plots import MARKERS, histories, history_plot, profiles, save
 
 BY = ["mesh", "executor"]
 STATIONS = (1, 3, 5, 7)

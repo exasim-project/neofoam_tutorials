@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from neofoam_verification.suite.benchmark import dimensions, load
-from neofoam_verification.suite.checks import evaluate
+from neofoam_tutorials.suite.benchmark import dimensions, load
+from neofoam_tutorials.suite.checks import evaluate
 
 ADVECTION = Path(__file__).resolve().parents[1] / "benchmarks" / "advection"
 PAPER = ADVECTION / "discUniFlow"

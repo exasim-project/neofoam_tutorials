@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from foamlib import FoamFile
 
-from neofoam_verification.benchmarks import (
+from neofoam_tutorials.benchmarks import (
     BENCHMARKS,
     Benchmark,
     GeneratedVelocity,

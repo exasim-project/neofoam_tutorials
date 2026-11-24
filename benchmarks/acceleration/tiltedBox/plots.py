@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from neofoam_verification.suite.plots import histories, history_plot, save
+from neofoam_tutorials.suite.plots import histories, history_plot, save
 
 BY = ["mesh", "executor"]
 

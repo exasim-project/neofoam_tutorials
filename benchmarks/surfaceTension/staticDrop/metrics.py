@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 from foamlib import FoamFile
 
-from neofoam_verification.foam import PolyMesh
+from neofoam_tutorials.foam import PolyMesh
 
 
 def derive(history: pd.DataFrame, case: Path) -> pd.DataFrame:

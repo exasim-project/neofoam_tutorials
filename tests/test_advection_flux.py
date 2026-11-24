@@ -15,8 +15,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from neofoam_verification import reconstruction
-from neofoam_verification.advection_flux import (
+from neofoam_tutorials import reconstruction
+from neofoam_tutorials.advection_flux import (
     load_run,
     read_output,
     run_key,
@@ -24,7 +24,7 @@ from neofoam_verification.advection_flux import (
     runs,
     settings,
 )
-from neofoam_verification.reconstruction import NAMES, have_openfoam, load_mesh
+from neofoam_tutorials.reconstruction import NAMES, have_openfoam, load_mesh
 
 RUNS = [(n, s, v, co) for n in NAMES for s, v, _, co in runs(n)]
 IDS = [f"{n}-{run_key(s, v, co)}" for n, s, v, co in RUNS]

@@ -31,7 +31,7 @@ Description
        bitwise.
 
     Output (text tables, 17 significant digits) in reconstructionReference/,
-    converted to .npz by neofoam_verification.reconstruction, which documents
+    converted to .npz by neofoam_tutorials.reconstruction, which documents
     the columns.
 
     Planes per interface cell, with C the cell centre, n0 = normal/|normal|

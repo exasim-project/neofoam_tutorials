@@ -7,10 +7,10 @@ import numpy as np
 import pandas as pd
 from neofoam.postprocess import InternalDataSet
 
-from neofoam_verification.metrics import bound_error, mass_error, table_errors
-from neofoam_verification.postprocess._host import HostCells
-from neofoam_verification.postprocess.change import Change
-from neofoam_verification.postprocess.hydrostatic import HydrostaticError
+from neofoam_tutorials.metrics import bound_error, mass_error, table_errors
+from neofoam_tutorials.postprocess._host import HostCells
+from neofoam_tutorials.postprocess.change import Change
+from neofoam_tutorials.postprocess.hydrostatic import HydrostaticError
 
 
 def _cells(z: np.ndarray, values: np.ndarray) -> InternalDataSet:

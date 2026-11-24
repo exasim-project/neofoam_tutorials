@@ -15,7 +15,7 @@ import sync_results  # noqa: E402
 sync_results.render_all()
 page_tables.render_all()
 
-project = "neofoam_verification"
+project = "neofoam_tutorials"
 copyright = "2025, NeoFOAM authors"
 author = "NeoFOAM authors"
 

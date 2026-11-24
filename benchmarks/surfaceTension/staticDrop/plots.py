@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from neofoam_verification.suite.plots import MARKERS, histories, history_plot, save
+from neofoam_tutorials.suite.plots import MARKERS, histories, history_plot, save
 
 BY = ["mesh", "executor"]
 
