@@ -37,4 +37,4 @@
 
 Rows: the Serial executor. CPU and GPU agree with it to 1e-05 (relative, in these columns; round-off values below 1e-10 left out).
 
-All 9 cases and columns: :download:`results.csv </_generated/singlePhase/cavity/results.csv>`, per-group checks: :download:`checks.json </_generated/singlePhase/cavity/checks.json>`.
+All 9 cases and columns: :download:`results.csv </_generated/singlePhase/cavity/results.csv>`, changes against the previous snapshot: :download:`changes.json </_generated/singlePhase/cavity/changes.json>`.

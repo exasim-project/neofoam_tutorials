@@ -81,15 +81,6 @@ Inputs
    * - ``reference/pitz_daily_1983.csv``
      - the measured reattachment length x_r / h ≈ 7.0 (Pitz & Daily 1983, AIAA J. 21,
        1565–1570; as commonly quoted for this case)
-   * - ``openfoam_reference.py``
-     - reruns OpenFOAM and rewrites ``reference/openfoam*.csv`` (below)
-
-The OpenFOAM reference is rebuilt with (``$OPENFOAM_BASHRC``, default
-``~/OpenFOAM/OpenFOAM-v2406/etc/bashrc``, is sourced for the runs; about 30 s):
-
-.. code-block:: bash
-
-   pixi run python benchmarks/singlePhase/pitzDaily/openfoam_reference.py runs/pitzDaily
 
 Metrics
 ~~~~~~~
@@ -146,8 +137,7 @@ Larger meshes
 
 A finer mesh doubles the cells of all five blocks, e.g. ``fine`` with ``[36, 60, 1]``,
 ``[360, 54, 1]``, ``[360, 60, 1]``, ``[50, 54, 1]``, ``[50, 60, 1]`` (the comment in
-``benchmark.yaml``). Then rerun ``openfoam_reference.py`` so the OpenFOAM tables hold the
-new mesh; a mesh without stored rows is skipped by the ``reference`` checks.
+``benchmark.yaml``). The stored OpenFOAM tables have no rows for a new mesh.
 
 Results
 -------
@@ -166,7 +156,7 @@ Results
   stalls at about 5e-4 (OpenFOAM: 3e-3).
 - **Executors** agree with Serial to 7e-4, the level the stalled residual allows.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/singlePhase/pitzDaily/verdicts.rst
+.. include:: /_generated/singlePhase/pitzDaily/changes.rst

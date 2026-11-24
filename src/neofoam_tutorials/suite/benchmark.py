@@ -2,14 +2,14 @@
 
 * ``benchmark.yaml`` -- the sweep (``dimensions`` in NeoFOAM's ``params.yaml`` shape,
   ``merge``, the ``smoke`` subset, the ``method`` dimension) and what is done with its
-  cases' results (``collect``, ``checks``, ``report``);
+  cases' results (``collect``, ``report``);
 * ``case/`` -- the base case, with its ``system/preprocess.yaml``;
 * ``plots.py`` -- ``plot(results, references, out)`` (:mod:`.plots` has helpers);
-* ``reference/`` -- the stored tables (CSV) the checks and plots read.
+* ``reference/`` -- the stored tables (CSV) the plots read.
 
 :func:`export` writes the benchmark's NeoFOAM sweep (``Sweep.export``: ``sweep.csv``,
 ``params.yaml``, ``configs/``, ``Snakefile``) to its workflow directory; the
-``Snakefile`` includes :data:`BENCHMARK_SMK` (collect -> verify, plots -> report) and
+``Snakefile`` includes :data:`BENCHMARK_SMK` (collect -> compare, plots -> report) and
 requires ``report.md``.
 """
 
@@ -24,11 +24,13 @@ import yaml
 
 #: ``benchmarks/`` of this repository: a benchmark's name is its folder relative to it.
 BENCHMARKS = Path(__file__).resolve().parents[3] / "benchmarks"
+#: the documentation's committed results, ``<category>/<name>/results.csv`` per benchmark
+SNAPSHOTS = BENCHMARKS.parent / "doc" / "_generated"
 BENCHMARK_SMK = Path(__file__).with_name("benchmark.smk")
 #: NeoFOAM's sweep rules a benchmark runs: the mesh once per mesh variant, then per case
 #: setup (configs, mesh copy, the case-level preprocess tools) and solve
 RULES = ("all", "setup_mesh", "blockMesh", "setup", "solve")
-#: NeoFOAM's mesh dimension: the checks group the cases by every other dimension
+#: NeoFOAM's mesh dimension: the results are grouped by every other dimension
 MESH = "mesh"
 
 

@@ -25,4 +25,4 @@
 
 Rows: the Serial executor. CPU and GPU agree with it to 4e-12 (relative, in these columns; round-off values below 1e-10 left out).
 
-All 9 cases and columns: :download:`results.csv </_generated/acceleration/tiltedBox/results.csv>`, per-group checks: :download:`checks.json </_generated/acceleration/tiltedBox/checks.json>`.
+All 9 cases and columns: :download:`results.csv </_generated/acceleration/tiltedBox/results.csv>`, changes against the previous snapshot: :download:`changes.json </_generated/acceleration/tiltedBox/changes.json>`.

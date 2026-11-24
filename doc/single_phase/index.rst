@@ -4,7 +4,7 @@ Single phase
 These benchmarks verify NeoFOAM's single-phase incompressible solver
 ``incompressibleFluidNeoN`` on NeoN: a laminar transient case run to the steady state
 (PISO) and a turbulent steady case (SIMPLE, k-ε). Each page describes the setup, the
-metrics, the current results and the checks.
+metrics, the current results and the changes since the previous snapshot.
 
 .. list-table::
    :header-rows: 1

@@ -86,8 +86,8 @@ Larger meshes
 ~~~~~~~~~~~~~
 
 The stored runs are for 100 × 60 only. A finer mesh
-(``n200x120: {block_mesh_dict_config: {blocks: [{cells: [200, 1, 120]}]}}``) is checked
-for mass and bounds only; for convergence use :doc:`disc_uni_flow`.
+(``n200x120: {block_mesh_dict_config: {blocks: [{cells: [200, 1, 120]}]}}``) has no
+stored TwoPhaseFlow run; for convergence use :doc:`disc_uni_flow`.
 
 Results
 -------
@@ -101,11 +101,9 @@ Results
   plane search stops elsewhere within ``isoFaceTol`` (1e-8) than OpenFOAM's.
 - **Mass and bounds**: mass error ≤ 4e-16, alpha stays in [0, 1], on every executor.
 - The testsuite's own limit E1 ≤ 0.0122 belongs to its plicRDF run; gradAlpha and
-  MULES do not reach it, so it is not checked.
+  MULES do not reach it.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/advection/discUniFlowTestsuite/verdicts.rst
-
-Each method is matched only against its own table, so the other reference skips.
+.. include:: /_generated/advection/discUniFlowTestsuite/changes.rst

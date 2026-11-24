@@ -3,7 +3,8 @@ Multiphase
 
 These benchmarks cover the building blocks of a geometric VoF solver: interface
 reconstruction, interface advection, surface tension, and gravity across the interface.
-Each page describes the setup, the metrics, the current results and the checks.
+Each page describes the setup, the metrics, the current results and the changes since
+the previous snapshot.
 
 .. list-table::
    :header-rows: 1
@@ -20,9 +21,8 @@ Each page describes the setup, the metrics, the current results and the checks.
        normal errors. The interface centre converges at second order (fitted 1.98 in
        ``LCentre1``).
      - The gradAlpha normal does not converge; OpenFOAM's gradAlpha behaves the same.
-       From n32 on, ``LCentre1`` differs from TwoPhaseFlow by up to 4.2e-6, so the
-       full sweep's ``reference`` check (rtol 1e-6) fails. The cause is the volTaylor
-       plane-search tolerance.
+       From n32 on, ``LCentre1`` differs from TwoPhaseFlow by up to 4.2e-6. The cause
+       is the volTaylor plane-search tolerance.
      - bitwise equal
    * - :doc:`disc_uni_flow`
      - Advection of a disc in uniform flow (paper setup, numufoam reference)
@@ -39,8 +39,8 @@ Each page describes the setup, the metrics, the current results and the checks.
      - Reproduces TwoPhaseFlow's ``advectorVoF``: MULES to 1.7e-14 and isoAdvector
        (gradAlpha) to 4.7e-9 relative in E1.
      - The testsuite's E1 limit of 0.0122 is set by plicRDF. gradAlpha (0.0225) and
-       MULES (0.0304) do not reach it, and it is not checked.
-     - every executor passes the reference
+       MULES (0.0304) do not reach it.
+     - every executor matches TwoPhaseFlow
    * - :doc:`static_drop`
      - Surface tension: parasitic currents of a static drop (CSF)
      - At n40 it reproduces interFoam: Laplace jump 29.90 Pa against 29.9009, max

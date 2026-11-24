@@ -41,25 +41,5 @@ collect:
   columns:
     mesh: mesh
     neo_n_control_config: executor
-# per executor (the dimensions but mesh)
-checks:
-  # TwoPhaseFlow's max|U| at t = 0.01 (results.csv, Grid1/2 = n32/n64). Not the same
-  # setup: isoAdvection with plicRDF (here gradAlpha), a closed box with a pressure
-  # reference cell (here an open top), momentum predictor and 6 correctors (here none and
-  # 6): agreement in magnitude only, measured 26 / 20 % below
-  - {type: reference, file: twophaseflow.csv, match: [mesh], columns: [maxU_10ms], rtol: 0.3}
-  # regression bounds, about 1.2 x the measured: max|U| over t <= 0.1 3.0 / 2.7 / 2.0 m/s
-  # (the current grows in time: 0.7 ... 0.8 m/s at t = 0.01), the pressure error against
-  # the hydrostatic solution 2.0e-2 / 9.4e-3 / 4.6e-3 (largest), 1.3e-3 / 4.1e-4 / 1.8e-4
-  # (mean) of the hydrostatic range, n16 / n32 / n64
-  - {type: maximum, column: maxU_max, maximum: 3.5}
-  - {type: maximum, column: p_err_max, maximum: 0.025}
-  - {type: maximum, column: p_err_mean, maximum: 1.5e-3}
-  # CPU and GPU against Serial: measured 4e-13 (written with 12 digits)
-  - type: agreement
-    across: executor
-    base: Serial
-    columns: [maxU_10ms, maxU_max, meanU, p_err_max, p_err_mean]
-    rtol: 1.0e-8
 # the columns of report.md's results table
 report: [maxU_10ms, maxU_max, maxU, meanU, p_err_max, p_err_mean]

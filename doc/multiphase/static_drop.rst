@@ -130,8 +130,7 @@ Larger meshes
 ``deltaT`` 2e-5 is 0.57 of the capillary limit ``sqrt(rho_avg dx³ / (2π σ))`` at n80,
 so a finer mesh needs a smaller time step too: add
 ``n160: {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}`` and a dimension
-``control_dict_config: {dt2e-5: {deltaT: 2.0e-5}, dt5e-6: {deltaT: 5.0e-6}}``. A new
-dimension adds its own check groups; narrow them with ``where``.
+``control_dict_config: {dt2e-5: {deltaT: 2.0e-5}, dt5e-6: {deltaT: 5.0e-6}}``.
 
 Results
 -------
@@ -148,10 +147,7 @@ Results
   0.15, 0.26, 0.42 m/s (Ca up to 6.1e-3), a known CSF property.
 - **Executors**: CPU and GPU agree with Serial to 1e-10.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/surfaceTension/staticDrop/verdicts.rst
-
-A smoke run (n20 only) skips the ``reference`` checks: interFoam is stored for n40 and
-n80.
+.. include:: /_generated/surfaceTension/staticDrop/changes.rst

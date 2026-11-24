@@ -140,7 +140,7 @@ Results
   reconstruction (plicRDF) is not yet in NeoN.
 - **Executors**: CPU and GPU agree with Serial to 5e-15.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/acceleration/tiltedBox/verdicts.rst
+.. include:: /_generated/acceleration/tiltedBox/changes.rst

@@ -79,15 +79,6 @@ Inputs
    * - ``reference/icofoam.csv``
      - OpenFOAM-v2406 ``icoFoam`` on the same case and meshes (fixed dt 0.001), evaluated
        by the same ``metrics.py`` (the tables written from its fields)
-   * - ``openfoam_reference.py``
-     - reruns icoFoam and rewrites ``reference/icofoam.csv`` (below)
-
-The icoFoam reference is rebuilt with (``$OPENFOAM_BASHRC``, default
-``~/OpenFOAM/OpenFOAM-v2406/etc/bashrc``, is sourced for the runs; about 5 min):
-
-.. code-block:: bash
-
-   pixi run python benchmarks/singlePhase/cavity/openfoam_reference.py runs/cavity
 
 Metrics
 ~~~~~~~
@@ -165,7 +156,7 @@ Results
 - **Executors**: CPU and GPU agree with Serial to 6e-8. On these small meshes the GPU is
   slower than Serial up to n40 and 1.7× faster on n80; CPU (4 threads) at most 1.25×.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/singlePhase/cavity/verdicts.rst
+.. include:: /_generated/singlePhase/cavity/changes.rst

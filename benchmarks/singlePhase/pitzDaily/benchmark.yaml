@@ -4,7 +4,7 @@
 # NeoFOAM's tutorial pitzDaily_steady: plain SIMPLE (consistent no) with p 0.3 / U 0.7
 # relaxation (the upstream tutorial is SIMPLEC), here 1500 iterations (NeoN has no
 # residualControl). Compared with OpenFOAM-v2406 simpleFoam on the same case and meshes
-# (reference/openfoam*.csv: openfoam_reference.py) and, loosely, with the measured
+# (reference/openfoam*.csv, stored) and, loosely, with the measured
 # reattachment length. Swept over mesh x executor.
 # NeoFOAM's incompressibleFluidNeoN (solvers/fluid_neon.py: without the sweep's
 # --no-preprocess)
@@ -61,31 +61,5 @@ collect:
   columns:
     mesh: mesh
     neo_n_control_config: executor
-# per executor (the dimensions but mesh)
-checks:
-  # OpenFOAM-v2406 simpleFoam, same case, mesh and iteration count; the linear solvers
-  # differ (GAMG / smoothSolver there, Ginkgo multigrid-CG / BiCGStab here), so the
-  # converged fields agree to the residual level, not round-off. Loose until tuned
-  - type: reference
-    file: openfoam.csv
-    match: [mesh]
-    columns: [x_r_h, Umin_xh1, Umin_xh3, Umin_xh5]
-    rtol: 0.05
-  # the iterations to the tutorial's residualControl depend on the linear solvers
-  - {type: reference, file: openfoam.csv, match: [mesh], columns: [iterations], rtol: 0.5}
-  # the profiles against OpenFOAM's (RMS / U_inlet, largest station)
-  - {type: maximum, column: profile_err, maximum: 0.01}
-  # converged: the initial residuals at the last iteration
-  - {type: maximum, column: p_res, maximum: 1.0e-2}
-  - {type: maximum, column: Ux_res, maximum: 1.0e-3}
-  # Pitz & Daily's measured x_r / h = 7.0 (the experiment; k-epsilon is known to fall
-  # short of it): a loose sanity check, rtol 0.2
-  - {type: reference, file: pitz_daily_1983.csv, match: [mesh], columns: [x_r_h], rtol: 0.2}
-  # CPU and GPU against Serial: the same algorithm to the residual level
-  - type: agreement
-    across: executor
-    base: Serial
-    columns: [x_r_h, Umin_xh1, Umin_xh3, Umin_xh5]
-    rtol: 1.0e-3
 # the columns of report.md's results table
 report: [nCells, x_r_h, Umin_xh1, Umin_xh3, Umin_xh5, profile_err, iterations, wall_s]

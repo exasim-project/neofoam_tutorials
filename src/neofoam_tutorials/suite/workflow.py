@@ -1,6 +1,6 @@
 """The workers of ``benchmark.smk``, run in the benchmark's workflow directory::
 
-    python -m neofoam_tutorials.suite.workflow collect|verify|plots|report \\
+    python -m neofoam_tutorials.suite.workflow collect|compare|plots|report \\
         --benchmark FOLDER --out PATH
     python -m neofoam_tutorials.suite.workflow metrics --benchmark FOLDER --out \\
         cases/<case>/postProcessing/metrics.dat
@@ -18,7 +18,9 @@
   its history; beside it, with ``collect.history``, ``histories.csv`` (every row of every
   history) and, with ``collect.profiles``, ``profiles.csv`` (those per-case tables,
   e.g. the metrics' final profiles), both with the case's variant columns;
-* ``verify`` -- ``checks.json``: the ``checks`` of ``benchmark.yaml`` (:mod:`.checks`);
+* ``compare`` -- ``changes.json``: the drastic changes of ``results.csv`` against the
+  documentation's snapshot ``doc/_generated/<category>/<name>/results.csv``
+  (:mod:`.changes`), rows matched by the dimension columns; it never fails the run;
 * ``plots`` -- the benchmark's ``plots.py``: ``plot(results, references, out)``;
 * ``report`` -- ``report.md`` (:mod:`.report`).
 """
@@ -35,11 +37,11 @@ from typing import Any
 
 import pandas as pd
 
-from .benchmark import MESH, load, name
-from .checks import evaluate
+from .benchmark import MESH, SNAPSHOTS, load, name
+from .changes import compare
 from .report import write_report
 
-COMMANDS = ("metrics", "collect", "verify", "plots", "report")
+COMMANDS = ("metrics", "collect", "compare", "plots", "report")
 #: NeoFOAM's postProcess "no data" sentinel (``neofoam.postprocess.GREAT``): read as NaN
 GREAT = 1.0e15
 #: beside results.csv: every history row, and the cases' profile tables
@@ -165,10 +167,17 @@ def mesh_column(folder: Path) -> str:
 
 
 def groups(folder: Path) -> list[str]:
-    """The results' columns of the dimensions but the mesh: one check result each."""
+    """The results' columns of the dimensions but the mesh."""
     spec = load(folder)
     renamed = spec["collect"].get("columns", {})
     return [renamed.get(d, d) for d in sorted(spec["dimensions"]) if d != MESH]
+
+
+def changes(folder: Path, results: pd.DataFrame) -> list[dict[str, Any]]:
+    """:func:`.changes.compare` of ``results`` against the benchmark's snapshot, if any."""
+    snapshot = SNAPSHOTS / name(folder) / "results.csv"
+    old = pd.read_csv(snapshot) if snapshot.exists() else results.iloc[0:0]
+    return compare(results, old, [*groups(folder), mesh_column(folder)])
 
 
 def references(folder: Path) -> dict[str, pd.DataFrame]:
@@ -195,21 +204,14 @@ def main(argv: Sequence[str] | None = None) -> None:
         collect(folder, workdir, args.out)
         return
     results = pd.read_csv(workdir / "results.csv")
-    if args.command == "verify":
-        checks = evaluate(
-            load(folder)["checks"],
-            results,
-            folder / "reference",
-            groups(folder),
-            mesh_column(folder),
-        )
-        args.out.write_text(json.dumps({"checks": checks}, indent=2) + "\n")
+    if args.command == "compare":
+        args.out.write_text(json.dumps({"changes": changes(folder, results)}, indent=2) + "\n")
     elif args.command == "plots":
         plot(folder, results, args.out)
     else:
-        checks = json.loads((workdir / "checks.json").read_text())["checks"]
+        found = json.loads((workdir / "changes.json").read_text())["changes"]
         columns = [*groups(folder), mesh_column(folder), *load(folder).get("report", [])]
-        write_report(name(folder), results, checks, columns, workdir / "plots", args.out)
+        write_report(name(folder), results, found, columns, workdir / "plots", args.out)
 
 
 if __name__ == "__main__":

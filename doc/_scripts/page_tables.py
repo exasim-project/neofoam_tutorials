@@ -7,14 +7,11 @@
   says how to read a dimension's payloads, :data:`NOTES` adds a benchmark's remark;
 * ``key_results.rst`` -- the :data:`KEY` columns of ``results.csv`` under the
   :data:`HEADERS` names, for the base executor, with the wall time per executor and the
-  executors' largest relative difference;
-* ``verdicts.rst`` -- one line per check of ``checks.json`` (all its groups), with the
-  reason from :data:`WHY`.
+  executors' largest relative difference.
 """
 
 from __future__ import annotations
 
-import json
 import math
 from collections.abc import Callable
 from pathlib import Path
@@ -242,99 +239,11 @@ def render_key_results(name: str) -> None:
         lines += [f"Rows: the {BASE} executor. {others} {agree}.", ""]
     lines += [
         f"All {len(results)} cases and columns: "
-        f":download:`results.csv </_generated/{name}/results.csv>`, per-group checks: "
-        f":download:`checks.json </_generated/{name}/checks.json>`.",
+        f":download:`results.csv </_generated/{name}/results.csv>`, changes against the "
+        f"previous snapshot: :download:`changes.json </_generated/{name}/changes.json>`.",
         "",
     ]
     (out / "key_results.rst").write_text("\n".join(lines))
-
-
-#: benchmark -> check-name prefix -> why the check is there / why it fails
-WHY: dict[str, dict[str, str]] = {
-    "reconstruction/circle": {
-        "reference": "Fails on the fine meshes: LCentre1 differs by up to 4.2e-6 (n1024) "
-        "because volTaylor stops within isoFaceTol (1e-8) of the target volume; the normal "
-        "norms agree to 4e-8.",
-        "order LCentre1": "The interface centre converges at second order, as in numufoam.",
-        "order LCentreInf": "Same for the largest centre error.",
-    },
-    "advection/discUniFlow": {
-        "reference": "MULES within a factor 2 of numufoam's E1; isoAdvector has no "
-        "numufoam counterpart (gradAlpha), so its groups skip.",
-        "maximum Emass": "Mass is conserved to round-off.",
-        "maximum Ebound": "Alpha stays in [0, 1]; MULES is checked only at CFL 0.1.",
-    },
-    "advection/discUniFlowTestsuite": {
-        "reference twophaseflow_mules": "NeoN MULES reproduces TwoPhaseFlow to round-off.",
-        "reference twophaseflow_isoadvection": "isoAdvector reproduces TwoPhaseFlow within "
-        "the plane-search tolerance.",
-        "maximum Emass": "The testsuite's mass assertion.",
-        "maximum Ebound": "The testsuite's boundedness assertion.",
-    },
-    "surfaceTension/staticDrop": {
-        "reference interfoam.csv dp ": "The Laplace jump matches interFoam at n40.",
-        "reference interfoam.csv maxU": "The spurious current matches interFoam.",
-        "reference interfoam.csv dp_err": "The CSF deficit of the jump matches interFoam.",
-        "maximum dp_err": "The jump is within 20 % of σ/R.",
-        "maximum maxU_max": "Regression bound on the spurious current.",
-        "agreement": "CPU and GPU reproduce Serial.",
-    },
-    "acceleration/tiltedBox": {
-        "reference": "Magnitude only: the setup differs from TwoPhaseFlow's (gradAlpha, open top).",
-        "maximum maxU_max": "Regression bound on the spurious current.",
-        "maximum p_err": "Regression bound on the hydrostatic pressure error.",
-        "agreement": "CPU and GPU reproduce Serial.",
-    },
-    "singlePhase/cavity": {
-        "reference": "NeoN reproduces OpenFOAM icoFoam's errors (the coarse meshes differ "
-        "by the time step, which the PISO steady state depends on weakly).",
-        "order": "Second order from n20 to n40; at n80 the error reaches Ghia's own, also "
-        "for icoFoam.",
-        "maximum u_Linf": "Regression bound on the coarsest mesh's error.",
-        "maximum v_Linf": "Regression bound on the coarsest mesh's error.",
-        "maximum dU": "The run reached the steady state.",
-        "agreement": "CPU and GPU reproduce Serial (iterative solves to 1e-8).",
-    },
-    "singlePhase/pitzDaily": {
-        "reference openfoam.csv x_r_h": "Same case, mesh and iterations as OpenFOAM's simpleFoam.",
-        "reference openfoam.csv iterations": "The convergence rate depends on the linear "
-        "solvers (Ginkgo here, GAMG / smoothSolver in OpenFOAM).",
-        "maximum profile_err": "The velocity profiles match OpenFOAM's.",
-        "maximum p_res": "Converged to the tutorial's residual tolerance.",
-        "maximum Ux_res": "Converged to the tutorial's residual tolerance.",
-        "reference pitz_daily_1983": "Loose sanity check against the experiment.",
-        "agreement": "CPU and GPU reproduce Serial.",
-    },
-}
-
-
-def _short(check: str) -> str:
-    """The check name, with its column list spaced so it wraps."""
-    return check.replace(",", ", ")
-
-
-def render_verdicts(name: str) -> None:
-    out = GENERATED / name
-    checks = json.loads((out / "checks.json").read_text())["checks"]
-    by_name: dict[str, list[dict[str, str]]] = {}
-    for check in checks:
-        by_name.setdefault(check["check"], []).append(check)
-    rows = []
-    for check, entries in by_name.items():
-        count = {s: sum(e["status"] == s for e in entries) for s in ("fail", "pass", "skip")}
-        shown = next(s for s in ("fail", "pass", "skip") if count[s])
-        result = f"**{shown.upper()}** {count[shown]}/{len(entries)}"
-        others = ", ".join(f"{n} {s}" for s, n in count.items() if n and s != shown)
-        result += f" ({others})" if others else ""
-        first = next(e for e in entries if e["status"] == shown)
-        why = next(
-            (w for prefix, w in WHY.get(name, {}).items() if f"{check} ".startswith(prefix)), ""
-        )
-        detail = f"{first['group']}: {first['detail']}"
-        rows.append([_short(check), result, detail, why])
-    header = ["Check", "Groups", "Detail (first such group)", "Why"]
-    lines = _list_table(header, rows, "24 16 30 30")
-    (out / "verdicts.rst").write_text("\n".join(lines))
 
 
 def render_all() -> None:
@@ -343,7 +252,6 @@ def render_all() -> None:
         render_params(name)
         if name in KEY and (GENERATED / name / "results.csv").exists():
             render_key_results(name)
-            render_verdicts(name)
 
 
 if __name__ == "__main__":

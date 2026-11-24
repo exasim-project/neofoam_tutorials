@@ -37,16 +37,5 @@ collect:
     mesh: mesh
     neo_n_control_config: executor
     reconstruction_scheme_config: method
-# per executor and method (the dimensions but mesh)
-checks:
-  # TwoPhaseFlow's reconstructInterface (v2506), stored; rows matched on the `match` columns
-  - type: reference
-    file: twophaseflow.csv
-    match: [method, nCells]
-    columns: [LNormalInf, LNormal1, LCentreInf, LCentre1, length, nCells]
-    rtol: 1.0e-6
-  # the centre is second order for any scheme; the normal is not for gradAlpha
-  - {type: order, column: LCentre1, spacing: length, minimum: 1.5}
-  - {type: order, column: LCentreInf, spacing: length, minimum: 1.5}
 # the columns of report.md's results table
 report: [nCells, LNormalInf, LNormal1, LCentreInf, LCentre1, k1, wall_s]

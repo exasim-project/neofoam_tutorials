@@ -1,7 +1,7 @@
 """The benchmark outputs in the documentation: ``doc/_generated/<category>/<name>/``.
 
 ``python doc/_scripts/sync_results.py`` (part of ``pixi run docs``) copies each
-benchmark's ``results.csv``, ``checks.json`` and ``plots/*.png`` (shrunk to at most
+benchmark's ``results.csv``, ``changes.json`` and ``plots/*.png`` (shrunk to at most
 :data:`MAX_WIDTH` pixels, 256 colours) from ``results/`` when a run exists there, then
 renders the tables. ``conf.py`` calls :func:`render_all` only, so the committed snapshot
 builds without ``results/``. Per benchmark it writes the include files
@@ -9,7 +9,9 @@ builds without ``results/``. Per benchmark it writes the include files
 * ``results.rst`` -- the report's columns of ``results.csv`` (the group columns, the mesh,
   then ``benchmark.yaml``'s ``report``), with a note when the snapshot holds a subset of
   the full sweep (a ``--smoke`` run);
-* ``checks.rst`` -- every check of ``checks.json`` with its status and detail;
+* ``changes.rst`` -- the run's drastic changes against the previous snapshot
+  (``changes.json``, :mod:`neofoam_tutorials.suite.changes`): the flagged ones and the
+  new cases;
 * ``plots.rst`` -- one figure per plot.
 """
 
@@ -24,6 +26,7 @@ import pandas as pd
 from PIL import Image
 
 from neofoam_tutorials.suite.benchmark import load
+from neofoam_tutorials.suite.changes import FACTOR, FLAGGED
 from neofoam_tutorials.suite.workflow import groups, mesh_column
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,11 +55,11 @@ def shrink(src: Path, dst: Path) -> None:
 def copy(name: str) -> bool:
     """Replace the snapshot of ``name`` by its run in ``results/``, if there is one."""
     src, dst = RESULTS / name, GENERATED / name
-    if not (src / "results.csv").exists() or not (src / "checks.json").exists():
+    if not (src / "results.csv").exists() or not (src / "changes.json").exists():
         return False
     shutil.rmtree(dst, ignore_errors=True)
     (dst / "plots").mkdir(parents=True)
-    for file in ("results.csv", "checks.json"):
+    for file in ("results.csv", "changes.json"):
         shutil.copy2(src / file, dst / file)
     for png in sorted((src / "plots").glob("*.png")):
         shrink(png, dst / "plots" / png.name)
@@ -64,6 +67,8 @@ def copy(name: str) -> bool:
 
 
 def _cell(value: object) -> str:
+    if value is None:
+        return ""
     if isinstance(value, float):
         return "" if math.isnan(value) else f"{value:.4g}"
     return str(value)
@@ -96,12 +101,21 @@ def render(name: str) -> None:
     lines += _list_table([f"``{c}``" for c in columns], rows)
     (out / "results.rst").write_text("\n".join(lines))
 
-    checks = json.loads((out / "checks.json").read_text())["checks"]
-    count = {s: sum(c["status"] == s for c in checks) for s in ("pass", "fail", "skip")}
-    lines = [f"{count['pass']} passed, {count['fail']} failed, {count['skip']} skipped.", ""]
-    rows = [[c["check"], c["group"], f"**{c['status'].upper()}**", c["detail"]] for c in checks]
-    lines += _list_table(["check", "group", "result", "detail"], rows, "30 15 10 45")
-    (out / "checks.rst").write_text("\n".join(lines))
+    changes = json.loads((out / "changes.json").read_text())["changes"]
+    flagged = sum(c["kind"] in FLAGGED for c in changes)
+    lines = [
+        f"Against the previous snapshot: {flagged} flagged (a metric off by more than a "
+        f"factor {FACTOR:g}, a case missing or NaN), "
+        f"{len(changes) - flagged} new cases.",
+        "",
+    ]
+    if changes:
+        rows = [
+            [c["case"], c["column"], f"**{c['kind']}**", _cell(c["old"]), _cell(c["new"])]
+            for c in changes
+        ]
+        lines += _list_table(["case", "column", "change", "snapshot", "run"], rows)
+    (out / "changes.rst").write_text("\n".join(lines))
 
     lines = []
     for png in sorted((out / "plots").glob("*.png")):

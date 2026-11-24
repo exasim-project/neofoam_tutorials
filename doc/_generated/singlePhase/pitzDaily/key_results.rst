@@ -26,4 +26,4 @@
 
 Rows: the Serial executor. CPU and GPU agree with it to 0.0007 (relative, in these columns; round-off values below 1e-10 left out).
 
-All 6 cases and columns: :download:`results.csv </_generated/singlePhase/pitzDaily/results.csv>`, per-group checks: :download:`checks.json </_generated/singlePhase/pitzDaily/checks.json>`.
+All 6 cases and columns: :download:`results.csv </_generated/singlePhase/pitzDaily/results.csv>`, changes against the previous snapshot: :download:`changes.json </_generated/singlePhase/pitzDaily/changes.json>`.

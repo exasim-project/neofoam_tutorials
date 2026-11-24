@@ -23,4 +23,4 @@
 
 Rows: the Serial executor. CPU and GPU are bitwise identical to it in these columns.
 
-All 6 cases and columns: :download:`results.csv </_generated/advection/discUniFlowTestsuite/results.csv>`, per-group checks: :download:`checks.json </_generated/advection/discUniFlowTestsuite/checks.json>`.
+All 6 cases and columns: :download:`results.csv </_generated/advection/discUniFlowTestsuite/results.csv>`, changes against the previous snapshot: :download:`changes.json </_generated/advection/discUniFlowTestsuite/changes.json>`.

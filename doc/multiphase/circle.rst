@@ -113,8 +113,8 @@ Larger meshes
 ~~~~~~~~~~~~~
 
 Add ``n2048: {block_mesh_dict_config: {blocks: [{cells: [2048, 1, 2048]}]}}`` to
-``mesh``. The TwoPhaseFlow table ends at n1024, so n2048 enters only the order checks
-and plots. Case data grows with n² (the sweep to n1024 needs about 1.5 GB).
+``mesh``. The TwoPhaseFlow table ends at n1024, so n2048 enters only the
+plots. Case data grows with n² (the sweep to n1024 needs about 1.5 GB).
 
 Results
 -------
@@ -133,7 +133,7 @@ Results
 - **Executors**: Serial, CPU and GPU give identical norms; at n1024 the solver takes
   12 / 11 / 9.8 s.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/reconstruction/circle/verdicts.rst
+.. include:: /_generated/reconstruction/circle/changes.rst

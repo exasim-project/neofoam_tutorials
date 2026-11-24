@@ -118,9 +118,9 @@ too.
 Larger meshes
 ~~~~~~~~~~~~~
 
-Uncomment ``n80``, ``n160``, ``n320`` in ``benchmark.yaml`` and, optionally, the
-commented ``order`` check on n40 to n320. n320 needs about 20 MB per case and 1–4 min
-on ``Serial`` per CFL; the ``reference`` check then fails for MULES (see Checks).
+Uncomment ``n80``, ``n160``, ``n320`` in ``benchmark.yaml``. n320 needs about 20 MB per
+case and 1–4 min on ``Serial`` per CFL. Neither method converges on n10 to n40; on
+n320, MULES reaches 3.5 × numufoam's E1.
 
 Results
 -------
@@ -153,10 +153,7 @@ The alpha fields at t = 0.5 on n40 show the difference:
    OpenFOAM-v2506, isoAdvector with plicRDF, same case: E1 = 7.7e-4, with errors below
    ±0.06. This is the reconstruction NeoN still needs.
 
-Checks
-~~~~~~
+Changes since the previous snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. include:: /_generated/advection/discUniFlow/verdicts.rst
-
-No ``order`` check is enabled: neither method converges on n10 to n40. On n320, MULES
-reaches 3.5 × numufoam's E1 and fails the ``reference`` band.
+.. include:: /_generated/advection/discUniFlow/changes.rst

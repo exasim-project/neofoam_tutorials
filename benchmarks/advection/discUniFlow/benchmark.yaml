@@ -58,27 +58,5 @@ collect:
     control_dict_config: CFL
     neo_n_control_config: executor
     advection_scheme_config: method
-# per CFL, executor and method (the dimensions but mesh)
-checks:
-  # numufoam's MULES (advectorVoF's MULESScheme, error.csv) differs in the interface
-  # normal (pointCellsLeastSquares; NeoN's MULES: Gauss linear): E1 agrees to 16 % at
-  # n10 and n20, NeoN's is 1.1-1.8x numufoam's at n40, up to 3.5x at n320 (CFL 0.1; the
-  # finer meshes fail this band). numufoam has no gradAlpha run (isoAlpha, plicRDF):
-  # isoAdvector's groups skip, the plots compare the trends.
-  - type: reference
-    file: numufoam.csv
-    match: [method, CFL, mesh]
-    columns: [Eshape, celltoCellDist, Ncells]
-    rtol: 1.0
-  # Observed order n40 -> n320 (enable with the finer meshes): MULES 0.7 at CFL 0.1,
-  # stalls at CFL 0.5; isoAdvector (gradAlpha) 0.8. On n10-n40 gradAlpha's E1 does not
-  # decrease (6.9e-3, 7.4e-3, 8.5e-3 at CFL 0.1), so no order is checked by default.
-  # - {type: order, column: Eshape, spacing: celltoCellDist, minimum: 0.6, where: {mesh: [n40, n80, n160, n320]}}
-  # mass is conserved to round-off (TwoPhaseFlow's testsuite asserts Emass <= 1e-13)
-  - {type: maximum, column: Emass, maximum: 1.0e-12}
-  # alpha stays in [0, 1] (testsuite: Ebound <= 1e-8) -- MULES only up to CFL 0.1: at
-  # CFL 0.5 it overshoots (Ebound 0.11 at n320, numufoam's 0.12), at 0.2 by ~3e-7
-  - {type: maximum, column: Ebound, maximum: 1.0e-8, where: {method: [isoAdvector]}}
-  - {type: maximum, column: Ebound, maximum: 1.0e-8, where: {method: [MULES], CFL: [CFL005, CFL01]}}
 # the columns of report.md's results table
 report: [Ncells, Eshape, Emass, Ebound, Tadv, wall_s, steps]

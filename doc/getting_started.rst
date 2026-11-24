@@ -55,13 +55,14 @@ The command prints the one Snakemake command it runs, for example:
 Inside the pixi environment, with OpenFOAM-v2406 sourced, this command alone
 reproduces the run. Snakemake reruns only what changed. It does not track the solver's
 source code, so after changing a method, add ``--forcerun solve``. The command targets
-``report.md``: once the cases are removed, a changed ``plots.py``, check or reference
-table reruns ``verify``, ``plots`` and ``report`` only (``--forcerun plots`` redraws the
-plots), as they read the collected tables, never the case folders. Snakemake's default
+``report.md``: once the cases are removed, a changed ``plots.py``, reference table or
+snapshot reruns ``compare``, ``plots`` and ``report`` only (``--forcerun plots`` redraws
+the plots), as they read the collected tables, never the case folders. Snakemake's default
 target ``all`` also wants every case and would rerun the solvers.
 
-The command exits non-zero if a workflow failed. A failed **check** does not fail the
-workflow; it is recorded in ``checks.json`` and in the report.
+The command exits non-zero if a workflow failed. The results are not judged: a
+**drastic change** against the documentation's snapshot is flagged in ``changes.json``
+and in the report, and never fails the workflow (see `Changes against the snapshot`_).
 
 Outputs
 -------
@@ -84,13 +85,13 @@ Each benchmark writes to ``results/<category>/<name>/`` (gitignored):
    * - ``profiles.csv``
      - with ``collect: {profiles: [...]}``: the cases' profile tables (cavity, pitzDaily),
        with the case's variant columns
-   * - ``checks.json``
-     - every check's result per group of cases (``pass``, ``fail``, ``skip``) with a
-       detail line
+   * - ``changes.json``
+     - the drastic changes of ``results.csv`` against the documentation's snapshot
+       (below): flagged metrics and cases, and the new cases
    * - ``plots/``
      - the benchmark's plots, PNG and PDF
    * - ``report.md``
-     - plots, results table and checks on one page
+     - plots, results table and changes on one page
    * - ``Snakefile``, ``sweep.csv``, ``params.yaml``, ``configs/``
      - the exported sweep, kept so the run can be repeated
    * - ``cases/``, ``meshes/``
@@ -109,7 +110,7 @@ A benchmark is a folder ``benchmarks/<category>/<name>/``:
    preprocess tools (``blockMesh``, ``setAlphaField``, ...) and
    ``system/postProcess.yaml`` the in-situ tables the solver writes (below).
 ``reference/``
-   Stored tables (CSV), read by the checks and the plots.
+   Stored tables (CSV) of other codes and the literature, drawn by the plots.
 ``plots.py``
    ``plot(results, references, out)``, using helpers from
    ``neofoam_tutorials.suite.plots``.
@@ -129,9 +130,9 @@ A benchmark is a folder ``benchmarks/<category>/<name>/``:
      SOLVE --> METRICS["metrics<br/>(optional)"]
      METRICS --> COLLECT["collect<br/>results.csv"]
      SOLVE --> COLLECT
-     COLLECT --> VERIFY["verify<br/>checks.json"]
+     COLLECT --> COMPARE["compare<br/>changes.json"]
      COLLECT --> PLOTS["plots<br/>plots/"]
-     VERIFY --> REPORT["report<br/>report.md"]
+     COMPARE --> REPORT["report<br/>report.md"]
      PLOTS --> REPORT
 
 ``setup`` lays the case's payloads over the base case, copies the mesh, and runs the
@@ -146,9 +147,9 @@ are NeoFOAM solvers registered through the ``neofoam.solvers`` entry point in
 - ``incompressibleFluidNeoNSweep``: NeoFOAM's ``incompressibleFluidNeoN`` (single phase).
 
 They are built from NeoFOAM's models only, and write tables with the same columns as
-the reference applications. Snakemake tracks ``benchmark.yaml``, ``plots.py``,
-``metrics.py`` and the reference tables, so changing a check reruns only ``verify`` and
-``report``.
+the reference applications. Snakemake tracks ``benchmark.yaml``'s ``collect`` section, ``plots.py``,
+``metrics.py``, the reference tables and the snapshot, so changing a plot reruns only
+``plots`` and ``report``.
 
 In-situ tables
 ~~~~~~~~~~~~~~
@@ -205,33 +206,24 @@ time) and the nodes ``hydrostaticError`` and ``change``, registered through the
    merged table; ``history``: ``true`` writes ``histories.csv``; ``profiles``: per-case
    files concatenated into ``profiles.csv``; ``columns``: dimension → column name in
    ``results.csv``, whose row per case is the last row of the merged table.
-``checks``
-   A list of checks (below).
 ``report``
    The columns of the report's results table.
 
-Checks
-~~~~~~
+Changes against the snapshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Checks run per group of cases. A group is one combination of every dimension except
-the mesh (for example ``MULES CFL01 Serial``), so a check sees all resolutions of a
-group.
+The suite shows NeoFOAM's results; it does not hold them to a tolerance. ``compare``
+(``neofoam_tutorials.suite.changes``) only flags what moved a lot since the snapshot in
+``doc/_generated/<category>/<name>/results.csv``, its rows matched to the run's by the
+dimension columns (``mesh``, ``executor``, ``method``, ...):
 
-``{type: reference, file, match, columns, rtol}``
-   Compare ``columns`` with ``reference/<file>``, rows matched on the ``match`` columns,
-   to relative tolerance ``rtol``. Empty stored values are not compared, and a group
-   without stored rows is skipped.
-``{type: order, column, spacing, minimum}``
-   The least-squares slope of ``log(column)`` over ``log(1/spacing)`` must be at least
-   ``minimum``.
-``{type: maximum, column, maximum}``
-   The group's largest value must be at most ``maximum``: a mass or bound error, or a
-   spurious velocity.
-``{type: agreement, across, base, columns, rtol}``
-   Each case must agree with the same case of the ``base`` variant of ``across`` to
-   ``rtol``, for example ``CPU`` and ``GPU`` against ``Serial``.
+- **ratio**: a numeric column whose run value is more than 2× or less than 0.5× the
+  snapshot's (a sign change too);
+- **nan**: a column that has a value in the snapshot and is NaN (or absent) in the run;
+- **missing**: a case of the snapshot that the run does not have.
 
-``where: {column: [values]}`` limits any check to those rows.
+A case only in the run (a new mesh or ``--method``) is listed as **new**, not flagged.
+Every numeric column is compared, timings included, and there is no per-column setting.
 
 Add a benchmark
 ---------------
@@ -266,18 +258,16 @@ A reconstruction or advection scheme registered with NeoFOAM (for example throug
    pixi run benchmark benchmarks/reconstruction/circle --method myScheme --smoke
 
 This runs the cases ``n8_Serial_myScheme`` and ``n16_Serial_myScheme`` and reports
-their errors and checks. A ``reference`` check skips groups that have no stored rows.
+their errors; against the snapshot they are new cases, listed but not flagged.
 To keep the method in the default sweep, add it as a variant of the method dimension
 in ``benchmark.yaml``.
 
-Change sweeps and thresholds
-----------------------------
+Change sweeps
+-------------
 
 Edit ``benchmark.yaml``. To add a resolution, add a variant to ``mesh`` (each
-benchmark page lists its larger meshes). To tighten or relax a check, change its
-``rtol``, ``minimum`` or ``maximum``; record the measured value and the reason in a
-comment next to it, as the existing checks do. Then rerun the printed Snakemake
-command: only the affected steps run again.
+benchmark page lists its larger meshes). Then rerun the printed Snakemake command: only
+the affected steps run again.
 
 .. _refresh-the-results:
 
@@ -293,14 +283,15 @@ without rerunning benchmarks. To update it, run the benchmarks and then build:
    pixi run docs                          # sync results/ into doc/_generated/, build
 
 ``pixi run docs`` runs ``doc/_scripts/sync_results.py``. The script copies
-``results.csv``, ``checks.json`` and the shrunk ``plots/*.png`` of every benchmark
+``results.csv``, ``changes.json`` and the shrunk ``plots/*.png`` of every benchmark
 that has a run in ``results/``, renders the tables, and builds the HTML with
 ``sphinx-build -W`` into ``doc/_build/html``. Commit ``doc/_generated/`` to keep the
 new snapshot. A page notes when its snapshot holds only part of the full sweep.
 
-The readable tables of each page (changed parameters, key results, check verdicts) are
-rendered from ``benchmark.yaml``, ``results.csv`` and ``checks.json`` at build time by
-``doc/_scripts/page_tables.py``. The setup sketches in ``doc/_static/setup/`` are drawn
+The readable tables of each page (changed parameters, key results, changes since the
+previous snapshot) are rendered from ``benchmark.yaml``, ``results.csv`` and
+``changes.json`` at build time by ``doc/_scripts/page_tables.py`` and
+``doc/_scripts/sync_results.py``. The setup sketches in ``doc/_static/setup/`` are drawn
 from the case files; after changing a case, redraw and commit them:
 
 .. code-block:: bash

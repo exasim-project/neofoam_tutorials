@@ -2,17 +2,15 @@
 paths:
   - "test/**/*.py"
   - "benchmarks/**/test_*.py"
-  - "reference/**/test_*.py"
-  - "conftest.py"
 ---
 
-# Test rules (`test/`, `benchmarks/`, `reference/`)
+# Test rules (`test/`, `benchmarks/`)
 
 ## Placement
 
-- `test/` tests only the package and mirrors `src/neofoam_tutorials/` 1:1: `metrics.py` → `test/test_metrics.py`, `suite/checks.py` → `test/suite/test_checks.py`.
-- A benchmark's own tests (its `metrics.py`, its `benchmark.yaml` checks on the stored tables) live next to it: `benchmarks/<category>/<name>/test_*.py`.
-- Checks of the committed reference data (shapes, self-consistency, a rerun reproduces it) live in `reference/test_*_reference.py`.
+- `test/` tests only the package and mirrors `src/neofoam_tutorials/` 1:1: `metrics.py` → `test/test_metrics.py`, `suite/changes.py` → `test/suite/test_changes.py`.
+- A benchmark's own tests (its `metrics.py`, its `benchmark.yaml`) live next to it: `benchmarks/<category>/<name>/test_*.py`.
+- No tests of the committed reference data: the benchmarks show results, they do not judge them.
 - Integration/e2e tests are named for the scenario (`test_neon_turbulence_parity.py`), never reusing a source-module name.
 - Prefer the lowest level that can prove the behavior — no solver run for a config check.
 - Tests are free functions, not classes.
@@ -32,7 +30,7 @@ paths:
 
 ## Hard constraints
 
-- The optional reference codes are the only skips: a test that needs TwoPhaseFlow (`openfoam`), the OpenFOAM-v2406 geometricVoF references (`geometricvof`) or NeoFOAM (`backend`) carries that marker and skips with the variable to set, e.g. `pytest.skip("TwoPhaseFlow's advectorVoF not found ($TWOPHASEFLOW_BASHRC)")`. No `try/except` imports.
+- Tests have no external dependencies (no TwoPhaseFlow, no OpenFOAM reference code, no solver run) and no skips. No `try/except` imports.
 - One `Foam::Time` per process — multiple runs (reference vs subject) go through subprocess workers that write `.npy` artifacts.
 - Never delete or weaken an existing test to get green.
 
