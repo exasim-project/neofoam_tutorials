@@ -29,7 +29,9 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["test", "benchmarks", "reference"]
+# test files of the same name in test/, benchmarks/ and reference/ import side by side
+addopts = "--import-mode=importlib"
 markers = [
     "openfoam: needs OpenFOAM-v2506 with TwoPhaseFlow's advectorVoF / reconstructInterface (TWOPHASEFLOW_BASHRC)",
     "geometricvof: builds and runs reference/reconstructionReference and advectionFluxReference (OpenFOAM-v2406, OPENFOAM_BASHRC)",
