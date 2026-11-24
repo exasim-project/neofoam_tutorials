@@ -1,0 +1,28 @@
+# NeoFOAM's in-situ tables (postProcessing/<name>.csv), at the field write times
+# (write_control stepper: controlDict's every 2 s), on incompressibleFluidNeoN's registry
+# fields: U in the cell columns next to the vertical centreline x = 0.5 and the cell rows
+# next to the horizontal one y = 0.5 (a box of half-width 0.03 holds the two neighbours
+# of the line up to n = 160; rows writes every cell: no line sampling on NeoN), from
+# which metrics.py interpolates the centreline profiles; the largest |U| and the largest
+# change of U since the previous write (change, this repository's node).
+tables:
+  - name: u_vertical
+    source: {type: internal, field: U}
+    pipeline:
+      - {type: box, min: [0.47, -1, -1], max: [0.53, 2, 2]}
+      - {type: rows, name: U}
+    write_control: {write_control_type: stepper}
+  - name: v_horizontal
+    source: {type: internal, field: U}
+    pipeline:
+      - {type: box, min: [-1, 0.47, -1], max: [2, 0.53, 2]}
+      - {type: rows, name: U}
+    write_control: {write_control_type: stepper}
+  - name: maxU
+    source: {type: internal, field: U}
+    pipeline: [{type: mag}, {type: max, name: maxU}]
+    write_control: {write_control_type: stepper}
+  - name: dU
+    source: {type: internal, field: U}
+    pipeline: [{type: change}, {type: max, name: dU}]
+    write_control: {write_control_type: stepper}

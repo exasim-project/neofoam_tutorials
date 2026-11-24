@@ -1,0 +1,55 @@
+[project]
+name = "neofoam-tutorials"
+version = "0.1.0"
+description = "Verification of NeoFOAM's MULES VoF advection against OpenFOAM (TwoPhaseFlow benchmarks)"
+authors = [{ name = "Henning Scheufler", email = "henning.scheufler@web.de" }]
+requires-python = ">=3.10"
+# numpy, foamlib, PyYAML and snakemake come from the pixi environment; neofoam is built
+# into it from a checkout by `pixi run install-neofoam` (the pip installs use --no-deps).
+dependencies = ["neofoam"]
+
+# The NeoFOAM benchmark solvers: `neofoam solver <name>`.
+[project.entry-points."neofoam.solvers"]
+reconstructInterface = "neofoam_tutorials.solvers.reconstruct_interface"
+advectorVoF = "neofoam_tutorials.solvers.advector_vof"
+incompressibleVoFNeoNSweep = "neofoam_tutorials.solvers.vof_neon"
+incompressibleFluidNeoNSweep = "neofoam_tutorials.solvers.fluid_neon"
+
+# NeoFOAM members the benchmarks use: the setAlphaPlane preprocess tool and the postProcess
+# sources and nodes (shapeError, startField, hydrostaticError, change).
+[project.entry-points."neofoam.plugins"]
+setAlphaPlane = "neofoam_tutorials.tools.set_alpha_plane"
+verificationPostProcess = "neofoam_tutorials.postprocess"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["test", "benchmarks"]
+# test files of the same name in test/ and benchmarks/ import side by side
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [".pixi/", "cases/", "results/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["neofoam_tutorials"]
+
+[tool.mypy]
+files = ["src"]
+mypy_path = ["src"]
+python_version = "3.12"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["foamlib", "foamlib.*", "pandas", "pandas.*", "yaml", "neofoam", "neofoam.*", "pybFoam", "pybFoam.*"]
+ignore_missing_imports = true

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="684pt" height="201.6pt" viewBox="0 0 684 201.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 201.6 
+L 684 201.6 
+L 684 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 91.743319 100.8 
+L 109.731064 100.8 
+L 109.731064 78.620936 
+L 91.743319 78.620936 
+L 91.743319 100.8 
+z
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #c8c8c8; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 109.731064 122.979064 
+L 289.608511 122.979064 
+L 289.608511 100.8 
+L 109.731064 100.8 
+L 109.731064 122.979064 
+z
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #c8c8c8; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 109.731064 100.8 
+L 289.608511 100.8 
+L 289.608511 78.620936 
+L 109.731064 78.620936 
+L 109.731064 100.8 
+z
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #c8c8c8; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 289.608511 122.979064 
+L 362.956596 115.294979 
+L 362.956596 100.8 
+L 289.608511 100.8 
+L 289.608511 122.979064 
+z
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #c8c8c8; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 289.608511 100.8 
+L 362.956596 100.8 
+L 362.956596 86.305021 
+L 289.608511 78.620936 
+L 289.608511 100.8 
+z
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #c8c8c8; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 131.910128 122.979064 
+L 131.910128 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.6"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 176.268255 122.979064 
+L 176.268255 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.6"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 220.626383 122.979064 
+L 220.626383 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.6"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 264.984511 122.979064 
+L 264.984511 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.6"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 91.743319 100.8 
+L 91.743319 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #54278f; stroke-width: 2.5"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #54278f" transform="translate(41.575851 87.599358)">inlet (patch)</text>
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #54278f" transform="translate(41.189601 97.200921)">U = (10 0 0)</text>
+   </g>
+   <g id="line2d_6">
+    <path d="M 362.956596 115.294979 
+L 362.956596 100.8 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #238b45; stroke-width: 2.5"/>
+   </g>
+   <g id="line2d_7">
+    <path d="M 362.956596 100.8 
+L 362.956596 86.305021 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #238b45; stroke-width: 2.5"/>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #238b45" transform="translate(365.57617 98.077344)">outlet (patch)</text>
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #238b45" transform="translate(365.57617 107.679531)">U zeroGradient</text>
+   </g>
+   <g id="line2d_8">
+    <path d="M 91.743319 78.620936 
+L 109.731064 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #cb181d; stroke-width: 2.5"/>
+   </g>
+   <g id="line2d_9">
+    <path d="M 109.731064 78.620936 
+L 289.608511 78.620936 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #cb181d; stroke-width: 2.5"/>
+   </g>
+   <g id="line2d_10">
+    <path d="M 289.608511 78.620936 
+L 362.956596 86.305021 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #cb181d; stroke-width: 2.5"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #cb181d" transform="translate(190.815957 59.659837)">upperWall (wall)</text>
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #cb181d" transform="translate(206.763457 69.262025)">U noSlip</text>
+   </g>
+   <g id="line2d_11">
+    <path d="M 91.743319 100.8 
+L 109.731064 100.8 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #2171b5; stroke-width: 2.5"/>
+   </g>
+   <g id="line2d_12">
+    <path d="M 109.731064 122.979064 
+L 109.731064 100.8 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #2171b5; stroke-width: 2.5"/>
+   </g>
+   <g id="line2d_13">
+    <path d="M 109.731064 122.979064 
+L 289.608511 122.979064 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #2171b5; stroke-width: 2.5"/>
+   </g>
+   <g id="line2d_14">
+    <path d="M 289.608511 122.979064 
+L 362.956596 115.294979 
+" clip-path="url(#pf686e74266)" style="fill: none; stroke: #2171b5; stroke-width: 2.5"/>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #2171b5" transform="translate(191.599707 137.368042)">lowerWall (wall)</text>
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; fill: #2171b5" transform="translate(206.763457 146.970229)">U noSlip</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 95.139002 89.710468 
+Q 99.687383 89.710468 101.999696 89.710468 
+" style="fill: none; stroke: #238b45; stroke-width: 2; stroke-linecap: round"/>
+    <path d="M 98.399696 87.910468 
+L 101.999696 89.710468 
+L 98.399696 91.510468 
+z
+" style="fill: #238b45; stroke: #238b45; stroke-width: 2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: middle" x="131.910128" y="76.874553" transform="rotate(-0 131.910128 76.874553)">1h</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: middle" x="176.268255" y="76.874553" transform="rotate(-0 176.268255 76.874553)">3h</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: middle" x="220.626383" y="76.874553" transform="rotate(-0 220.626383 76.874553)">5h</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 7px; font-family: 'DejaVu Sans'; text-anchor: middle" x="264.984511" y="76.874553" transform="rotate(-0 264.984511 76.874553)">7h</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 113.22383 103.6952 
+Q 113.22383 111.892334 113.22383 120.089469 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linecap: round"/>
+    <path d="M 111.42383 107.2952 
+L 113.22383 103.6952 
+L 115.02383 107.2952 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linecap: round"/>
+    <path d="M 115.02383 116.489469 
+L 113.22383 120.089469 
+L 111.42383 116.489469 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start" x="114.970213" y="114.227774" transform="rotate(-0 114.970213 114.227774)">h</text>
+   </g>
+  </g>
+  <g id="text_10">
+   <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start" x="437.76" y="24.486281" transform="rotate(-0 437.76 24.486281)">singlePhase/pitzDaily</text>
+  </g>
+  <g id="text_11">
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 50.003437)">step height h = 25.4 mm</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 64.816172)">inlet U = 10 m/s, ν = 1e-05 m²/s</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 78.678281)">Re_h = U h / ν = 25400</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 93.203437)">kEpsilon, wall functions</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 108.016172)">inlet k = 0.375, ε = 14.855</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 122.003437)">outlet: p = 0, U zeroGradient</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 136.816172)">SIMPLE, 1500 iterations</text>
+   <text style="font-size: 9px; font-family: 'DejaVu Sans'" transform="translate(437.76 150.803437)">dashed: the profile stations x/h</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pf686e74266">
+   <rect x="13.68" y="57.140426" width="410.4" height="87.319149"/>
+  </clipPath>
+ </defs>
+</svg>

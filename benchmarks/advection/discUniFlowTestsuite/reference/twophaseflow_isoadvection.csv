@@ -1,0 +1,2 @@
+method,mesh,Time,Eshape,Emass,Ebound,celltoCellDist,Ncells,avgCellVol
+isoAdvector,n100x60,4,0.022533280990538068,1.021405182655144e-14,0,0.050000000000000794,6000,0.0024999999999998587

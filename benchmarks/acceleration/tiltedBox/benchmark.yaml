@@ -1,0 +1,45 @@
+# Tilted box (hydrostatic balance, spurious currents of the gravity force): TwoPhaseFlow's
+# run/benchmark/acceleration/tiltedBox (numufoam's acceleration/tiltedBox with rho 1000/1):
+# the unit box tilted by 30 degrees (rotated blockMesh vertices), water below the flat
+# interface z = 0.1345, g = (0 0 -9.81), sigma 0, adaptive time step (Co 0.2) to t = 0.1.
+# The fluids should stay at rest; the face force ghf snGrad(rho) across the interface
+# drives a spurious current instead. Swept over resolution x executor.
+# NeoFOAM's incompressibleVoFNeoN (solvers/vof_neon.py: without the sweep's --no-preprocess)
+solver: incompressibleVoFNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # TwoPhaseFlow: 32, 64, 128 (numufoam up to 512): n128 is
+  # {block_mesh_dict_config: {blocks: [{cells: [128, 1, 128]}]}}. Another tilt angle is a
+  # mesh variant with the rotated vertices: {block_mesh_dict_config: {vertices: [...], ...}}
+  mesh:
+    n16: {block_mesh_dict_config: {blocks: [{cells: [16, 1, 16]}]}}
+    n32: {block_mesh_dict_config: {blocks: [{cells: [32, 1, 32]}]}}
+    n64: {block_mesh_dict_config: {blocks: [{cells: [64, 1, 64]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [n16]
+  neo_n_control_config: [Serial]
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (the end time; maxU_max over time) of the case's
+# postProcess tables (case/system/postProcess.yaml, at the field write times: every
+# 0.005) merged on the time, with metrics.py's derived columns; histories.csv: every row
+collect:
+  tables:
+    - postProcessing/maxU.csv
+    - postProcessing/magU_integral.csv
+    - postProcessing/p_err_max.csv
+    - postProcessing/p_err_integral.csv
+    - postProcessing/volume.csv
+  derive: metrics.py
+  history: true
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# the columns of report.md's results table
+report: [maxU_10ms, maxU_max, maxU, meanU, p_err_max, p_err_mean]

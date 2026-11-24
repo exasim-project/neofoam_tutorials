@@ -1,0 +1,18 @@
+# The ruff hooks of NeoFOAM's .pre-commit-config.yaml (same rev); config in pyproject.toml.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.2
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [--fix]
+
+  - repo: local
+    hooks:
+      # mypy needs the project's dependencies, so it runs in the pixi environment.
+      - id: type-check
+        name: Mypy Type Check
+        entry: pixi run type-check
+        language: system
+        pass_filenames: false
+        types: [python]

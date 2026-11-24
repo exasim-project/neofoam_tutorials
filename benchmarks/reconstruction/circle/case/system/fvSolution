@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.2.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// NeoFOAM's reconstruction controls, where isoAdvectorNeoN reads them
+// (read_iso_advector_controls); the sweep sets reconstructionScheme.
+solvers
+{
+    alpha1
+    {
+        reconstructionScheme gradAlpha;
+        isoFaceTol          1e-8;
+        surfCellTol         1e-8;
+    }
+}
+
+// ************************************************************************* //

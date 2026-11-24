@@ -1,0 +1,37 @@
+# NeoFOAM's in-situ tables (postProcessing/<name>.csv), at the field write times
+# (write_control stepper: controlDict's every 0.005), on incompressibleVoFNeoN's registry
+# fields: the spurious current (max |U| and the volume integral of |U|), the pressure's
+# distance to the hydrostatic solution of the initial interface (hydrostaticError, this
+# repository's node: the plane of setAlphaFieldDict, rho of transportProperties, g of
+# constant/g) over the hydrostatic pressure range, largest and volume integral, and the
+# mesh volume; collect derives the volume-weighted means (the rotated mesh's cells differ
+# in volume by 1e-6), maxU_max and maxU_10ms (metrics.py).
+tables:
+  - name: maxU
+    source: {type: internal, field: U}
+    pipeline: [{type: mag}, {type: max, name: maxU}]
+    write_control: {write_control_type: stepper}
+  - name: magU_integral
+    source: {type: internal, field: U}
+    pipeline: [{type: mag}, {type: volIntegrate, name: magU_integral}]
+    write_control: {write_control_type: stepper}
+  - name: volume
+    source: {type: internal, field: p}
+    pipeline: [{type: area}, {type: sum, name: volume}]
+    write_control: {write_control_type: stepper}
+  - name: p_err_max
+    source: {type: internal, field: p}
+    pipeline:
+      - &hydrostatic
+        type: hydrostaticError
+        rho_heavy: 1000
+        rho_light: 1
+        g: [0, 0, -9.81]
+        origin: [0, 0, 0.1345]
+        normal: [0, 0, -1]
+      - {type: max, name: p_err_max}
+    write_control: {write_control_type: stepper}
+  - name: p_err_integral
+    source: {type: internal, field: p}
+    pipeline: [*hydrostatic, {type: volIntegrate, name: p_err_integral}]
+    write_control: {write_control_type: stepper}

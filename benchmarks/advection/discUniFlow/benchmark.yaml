@@ -1,0 +1,62 @@
+# Disc in uniform flow (arXiv 1801.05382 sec. 4.2.1, numufoam's discUniFlow): a disc of
+# radius 0.2 translated by U = (1, 1) from (0.25, 0.25) for t = 0.5 in the unit square.
+# TwoPhaseFlow's advectorVoF on NeoFOAM (NeoN isoAdvector with gradAlpha, NeoN MULES),
+# swept over resolution x CFL (maxAlphaCo) x method x executor; the errors are
+# TwoPhaseFlow's volumeFractionError at t = 0.5.
+solver: advectorVoF
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads. The default sweep is
+# the coarse half of numufoam's sets (a few minutes); numufoam's finer meshes and other
+# CFLs are one line each: uncomment them (n320: ~20 MB per case, Serial 1-4 min per CFL).
+dimensions:
+  mesh:
+    n10: {block_mesh_dict_config: {blocks: [{cells: [10, 1, 10]}]}}
+    n20: {block_mesh_dict_config: {blocks: [{cells: [20, 1, 20]}]}}
+    n40: {block_mesh_dict_config: {blocks: [{cells: [40, 1, 40]}]}}
+    # n80: {block_mesh_dict_config: {blocks: [{cells: [80, 1, 80]}]}}
+    # n160: {block_mesh_dict_config: {blocks: [{cells: [160, 1, 160]}]}}
+    # n320: {block_mesh_dict_config: {blocks: [{cells: [320, 1, 320]}]}}
+  control_dict_config:
+    # CFL005: {maxAlphaCo: 0.05}
+    CFL01: {maxAlphaCo: 0.1}
+    # CFL02: {maxAlphaCo: 0.2}
+    CFL05: {maxAlphaCo: 0.5}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+  advection_scheme_config:
+    isoAdvector: {advectionScheme: isoAdvector}
+    MULES: {advectionScheme: MULES}
+# --method NAME replaces this dimension's variants by {NAME: {entry: NAME}}
+method: {dimension: advection_scheme_config, entry: advectionScheme}
+# --smoke keeps these variants
+smoke:
+  mesh: [n10]
+  control_dict_config: [CFL01]
+  neo_n_control_config: [Serial]
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (t = 0.5) of the case's tables merged on the time (a later
+# table's column replaces an earlier one): the solver's volumeFractionError.dat (Tadv and
+# the mesh columns; its Eshape, Emass, Ebound are replaced) and timing.dat, then the
+# postProcess tables of case/system/postProcess.yaml (Eshape, mass, mass0, alpha_min,
+# alpha_max), from which metrics.py derives Emass and Ebound. histories.csv: every row
+collect:
+  tables:
+    - postProcessing/volumeFractionError/0/volumeFractionError.dat
+    - postProcessing/volumeFractionError/0/timing.dat
+    - postProcessing/Eshape.csv
+    - postProcessing/mass.csv
+    - postProcessing/mass0.csv
+    - postProcessing/alpha_min.csv
+    - postProcessing/alpha_max.csv
+  derive: metrics.py
+  history: true
+  columns:
+    mesh: mesh
+    control_dict_config: CFL
+    neo_n_control_config: executor
+    advection_scheme_config: method
+# the columns of report.md's results table
+report: [Ncells, Eshape, Emass, Ebound, Tadv, wall_s, steps]

@@ -1,0 +1,3 @@
+# blockMesh runs once per mesh variant of a sweep; no case-level tools
+tools:
+  - tool: blockMesh

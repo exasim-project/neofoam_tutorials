@@ -1,0 +1,45 @@
+# Static drop (parasitic currents of the Brackbill CSF surface tension): NeoFOAM's
+# stationaryDroplet case (test/solver/incompressibleVoFNeoN), a 2 mm water cylinder in air
+# at the centre of an 8 mm box, sigma 0.07, g = 0, MULES, 200 steps of 2e-5 to t = 4e-3.
+# The drop should stay at rest: what moves is the spurious current, and the pressure jump
+# should balance sigma/R. Swept over resolution x executor.
+# NeoFOAM's incompressibleVoFNeoN (solvers/vof_neon.py: without the sweep's --no-preprocess)
+solver: incompressibleVoFNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # R/dx = 5, 10, 20; deltaT 2e-5 is 0.57 of the capillary limit
+  # sqrt(rho_avg dx^3 / (2 pi sigma)) at n80: a finer mesh needs a smaller deltaT
+  # (control_dict_config in a further dimension)
+  mesh:
+    n20: {block_mesh_dict_config: {blocks: [{cells: [20, 20, 1]}]}}
+    n40: {block_mesh_dict_config: {blocks: [{cells: [40, 40, 1]}]}}
+    n80: {block_mesh_dict_config: {blocks: [{cells: [80, 80, 1]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [n20]
+  neo_n_control_config: [Serial]
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (the end time; maxU_max, Ca_max over time) of the case's
+# postProcess tables (case/system/postProcess.yaml, at the field write times: every 10th
+# step) merged on the time, with metrics.py's derived columns; histories.csv: every row
+collect:
+  tables:
+    - postProcessing/maxU.csv
+    - postProcessing/magU_integral.csv
+    - postProcessing/volume.csv
+    - postProcessing/p_inside.csv
+    - postProcessing/p_outside.csv
+    - postProcessing/water.csv
+  derive: metrics.py
+  history: true
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# the columns of report.md's results table
+report: [maxU_max, meanU, Ca_max, maxU, dp, sigma_R, dp_err]

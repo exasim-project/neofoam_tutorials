@@ -1,0 +1,71 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// numufoam's discUniFlow (interfaceAdvector) on NeoFOAM's advectorVoF benchmark solver.
+// The time step is fixed: the undamped maxAlphaCo step before the first step (deltaT
+// is its ceiling), snapped onto writeInterval; maxCo is off as in numufoam.
+application     advectorVoF;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         0.5;
+
+deltaT          0.1;
+
+writeControl    adjustableRunTime;
+
+writeInterval   0.5;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  14;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable no;
+
+adjustTimeStep  yes;
+
+maxCo           1e10;
+
+maxAlphaCo      0.1;
+
+maxDeltaT       1e6;
+
+executor        Serial;
+
+functions
+{
+    volumeFractionError
+    {
+        type            volumeFractionError;
+        libs            ("libpostProcess.so");
+        field           alpha.water;
+        functionType    cylinder;
+        radius          0.2;
+        direction       (0 1 0);
+        origin          (0.25 0 0.25);
+        writeControl    adjustableRunTime;
+        writeInterval   0.1;
+        writePrecision  16;
+    }
+}
+
+// ************************************************************************* //

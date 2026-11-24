@@ -1,0 +1,47 @@
+# Disc in uniform flow, TwoPhaseFlow's testsuite variant (testsuite/advection/
+# test-discUniFlow): a disc of radius 0.25 translated by U = (1, 0.5) from (0.5, 0.5)
+# for t = 4 on 100 x 60 cells, maxAlphaCo 0.1. TwoPhaseFlow's advectorVoF on NeoFOAM
+# (NeoN isoAdvector with gradAlpha, NeoN MULES) over method x executor, next to the
+# stored TwoPhaseFlow advectorVoF runs of the same schemes (reference/twophaseflow_*.csv).
+solver: advectorVoF
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  mesh:
+    n100x60: {block_mesh_dict_config: {blocks: [{cells: [100, 1, 60]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+  advection_scheme_config:
+    isoAdvector: {advectionScheme: isoAdvector}
+    MULES: {advectionScheme: MULES}
+# --method NAME replaces this dimension's variants by {NAME: {entry: NAME}}
+method: {dimension: advection_scheme_config, entry: advectionScheme}
+# --smoke keeps these variants
+smoke:
+  neo_n_control_config: [Serial]
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (t = 4) of the case's tables merged on the time (a later
+# table's column replaces an earlier one): the solver's volumeFractionError.dat (Tadv and
+# the mesh columns; its Eshape, Emass, Ebound are replaced) and timing.dat, then the
+# postProcess tables of case/system/postProcess.yaml (Eshape, mass, mass0, alpha_min,
+# alpha_max), from which metrics.py derives Emass and Ebound. histories.csv: every row
+collect:
+  tables:
+    - postProcessing/volumeFractionError/0/volumeFractionError.dat
+    - postProcessing/volumeFractionError/0/timing.dat
+    - postProcessing/Eshape.csv
+    - postProcessing/mass.csv
+    - postProcessing/mass0.csv
+    - postProcessing/alpha_min.csv
+    - postProcessing/alpha_max.csv
+  derive: metrics.py
+  history: true
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+    advection_scheme_config: method
+# the columns of report.md's results table
+report: [Ncells, Eshape, Emass, Ebound, Tadv, wall_s, steps]

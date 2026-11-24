@@ -1,0 +1,65 @@
+# pitzDaily: OpenFOAM's simpleFoam tutorial (incompressible/simpleFoam/pitzDaily), the
+# backward-facing step of Pitz & Daily (1983), AIAA J. 21(11), 1565-1570: step height
+# h = 25.4 mm, inlet U = 10 m/s, nu = 1e-5 (Re_h = 25400), k-epsilon with wall functions.
+# NeoFOAM's tutorial pitzDaily_steady: plain SIMPLE (consistent no) with p 0.3 / U 0.7
+# relaxation (the upstream tutorial is SIMPLEC), here 1500 iterations (NeoN has no
+# residualControl). Compared with OpenFOAM-v2406 simpleFoam on the same case and meshes
+# (reference/openfoam*.csv, stored) and, loosely, with the measured
+# reattachment length. Swept over mesh x executor.
+# NeoFOAM's incompressibleFluidNeoN (solvers/fluid_neon.py: without the sweep's
+# --no-preprocess)
+solver: incompressibleFluidNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # the cells of the tutorial's five blocks; coarse halves them (13 / 14 for 25 / 27).
+  # A finer mesh doubles them: fine is {cells: [36, 60, 1]}, [360, 54, 1], [360, 60, 1],
+  # [50, 54, 1], [50, 60, 1]
+  mesh:
+    coarse:
+      block_mesh_dict_config:
+        blocks:
+          - {cells: [9, 15, 1]}
+          - {cells: [90, 14, 1]}
+          - {cells: [90, 15, 1]}
+          - {cells: [13, 14, 1]}
+          - {cells: [13, 15, 1]}
+    tutorial:
+      block_mesh_dict_config:
+        blocks:
+          - {cells: [18, 30, 1]}
+          - {cells: [180, 27, 1]}
+          - {cells: [180, 30, 1]}
+          - {cells: [25, 27, 1]}
+          - {cells: [25, 30, 1]}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [coarse]
+  neo_n_control_config: [Serial]
+# per case, after the solve: metrics.py's table (a row per iteration; the fields written
+# every 500) as postProcessing/metrics.dat, its final profiles as
+# postProcessing/profiles.csv, then the time directories but 0 and the last removed. Not
+# NeoFOAM's postProcess: the residuals come from the log (its residuals source reads the
+# fvMesh's solverPerformanceDict, which NeoN's Ginkgo solves never fill), and the
+# reattachment length interpolates the lower wall's near-wall Ux at the wall faces' x
+# (its patch source cannot sample a NeoN field), so metrics.py reads U anyway
+metrics: {script: metrics.py, prune: true}
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (iteration 1500) of the metrics table; histories.csv:
+# every row (the residuals per iteration); profiles.csv: the final Ux profiles
+collect:
+  tables:
+    - postProcessing/metrics.dat
+  history: true
+  profiles:
+    - postProcessing/profiles.csv
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# the columns of report.md's results table
+report: [nCells, x_r_h, Umin_xh1, Umin_xh3, Umin_xh5, profile_err, iterations, wall_s]

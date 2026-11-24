@@ -1,0 +1,68 @@
+[workspace]
+authors = ["Henning Scheufler <henning.scheufler@web.de>"]
+channels = ["conda-forge", "bioconda"]
+name = "neofoam_tutorials"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[activation.env]
+# NeoFOAM (and its pybFoam) is built against OpenFOAM-v2406; the benchmark workflows
+# run under it (scripts/benchmark.sh). NEOFOAM_SRC is the checkout `pixi run install-neofoam` builds.
+NEOFOAM_BASHRC = "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
+NEOFOAM_SRC = "$HOME/libsAndApps/NeoFOAM/.claude/worktrees/workflow-benchmarks"
+
+[dependencies]
+python = "3.12.*"
+pip = "*"
+setuptools = ">=64"
+numpy = "*"
+foamlib = "*"
+pytest = "*"
+snakemake = ">=9.27.1,<10"
+pyyaml = ">=6.0.3,<7"
+# the benchmark results, checks and plots (suite/)
+pandas = "*"
+matplotlib = "*"
+
+# NeoFOAM's runtime dependencies (its pyproject) and build tools; NeoFOAM itself is built
+# from $NEOFOAM_SRC by `pixi run install-neofoam` with the system gcc and CUDA (as OpenFOAM).
+[feature.neofoam.dependencies]
+typer = "*"
+pydantic = ">=2"
+networkx = ">=3"
+pyvis = ">=0.3.2"
+scikit-build-core = ">=0.11"
+nanobind = "3.0.*"
+cmake = ">=3.22"
+ninja = "*"
+
+# Lint and type-check tools (as neofoam_mechanics).
+[feature.dev.dependencies]
+ruff = "0.14.2.*"
+mypy = "*"
+pre-commit = "*"
+
+# The documentation (doc/, `pixi run docs`): Sphinx with the Furo theme and Mermaid.
+[feature.docs.dependencies]
+sphinx = "*"
+furo = "*"
+sphinxcontrib-mermaid = "*"
+
+[environments]
+default = ["dev", "neofoam", "docs"]
+
+[tasks]
+install = 'pip install -e . --no-build-isolation --no-deps'
+test = { cmd = "pytest -v", depends-on = ["install"] }
+# Exports a benchmark's NeoFOAM sweep (benchmark.yaml) to results/ and runs it with one
+# snakemake command (printed): pixi run benchmark FOLDER [--smoke] [--method NAME] [-c N]
+benchmark = { cmd = "bash scripts/benchmark.sh", depends-on = ["install"] }
+# Builds and installs NeoFOAM (C++ core, Kokkos OpenMP+CUDA, Ginkgo, pybFoam on v2406)
+# from $NEOFOAM_SRC (or the given checkout) into this environment; 4 jobs, under build.lock.
+install-neofoam = "bash scripts/install_neofoam.sh"
+# The documentation: copies the benchmark outputs of results/ into doc/_generated/ (the
+# committed snapshot), then builds doc/_build/html with warnings as errors.
+docs = "python doc/_scripts/sync_results.py && sphinx-build -W -b html doc doc/_build/html"
+lint = "ruff check src test benchmarks && ruff format --check src test benchmarks"
+format = "ruff format src test benchmarks && ruff check --fix src test benchmarks"
+type-check = "mypy"

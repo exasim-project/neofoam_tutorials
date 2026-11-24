@@ -1,0 +1,41 @@
+# Circle reconstruction on hex meshes (arXiv 1801.05382 sec. 4.1.1, numufoam's circle):
+# TwoPhaseFlow's reconstructInterface on NeoFOAM, swept over resolution x executor x
+# scheme. The errors are TwoPhaseFlow's reconstructionError against the exact circle.
+solver: reconstructInterface
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  mesh:
+    n8: {block_mesh_dict_config: {blocks: [{cells: [8, 1, 8]}]}}
+    n16: {block_mesh_dict_config: {blocks: [{cells: [16, 1, 16]}]}}
+    n32: {block_mesh_dict_config: {blocks: [{cells: [32, 1, 32]}]}}
+    n64: {block_mesh_dict_config: {blocks: [{cells: [64, 1, 64]}]}}
+    n128: {block_mesh_dict_config: {blocks: [{cells: [128, 1, 128]}]}}
+    n256: {block_mesh_dict_config: {blocks: [{cells: [256, 1, 256]}]}}
+    n512: {block_mesh_dict_config: {blocks: [{cells: [512, 1, 512]}]}}
+    n1024: {block_mesh_dict_config: {blocks: [{cells: [1024, 1, 1024]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+  reconstruction_scheme_config:
+    gradAlpha: {reconstructionScheme: gradAlpha}
+# --method NAME replaces this dimension's variants by {NAME: {entry: NAME}}
+method: {dimension: reconstruction_scheme_config, entry: reconstructionScheme}
+# --smoke keeps these variants
+smoke:
+  mesh: [n8, n16]
+  neo_n_control_config: [Serial]
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row of each table
+collect:
+  tables:
+    - postProcessing/reconstructionError/0/error.dat
+    - postProcessing/reconstructionError/0/timing.dat
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+    reconstruction_scheme_config: method
+# the columns of report.md's results table
+report: [nCells, LNormalInf, LNormal1, LCentreInf, LCentre1, k1, wall_s]

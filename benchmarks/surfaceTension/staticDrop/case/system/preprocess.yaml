@@ -1,0 +1,6 @@
+# blockMesh runs once per mesh variant of a sweep, setAlphaField per case: the water
+# cylinder of system/setAlphaFieldDict cut exactly (cutCellIso) into 0/alpha.water.
+tools:
+  - tool: blockMesh
+  - tool: setAlphaField
+    depends_on: [blockMesh]

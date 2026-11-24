@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     interIsoFoam;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         0.1;
+deltaT          0.001;
+
+// TwoPhaseFlow's run writes (and samples max|U| at) every 0.01; here twice as often
+writeControl    adjustableRunTime;
+writeInterval   0.005;
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  12;
+writeCompression off;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable no;
+
+adjustTimeStep  yes;
+maxCo           0.2;
+maxAlphaCo      0.2;
+maxDeltaT       1;
+
+// the NeoN executor (NeoNControlConfig); the sweep sets it
+executor        Serial;
+
+// ************************************************************************* //

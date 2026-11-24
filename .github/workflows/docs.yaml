@@ -1,0 +1,57 @@
+# Builds doc/ from the committed result snapshot (doc/_generated/) and publishes it on the
+# gh-pages branch: main at the site root, each pull request under pr-preview/pr-<N>/ (the
+# link is posted as a PR comment; the preview is removed when the PR closes). No NeoFOAM or
+# OpenFOAM is needed: the pages only render that snapshot.
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# One deploy at a time: main and every preview push to the same gh-pages branch.
+concurrency:
+  group: docs-gh-pages
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.event.action != 'closed'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # pandas<3: pandas 3 parses the result CSVs differently and changes the tables.
+      - if: github.event.action != 'closed'
+        run: pip install sphinx furo sphinxcontrib-mermaid numpy "pandas<3" pillow pyyaml
+      - if: github.event.action != 'closed'
+        run: sphinx-build -W -b html doc doc/_build/html && touch doc/_build/html/.nojekyll
+        env:
+          PYTHONPATH: src
+      - name: Check that the build left the committed snapshot unchanged
+        if: github.event.action != 'closed'
+        run: git diff --exit-code -- doc/_generated
+      - name: Deploy main to the site root
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: doc/_build/html
+          branch: gh-pages
+          clean-exclude: pr-preview/
+      # Fork PRs get a read-only token, so only same-repository PRs get a preview.
+      - name: Deploy the PR preview
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: doc/_build/html
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: auto

@@ -1,0 +1,49 @@
+# Lid-driven cavity at Re = 100: the unit square, lid U = (1 0 0), nu = 0.01 (OpenFOAM's
+# icoFoam cavity has a 0.1 m square, Re = 10), laminar, PISO (2 correctors) with Gauss
+# linear, adaptive time step (Co 0.5) to t = 20, the steady state. The centreline
+# velocities are compared with Ghia, Ghia & Shin (1982), J. Comput. Phys. 48, 387-411,
+# Tables I and II, Re = 100 (reference/ghia1982.csv), and with OpenFOAM's icoFoam on
+# the same case (reference/icofoam.csv, stored). Swept over resolution x executor.
+# NeoFOAM's incompressibleFluidNeoN (solvers/fluid_neon.py: without the sweep's
+# --no-preprocess)
+solver: incompressibleFluidNeoNSweep
+# each payload is laid over the base case's config (case/)
+merge: true
+# NeoFOAM's params.yaml: dimension -> variant -> config payloads
+dimensions:
+  # OpenFOAM's tutorial: 20 x 20; Ghia: 129 x 129. n160 is
+  # {block_mesh_dict_config: {blocks: [{cells: [160, 160, 1]}]}}
+  mesh:
+    n20: {block_mesh_dict_config: {blocks: [{cells: [20, 20, 1]}]}}
+    n40: {block_mesh_dict_config: {blocks: [{cells: [40, 40, 1]}]}}
+    n80: {block_mesh_dict_config: {blocks: [{cells: [80, 80, 1]}]}}
+  neo_n_control_config:
+    Serial: {executor: Serial}
+    CPU: {executor: CPU}
+    GPU: {executor: GPU}
+# --smoke keeps these variants
+smoke:
+  mesh: [n20]
+  neo_n_control_config: [Serial]
+# per case, after the solve: metrics.py's table from the case's postProcess tables
+# (case/system/postProcess.yaml: U next to the centrelines, every 2 s) and log.solver as
+# postProcessing/metrics.dat, its final profiles as postProcessing/profiles.csv; then the
+# time directories but 0 and the last removed
+metrics: {script: metrics.py, prune: true}
+# results.csv: one row per case, a column per dimension (renamed here) holding the
+# variant name, then the last row (t = 20) of the metrics table and the postProcess
+# tables maxU and dU, merged on the time; histories.csv: every row; profiles.csv: the
+# final centreline profiles
+collect:
+  tables:
+    - postProcessing/metrics.dat
+    - postProcessing/maxU.csv
+    - postProcessing/dU.csv
+  history: true
+  profiles:
+    - postProcessing/profiles.csv
+  columns:
+    mesh: mesh
+    neo_n_control_config: executor
+# the columns of report.md's results table
+report: [h, u_L2, u_Linf, v_L2, v_Linf, dU, steps, wall_s, time_per_step_s]
