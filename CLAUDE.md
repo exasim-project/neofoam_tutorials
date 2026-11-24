@@ -1,7 +1,7 @@
 # CLAUDE.md — neofoam_tutorials
 
-Verification benchmarks of NeoFOAM against OpenFOAM; see [README.md](README.md) for
-the environment (`pixi install`), the tasks and the layout.
+Verification benchmarks of NeoFOAM; see [README.md](README.md) for the commands and the
+layout, and the getting-started page of the docs for details.
 
 ## Conventions
 
