@@ -1,3 +1,8 @@
+---
+paths:
+  - "tests/**/*.py"
+---
+
 # Test rules (`tests/`)
 
 ## Placement
@@ -22,7 +27,7 @@
 
 ## Hard constraints
 
-- pybFoam/OpenFOAM are hard deps: no skip-if-missing, no `try/except` imports. Only optional extras (telemetry, agent, MCP) use `pytest.importorskip`.
+- The optional reference codes are the only skips: a test that needs TwoPhaseFlow (`openfoam`), the OpenFOAM-v2406 geometricVoF references (`geometricvof`) or NeoFOAM (`backend`) carries that marker and skips with the variable to set, e.g. `pytest.skip("TwoPhaseFlow's advectorVoF not found ($TWOPHASEFLOW_BASHRC)")`. No `try/except` imports.
 - One `Foam::Time` per process — multiple runs (reference vs subject) go through subprocess workers that write `.npy` artifacts.
 - Never delete or weaken an existing test to get green.
 

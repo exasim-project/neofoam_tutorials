@@ -1,3 +1,10 @@
+---
+paths:
+  - "src/**/*.py"
+  - "benchmarks/**/*.py"
+  - "doc/_scripts/**/*.py"
+---
+
 # neofoam_tutorials Python package — Code style
 
 ## Tooling
