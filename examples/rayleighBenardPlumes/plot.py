@@ -36,7 +36,11 @@ def _plot_temperature(temperature: np.ndarray, centres: np.ndarray, time: float)
     """The temperature field with its plumes, ``plots/temperature.png``."""
     fig, ax = plt.subplots(figsize=(6, 5.4))
     contour = ax.tricontourf(
-        centres[:, 0], centres[:, 1], temperature, levels=64, cmap="RdBu_r", vmin=T_COLD, vmax=T_HOT
+        centres[:, 0],
+        centres[:, 1],
+        np.clip(temperature, T_COLD, T_HOT),
+        levels=np.linspace(T_COLD, T_HOT, 65),
+        cmap="RdBu_r",
     )
     fig.colorbar(contour, ax=ax, label="T [K]")
     ax.set_aspect("equal")
