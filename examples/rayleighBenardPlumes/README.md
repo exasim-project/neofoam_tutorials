@@ -30,6 +30,13 @@ source <OpenFOAM v2406>/etc/bashrc     # and NeoFOAM's Python environment active
 ./Allclean
 ```
 
+`p_rgh` is solved by CG with an algebraic multigrid preconditioner, `system/amg.json`: NeoN's
+MergedPgm aggregation with the GAMG scale correction, unsorted, smoothed by 3 sweeps of
+Jacobi relaxed by 0.8. Tuned on the first 25 steps (Serial): 19 iterations per solve on average
+(20 at most) against 84 (209) of 2 sweeps relaxed by 0.9, 0.19 s per step.
+`incompressibleFluid` (pybFoam) has no Ginkgo; for it, set `p_rgh` to `GAMG` in
+`system/fvSolution`.
+
 Both solvers detect the Boussinesq model from `beta` and `TRef` in
 `constant/transportProperties`. For a quick check, shorten `endTime` in
 `system/controlDict`. `plot.py` writes `plots/temperature.png` (T at the last written time)

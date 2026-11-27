@@ -10,11 +10,12 @@ solvers
 {
     p_rgh
     {
-        solver          PCG;
-        preconditioner  diagonal;
+        solver          Ginkgo;
+        configFile      system/amg.json;    // CG with NeoN's MergedPgm AMG
+        l1ScaledResidual true;              // OpenFOAM's normalised residual
         tolerance       1e-8;
         relTol          0.01;
-        maxIter         2000;
+        maxIter         1000;
     }
     p_rghFinal
     {
