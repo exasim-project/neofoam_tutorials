@@ -1,9 +1,9 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
-# Rayleigh-Benard convection at Ra = 1e11, Pr = 1: a 1 m x 1 m cell heated from below,
-# cooled from above (dT = 1 K), Boussinesq, laminar on a 128 x 128 mesh. The mesh does not
-# resolve the thermal boundary layers at this Ra; the run shows the plumes they emit.
+# Rayleigh-Benard convection at Ra = 1e8, Pr = 1: a 1 m x 1 m cell heated from below,
+# cooled from above (dT = 1 K), Boussinesq, laminar on a 128 x 128 mesh that resolves the
+# thermal boundary layers (about 6 cells) and the plumes they emit.
 #
 #   ./Allrun                                   # incompressibleFluidNeoN on NeoN's Serial executor
 #   ./Allrun incompressibleFluidNeoN GPU       # on the GPU (a CUDA build of NeoFOAM); also CPU

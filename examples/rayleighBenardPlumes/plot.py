@@ -9,10 +9,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
-RAYLEIGH = 1e11
+RAYLEIGH = 1e8
 HEIGHT = 1.0
 T_HOT = 300.5
 T_COLD = 299.5
+FLOOR_VIEW = 0.35  # height [m] of the zoomed view of the floor's plumes
 CASE = Path(__file__).parent
 
 
@@ -44,21 +45,23 @@ def _nusselt(mesh: pv.UnstructuredGrid) -> tuple[float, float]:
     return float(nu_floor), float(nu_ceiling)
 
 
-def _render_temperature(mesh: pv.UnstructuredGrid, time: float) -> None:
-    """The temperature field with its plumes, ``plots/temperature.png``."""
-    plotter = pv.Plotter(off_screen=True, window_size=(1000, 900))
+def _render_temperature(
+    mesh: pv.UnstructuredGrid, title: str, file_name: str, window_size: tuple[int, int]
+) -> None:
+    """The temperature of ``mesh`` seen from +z, ``plots/<file_name>``."""
+    plotter = pv.Plotter(off_screen=True, window_size=window_size)
     plotter.add_mesh(
         mesh,
         scalars="T",
         cmap="RdBu_r",
         clim=(T_COLD, T_HOT),
         lighting=False,
-        scalar_bar_args={"title": "T [K]", "vertical": True, "fmt": "%.2f"},
+        scalar_bar_args={"title": "T [K]", "vertical": True, "fmt": "%.2f", "position_x": 0.88},
     )
-    plotter.add_text(f"Ra = 1e11, Pr = 1: T at t = {time:g} s", font_size=12)
+    plotter.add_text(title, font_size=12)
     plotter.view_xy()
-    plotter.camera.zoom(1.1)
-    plotter.screenshot(CASE / "plots" / "temperature.png")
+    plotter.camera.tight(padding=0.08, adjust_render_window=False)
+    plotter.screenshot(CASE / "plots" / file_name)
     plotter.close()
 
 
@@ -83,7 +86,12 @@ def main() -> None:
     meshes = [_internal_mesh(reader, time) for time in times]
     nusselt = np.array([_nusselt(mesh) for mesh in meshes])
     (CASE / "plots").mkdir(exist_ok=True)
-    _render_temperature(meshes[-1], times[-1])
+    title = f"Ra = 1e8, Pr = 1: T at t = {times[-1]:g} s"
+    _render_temperature(meshes[-1], title, "temperature.png", (1150, 900))
+    floor_layer = meshes[-1].clip_box((0, 1, 0, FLOOR_VIEW, -1, 1), invert=False)
+    _render_temperature(
+        floor_layer, f"{title}, y < {FLOOR_VIEW} m", "temperature_floor.png", (2600, 750)
+    )
     _plot_nusselt(times, nusselt)
     print(f"t = {times[-1]:g} s: Nu floor {nusselt[-1, 0]:.1f}, ceiling {nusselt[-1, 1]:.1f}")
 
