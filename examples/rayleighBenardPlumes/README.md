@@ -11,7 +11,7 @@ organise into a large-scale circulation of the cell.
 | nu = kappa | 5.7184e-7 m^2/s |
 | free-fall velocity, time | sqrt(g beta dT H) = 0.181 m/s, 5.53 s |
 | mesh | 128 x 128, graded 8:1 to the walls: 2.3 mm at the plates, 18.6 mm in the core |
-| time | 300 s (about 54 free-fall times) in steps of 0.02 s, written every 10 s |
+| time | 300 s (about 54 free-fall times), adaptive steps at Co 0.5 (at most 0.1 s), written every 10 s |
 | start | at rest, T = 300 K plus 1 % of dT of noise (`setExprFields`) |
 
 **This is a demo, not a resolved simulation.** At Ra = 1e11 the thermal boundary layers are

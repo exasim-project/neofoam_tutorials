@@ -20,7 +20,9 @@ writePrecision  8;
 timeFormat      general;
 timePrecision   6;
 runTimeModifiable false;
-adjustTimeStep  no;
+adjustTimeStep  yes;
+maxCo           0.5;
+maxDeltaT       0.1;
 
 // read by incompressibleFluidNeoN only (Serial, CPU or GPU)
 executor        ${NEOFOAM_EXECUTOR:-Serial};
