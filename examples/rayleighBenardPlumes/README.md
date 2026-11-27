@@ -37,6 +37,10 @@ Jacobi relaxed by 0.8. Tuned on the first 25 steps (Serial): 19 iterations per s
 `incompressibleFluid` (pybFoam) has no Ginkgo; for it, set `p_rgh` to `GAMG` in
 `system/fvSolution`.
 
+NeoN allocates its fields from an Umpire memory pool (`allocator UmpirePool;
+memPoolSize 1;` in `system/controlDict`, the first block in GB; the pool grows): on the GPU
+the 250 steps of the first 5 s take 5.9 s instead of 9.1 s with the default allocator.
+
 Both solvers detect the Boussinesq model from `beta` and `TRef` in
 `constant/transportProperties`. For a quick check, shorten `endTime` in
 `system/controlDict`. `plot.py` writes `plots/temperature.png` (T at the last written time)

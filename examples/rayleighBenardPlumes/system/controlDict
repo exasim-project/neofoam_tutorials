@@ -24,3 +24,7 @@ adjustTimeStep  no;
 
 // read by incompressibleFluidNeoN only (Serial, CPU or GPU)
 executor        ${NEOFOAM_EXECUTOR:-Serial};
+// NeoN's fields allocate from an Umpire memory pool on the executor's memory space
+// (no cudaMalloc/cudaFree per temporary field); memPoolSize is its first block in GB
+allocator       UmpirePool;
+memPoolSize     1;
