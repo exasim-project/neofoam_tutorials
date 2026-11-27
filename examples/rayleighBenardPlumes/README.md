@@ -10,12 +10,12 @@ organise into a large-scale circulation of the cell.
 | g, beta, dT | 9.81 m/s^2, 1/300 1/K, 1 K |
 | nu = kappa | 1.8083e-5 m^2/s |
 | free-fall velocity, time | sqrt(g beta dT H) = 0.181 m/s, 5.53 s |
-| mesh | 128 x 128, graded 8:1 to the walls: 2.3 mm at the plates, 18.6 mm in the core |
+| mesh | 256 x 256, graded 8:1 to the walls: 1.1 mm at the plates, 9.1 mm in the core |
 | time | 300 s (about 54 free-fall times), adaptive steps at Co 0.5 (at most 0.1 s), written every 10 s |
 | start | at rest, T = 300 K plus 1 % of dT of noise (`setExprFields`) |
 
 At Ra = 1e8 the thermal boundary layers are about H / (2 Nu) = 14 mm thick (Nu ~ 0.124
-Ra^0.309 = 37, Niemela et al., Nature 2000), about 6 cells of the graded mesh, so the
+Ra^0.309 = 37, Niemela et al., Nature 2000), about 12 cells of the graded mesh, so the
 laminar run resolves the plumes. It is 2D: the large-scale circulation and Nu of a 2D cell
 differ from the 3D experiments the fit comes from. The Nusselt number is estimated from the
 wall-adjacent cells.
