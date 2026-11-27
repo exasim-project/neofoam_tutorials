@@ -1,0 +1,26 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+
+application     incompressibleFluidNeoN;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         300;            // about 54 free-fall times
+deltaT          0.02;
+writeControl    runTime;
+writeInterval   10;
+writeFormat     ascii;
+writePrecision  8;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable false;
+adjustTimeStep  no;
+
+// read by incompressibleFluidNeoN only (Serial, CPU or GPU)
+executor        ${NEOFOAM_EXECUTOR:-Serial};

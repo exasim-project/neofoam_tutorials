@@ -1,0 +1,36 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+
+// Square cell, H = L = 1 m, 2D (one cell in z). Each direction has 128 cells, graded 8:1
+// from the centre to the walls: 2.3 mm next to the plates, 18.6 mm in the core.
+scale   1;
+
+vertices
+(
+    (0 0 -0.005) (1 0 -0.005) (1 1 -0.005) (0 1 -0.005)
+    (0 0  0.005) (1 0  0.005) (1 1  0.005) (0 1  0.005)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (128 128 1)
+    simpleGrading
+    (
+        ((0.5 0.5 8) (0.5 0.5 0.125))
+        ((0.5 0.5 8) (0.5 0.5 0.125))
+        1
+    )
+);
+
+boundary
+(
+    floor        { type wall;  faces ((1 5 4 0)); }
+    ceiling      { type wall;  faces ((3 7 6 2)); }
+    sideWalls    { type wall;  faces ((0 4 7 3) (2 6 5 1)); }
+    frontAndBack { type empty; faces ((0 3 2 1) (4 5 6 7)); }
+);
