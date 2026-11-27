@@ -24,6 +24,5 @@ NEOFOAM_EXECUTOR="$executor" FOAM_SIGFPE=false \
     /usr/bin/time -f "$solver ($executor) wall=%e s peak_rss_KB=%M" \
     neofoam solver "$(echo "$solver" | tr '[:upper:]' '[:lower:]')" > "log.$solver" 2>&1 || exit 1
 tail -1 "log.$solver"
-postProcess -func writeCellCentres -time 0 > log.writeCellCentres 2>&1 || exit 1
 python plot.py
 #------------------------------------------------------------------------------

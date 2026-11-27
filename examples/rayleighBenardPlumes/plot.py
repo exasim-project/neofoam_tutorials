@@ -1,4 +1,4 @@
-"""Plot the temperature of the last written time and the plates' Nusselt numbers over time."""
+"""Render the temperature of the last written time and plot the plates' Nusselt numbers."""
 
 from pathlib import Path
 
@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from foamlib import FoamCase, FoamFieldFile
+import pyvista as pv
 
 RAYLEIGH = 1e11
 HEIGHT = 1.0
@@ -16,14 +16,26 @@ T_COLD = 299.5
 CASE = Path(__file__).parent
 
 
-def _cell_centres() -> np.ndarray:
-    """The cell centres that ``postProcess -func writeCellCentres -time 0`` wrote."""
-    return np.asarray(FoamFieldFile(CASE / "0" / "C").internal_field)
+def _reader() -> pv.POpenFOAMReader:
+    """An OpenFOAM reader of the case's written times, cell data only."""
+    foam_file = CASE / "case.foam"
+    foam_file.touch()
+    reader = pv.POpenFOAMReader(foam_file)
+    reader.enable_all_cell_arrays()
+    reader.cell_to_point_creation = False
+    return reader
 
 
-def _nusselt(temperature: np.ndarray, centres: np.ndarray) -> tuple[float, float]:
+def _internal_mesh(reader: pv.POpenFOAMReader, time: float) -> pv.UnstructuredGrid:
+    """The cells and their fields at ``time``."""
+    reader.set_active_time_value(time)
+    return reader.read()["internalMesh"]
+
+
+def _nusselt(mesh: pv.UnstructuredGrid) -> tuple[float, float]:
     """The floor's and ceiling's Nusselt numbers from the wall-adjacent cells' temperature."""
-    y = centres[:, 1]
+    temperature = np.asarray(mesh.cell_data["T"])
+    y = mesh.cell_centers().points[:, 1]
     floor = np.isclose(y, y.min())
     ceiling = np.isclose(y, y.max())
     delta_t = T_HOT - T_COLD
@@ -32,29 +44,29 @@ def _nusselt(temperature: np.ndarray, centres: np.ndarray) -> tuple[float, float
     return float(nu_floor), float(nu_ceiling)
 
 
-def _plot_temperature(temperature: np.ndarray, centres: np.ndarray, time: float) -> None:
+def _render_temperature(mesh: pv.UnstructuredGrid, time: float) -> None:
     """The temperature field with its plumes, ``plots/temperature.png``."""
-    fig, ax = plt.subplots(figsize=(6, 5.4))
-    contour = ax.tricontourf(
-        centres[:, 0],
-        centres[:, 1],
-        np.clip(temperature, T_COLD, T_HOT),
-        levels=np.linspace(T_COLD, T_HOT, 65),
+    plotter = pv.Plotter(off_screen=True, window_size=(1000, 900))
+    plotter.add_mesh(
+        mesh,
+        scalars="T",
         cmap="RdBu_r",
+        clim=(T_COLD, T_HOT),
+        lighting=False,
+        scalar_bar_args={"title": "T [K]", "vertical": True, "fmt": "%.2f"},
     )
-    fig.colorbar(contour, ax=ax, label="T [K]")
-    ax.set_aspect("equal")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_title(f"Ra = 1e11, Pr = 1: T at t = {time:g} s")
-    fig.savefig(CASE / "plots" / "temperature.png", dpi=150, bbox_inches="tight")
+    plotter.add_text(f"Ra = 1e11, Pr = 1: T at t = {time:g} s", font_size=12)
+    plotter.view_xy()
+    plotter.camera.zoom(1.1)
+    plotter.screenshot(CASE / "plots" / "temperature.png")
+    plotter.close()
 
 
 def _plot_nusselt(times: list[float], nusselt: np.ndarray) -> None:
     """The plates' Nusselt numbers over time next to Niemela et al.'s fit, ``plots/nusselt.png``."""
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(times, nusselt[:, 0], label="floor (hot)")
-    ax.plot(times, nusselt[:, 1], label="ceiling (cold)")
+    ax.plot(times, nusselt[:, 0], marker=".", label="floor (hot)")
+    ax.plot(times, nusselt[:, 1], marker=".", label="ceiling (cold)")
     ax.axhline(
         0.124 * RAYLEIGH**0.309, color="k", ls="--", label="0.124 Ra^0.309 (Niemela et al. 2000)"
     )
@@ -66,14 +78,12 @@ def _plot_nusselt(times: list[float], nusselt: np.ndarray) -> None:
 
 def main() -> None:
     """Write the temperature and Nusselt plots and print the last Nusselt numbers."""
-    centres = _cell_centres()
-    written = [time for time in FoamCase(CASE) if time.time > 0]
-    times = [time.time for time in written]
-    nusselt = np.array(
-        [_nusselt(np.asarray(time["T"].internal_field), centres) for time in written]
-    )
+    reader = _reader()
+    times = [time for time in reader.time_values if time > 0]
+    meshes = [_internal_mesh(reader, time) for time in times]
+    nusselt = np.array([_nusselt(mesh) for mesh in meshes])
     (CASE / "plots").mkdir(exist_ok=True)
-    _plot_temperature(np.asarray(written[-1]["T"].internal_field), centres, times[-1])
+    _render_temperature(meshes[-1], times[-1])
     _plot_nusselt(times, nusselt)
     print(f"t = {times[-1]:g} s: Nu floor {nusselt[-1, 0]:.1f}, ceiling {nusselt[-1, 1]:.1f}")
 
