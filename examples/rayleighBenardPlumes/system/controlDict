@@ -1,0 +1,32 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+
+application     incompressibleFluidNeoN;
+
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         300;            // about 54 free-fall times
+deltaT          0.02;
+writeControl    runTime;
+writeInterval   10;
+writeFormat     ascii;
+writePrecision  8;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable false;
+adjustTimeStep  yes;
+maxCo           0.5;
+maxDeltaT       0.1;
+
+// read by incompressibleFluidNeoN only (Serial, CPU or GPU)
+executor        ${NEOFOAM_EXECUTOR:-Serial};
+// NeoN's fields allocate from an Umpire memory pool on the executor's memory space
+// (no cudaMalloc/cudaFree per temporary field); memPoolSize is its first block in GB
+allocator       UmpirePool;
+memPoolSize     1;

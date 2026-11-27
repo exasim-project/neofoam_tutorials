@@ -1,0 +1,28 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+#------------------------------------------------------------------------------
+# Rayleigh-Benard convection at Ra = 1e8, Pr = 1: a 1 m x 1 m cell heated from below,
+# cooled from above (dT = 1 K), Boussinesq, laminar on a 256 x 256 mesh that resolves the
+# thermal boundary layers (about 12 cells) and the plumes they emit.
+#
+#   ./Allrun                                   # incompressibleFluidNeoN on NeoN's Serial executor
+#   ./Allrun incompressibleFluidNeoN GPU       # on the GPU (a CUDA build of NeoFOAM); also CPU
+#   ./Allrun incompressibleFluid               # the pybFoam solver
+#
+# OpenFOAM v2406 sourced and NeoFOAM's Python environment active.
+solver="${1:-incompressibleFluidNeoN}"
+executor="${2:-Serial}"
+./Allclean
+cp -r 0.orig 0
+blockMesh > log.blockMesh 2>&1 || exit 1
+# T: TRef plus 1 % of dT of noise, or the symmetric start would stay at rest for long
+setExprFields > log.setExprFields 2>&1 || exit 1
+
+# the executor entry of system/controlDict reads NEOFOAM_EXECUTOR;
+# FOAM_SIGFPE off: OpenFOAM's FPE trap would abort on a benign denormal.
+NEOFOAM_EXECUTOR="$executor" FOAM_SIGFPE=false \
+    /usr/bin/time -f "$solver ($executor) wall=%e s peak_rss_KB=%M" \
+    neofoam solver "$(echo "$solver" | tr '[:upper:]' '[:lower:]')" > "log.$solver" 2>&1 || exit 1
+tail -1 "log.$solver"
+python plot.py
+#------------------------------------------------------------------------------

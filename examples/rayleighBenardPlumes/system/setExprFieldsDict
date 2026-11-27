@@ -1,0 +1,18 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      setExprFieldsDict;
+}
+
+// T = TRef plus 1 % of dT of white noise, to break the symmetry of the start
+expressions
+(
+    T
+    {
+        field       T;
+        dimensions  [0 0 0 1 0 0 0];
+        expression  #{ 300 + 0.01*(rand() - 0.5) #};
+    }
+);

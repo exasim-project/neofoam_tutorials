@@ -1,0 +1,25 @@
+{
+    "type": "solver::Cg",
+    "preconditioner": {
+        "type": "solver::Multigrid",
+        "max_levels": 10,
+        "min_coarse_rows": 32,
+        "mg_level": [
+            {"type": "neon::MergedPgm", "merge_levels": 1, "deterministic": true,
+             "skip_sorting": true, "scale_correction": true}
+        ],
+        "pre_smoother": [
+            {"type": "solver::Ir", "relaxation_factor": 0.8,
+             "solver": {"type": "preconditioner::Jacobi", "max_block_size": 1},
+             "criteria": [{"type": "Iteration", "max_iters": 3}]}
+        ],
+        "post_uses_pre": true,
+        "coarsest_solver": {"type": "solver::Ir", "relaxation_factor": 0.9,
+            "solver": {"type": "preconditioner::Jacobi", "max_block_size": 1},
+            "criteria": [{"type": "Iteration", "max_iters": 8}]},
+        "cycle": "v",
+        "default_initial_guess": "zero",
+        "criteria": [{"type": "Iteration", "max_iters": 1}]
+    },
+    "criteria": [{"type": "Iteration", "max_iters": 1000}, "neon::l1ScaledResidual"]
+}

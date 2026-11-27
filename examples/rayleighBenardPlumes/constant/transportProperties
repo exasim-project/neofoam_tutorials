@@ -1,0 +1,15 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+
+// Ra = g beta dT H^3 / (nu kappa) = 1e8 and Pr = nu / kappa = 1, with dT = 1 K, H = 1 m
+transportModel  Newtonian;
+nu              1.8083e-05;
+beta            3.3333333e-03;
+TRef            300;
+Pr              1;
+Prt             0.85;
